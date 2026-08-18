@@ -128,7 +128,25 @@ const Security = (() => {
     try {
       if (typeof sessionStorage === 'undefined') return null;
       const raw = sessionStorage.getItem(SESSIONS_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed !== null) return parsed;
+        if (typeof parsed === 'string') {
+          if (typeof MasterDB !== 'undefined' && MasterDB.getUser) {
+            const u = MasterDB.getUser(parsed);
+            if (u) return { username: u.username, role: u.role || 'hr_admin', permissions: u.permissions || [] };
+          }
+          return { username: parsed, role: (parsed === 'fariz' || parsed === 'irsyadil' || parsed === 'admin') ? 'super_admin' : 'hr_admin' };
+        }
+      } catch (e) {
+        if (typeof MasterDB !== 'undefined' && MasterDB.getUser) {
+          const u = MasterDB.getUser(raw);
+          if (u) return { username: u.username, role: u.role || 'hr_admin', permissions: u.permissions || [] };
+        }
+        return { username: raw, role: (raw === 'fariz' || raw === 'irsyadil' || raw === 'admin') ? 'super_admin' : 'hr_admin' };
+      }
+      return null;
     } catch (e) {
       return null;
     }
