@@ -164,3 +164,10 @@ const AttendanceEngine = (() => {
     getAuditLog
   };
 })();
+
+if (typeof window !== 'undefined') {
+  window.AttendanceEngine = AttendanceEngine;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = AttendanceEngine;
+}

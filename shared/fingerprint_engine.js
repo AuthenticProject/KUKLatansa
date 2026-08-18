@@ -1,14 +1,23 @@
 /**
  * fingerprint_engine.js
- * Engine for parsing, mapping, validating, and immutably storing Fingerprint Attendance Data
+ * Hardened engine for parsing, mapping, validating, and immutably storing Fingerprint Attendance Data.
+ * Includes concurrency locks, file upload validation, and tamper-proof audit trails.
  */
 
 const FingerprintEngine = (() => {
+  'use strict';
+
   const STORAGE_KEY_RAW = 'kuk_raw_fingerprints';
+  const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit
+  const ALLOWED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
 
   function getRawData() {
-    const raw = localStorage.getItem(STORAGE_KEY_RAW);
-    return raw ? JSON.parse(raw) : [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_RAW);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
   }
 
   function saveRawData(newDataArray) {
@@ -24,10 +33,38 @@ const FingerprintEngine = (() => {
     localStorage.setItem(STORAGE_KEY_RAW, JSON.stringify(combined));
   }
 
+  // Validate File metadata before parsing
+  function validateFileMetadata(file) {
+    if (!file) throw new Error("File tidak ditemukan.");
+
+    // Check size
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      if (typeof Security !== 'undefined') {
+        Security.audit('FILE_UPLOAD_REJECTED', { reason: 'FILE_TOO_LARGE', size: file.size, name: file.name }, 'WARN');
+      }
+      throw new Error(`Ukuran file melebihi batas maksimal (Maks: 5MB). Ukuran file Anda: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
+    }
+
+    // Check extension
+    const fileName = (file.name || '').toLowerCase();
+    const hasValidExt = ALLOWED_EXTENSIONS.some(ext => fileName.endsWith(ext));
+    if (!hasValidExt) {
+      if (typeof Security !== 'undefined') {
+        Security.audit('FILE_UPLOAD_REJECTED', { reason: 'INVALID_EXTENSION', name: file.name }, 'WARN');
+      }
+      throw new Error(`Format file tidak didukung (${fileName}). Harap unggah file Excel (.xlsx, .xls) atau .csv.`);
+    }
+
+    return true;
+  }
+
   // Expects file object from input type="file"
   async function parseExcelFile(file) {
+    validateFileMetadata(file);
+
     return new Promise((resolve, reject) => {
-      if (!window.XLSX) {
+      const XLSXLib = typeof window !== 'undefined' ? window.XLSX : (typeof XLSX !== 'undefined' ? XLSX : null);
+      if (!XLSXLib) {
         return reject(new Error("Library SheetJS (XLSX) belum dimuat."));
       }
 
@@ -35,31 +72,45 @@ const FingerprintEngine = (() => {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
+          const workbook = XLSXLib.read(data, { type: 'array' });
+          if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+            throw new Error("File Excel kosong atau tidak memiliki lembar kerja.");
+          }
+
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
+          if (!worksheet) {
+            throw new Error("Lembar kerja Excel pertama tidak dapat dibaca.");
+          }
           
-          // Convert sheet to JSON array (array of arrays to handle varying headers)
-          const jsonArray = XLSX.utils.sheet_to_json(worksheet, { raw: false });
+          // Convert sheet to JSON array
+          const jsonArray = XLSXLib.utils.sheet_to_json(worksheet, { raw: false });
+          if (!jsonArray || jsonArray.length === 0) {
+            throw new Error("Data tabel dalam file Excel kosong.");
+          }
+
           resolve(jsonArray);
         } catch (err) {
-          reject(new Error("Gagal mem-parsing file Excel. Format tidak didukung."));
+          if (typeof Security !== 'undefined') {
+            Security.audit('MALFORMED_EXCEL_PARSING_FAILED', { error: err.message, name: file.name }, 'WARN');
+          }
+          reject(new Error("Gagal mem-parsing file Excel. Format file rusak atau tidak valid: " + err.message));
         }
       };
-      reader.onerror = () => reject(new Error("Gagal membaca file."));
+      reader.onerror = () => reject(new Error("Gagal membaca file dari media penyimpanan."));
       reader.readAsArrayBuffer(file);
     });
   }
 
   // Heuristic mapping: Find columns matching "PIN", "ID", "Tanggal", "Date", "Jam", "Waktu"
   function mapColumnsAndValidate(jsonRows) {
-    if (!jsonRows || jsonRows.length === 0) throw new Error("File kosong atau format salah.");
+    if (!jsonRows || jsonRows.length === 0) throw new Error("Data baris kosong.");
 
     // Determine headers from first row
     const firstRow = jsonRows[0];
     const keys = Object.keys(firstRow);
     
-    let pinKey = keys.find(k => k.toLowerCase().includes('pin') || k.toLowerCase() === 'id' || k.toLowerCase().includes('id kar'));
+    let pinKey = keys.find(k => k.toLowerCase().includes('pin') || k.toLowerCase() === 'id' || k.toLowerCase().includes('id kar') || k.toLowerCase().includes('no. id'));
     let dateKey = keys.find(k => k.toLowerCase().includes('tanggal') || k.toLowerCase().includes('date') || k.toLowerCase() === 'tgl');
     let timeKey = keys.find(k => k.toLowerCase().includes('jam') || k.toLowerCase().includes('time') || k.toLowerCase() === 'waktu');
 
@@ -68,13 +119,13 @@ const FingerprintEngine = (() => {
       const dateTimeKey = keys.find(k => k.toLowerCase().includes('waktu') || k.toLowerCase().includes('date time'));
       if (dateTimeKey && pinKey) {
         dateKey = dateTimeKey;
-        timeKey = dateTimeKey; // We will split them later
+        timeKey = dateTimeKey;
       } else {
-        throw new Error(`Kolom wajib tidak ditemukan. Pastikan ada kolom untuk PIN, Tanggal, dan Jam.`);
+        throw new Error(`Struktur kolom tidak sesuai standar. Pastikan ada kolom untuk PIN/ID, Tanggal, dan Jam.`);
       }
     }
 
-    const employees = MasterDB.getEmployees();
+    const employees = typeof MasterDB !== 'undefined' && MasterDB.getEmployees ? MasterDB.getEmployees() : [];
     const existingRaw = getRawData();
     
     // Quick hash map for duplicate detection: Set of "PIN_DATE_TIME"
@@ -89,7 +140,7 @@ const FingerprintEngine = (() => {
       processedRows: []
     };
 
-    jsonRows.forEach((row, index) => {
+    jsonRows.forEach((row) => {
       stats.total++;
       
       let pin = (row[pinKey] || '').toString().trim();
@@ -108,12 +159,7 @@ const FingerprintEngine = (() => {
         return; // Skip invalid
       }
 
-      // Format standard: YYYY-MM-DD
-      // If machine exports MM/DD/YYYY or DD/MM/YYYY, need parsing. 
-      // Assuming SheetJS `{raw: false}` gives local string or simple format.
-      // We will leave the raw string for now, or attempt basic cleanup
       dateVal = dateVal.replace(/\//g, '-'); 
-
       const uniqueKey = `${pin}_${dateVal}_${timeVal}`;
       
       // Duplicate Check
@@ -141,30 +187,54 @@ const FingerprintEngine = (() => {
       }
 
       stats.processedRows.push(payloadRow);
-      // prevent multiple duplicates within the same upload file
-      existingSet.add(uniqueKey); 
+      existingSet.add(uniqueKey); // Prevent multiple duplicates within the same upload file
     });
 
     return stats;
   }
 
   function commitImport(processedRows) {
-    // We only commit rows that are matched to an employee to keep data clean, 
-    // OR we commit all non-duplicate rows (including unmatched) for auditing.
-    // The requirement says "Raw attendance must remain immutable." 
-    // And "Admin must be able to resolve mapping issues before committing."
-    // For safety, we commit all passed-in rows. The UI should block if there are unmatched,
-    // or warn the admin.
-    
-    if(!processedRows || processedRows.length === 0) return 0;
-    saveRawData(processedRows);
-    return processedRows.length;
+    if (!processedRows || processedRows.length === 0) return 0;
+
+    // Acquire Concurrency Lock to prevent race condition during batch import
+    let lock = null;
+    if (typeof Security !== 'undefined' && Security.acquireLock) {
+      lock = Security.acquireLock('FINGERPRINT_IMPORT_LOCK', 15000);
+      if (!lock.acquired) {
+        throw new Error(`Proses import sedang berjalan oleh ${lock.lockedBy}. Harap tunggu sebentar.`);
+      }
+    }
+
+    try {
+      saveRawData(processedRows);
+
+      if (typeof Security !== 'undefined' && Security.audit) {
+        Security.audit('FINGERPRINT_IMPORT_COMMITTED', {
+          count: processedRows.length,
+          timestamp: new Date().toISOString()
+        }, 'INFO');
+      }
+
+      return processedRows.length;
+    } finally {
+      if (typeof Security !== 'undefined' && Security.releaseLock) {
+        Security.releaseLock('FINGERPRINT_IMPORT_LOCK');
+      }
+    }
   }
 
   return {
     getRawData,
+    validateFileMetadata,
     parseExcelFile,
     mapColumnsAndValidate,
     commitImport
   };
 })();
+
+if (typeof window !== 'undefined') {
+  window.FingerprintEngine = FingerprintEngine;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = FingerprintEngine;
+}

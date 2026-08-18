@@ -127,10 +127,37 @@
   }
 
   function checkAuth() {
-    if (!getUsername()) {
-      window.location.replace(_base('index.html'));
-      return false;
+    if (typeof Security !== 'undefined' && Security.validateSession) {
+      const sessionResult = Security.validateSession();
+      if (!sessionResult.valid) {
+        if (sessionResult.reason === 'ROLE_TAMPERING_DETECTED') {
+          alert("⚠️ Pelanggaran Keamanan: Terdeteksi manipulasi hak akses (Role Escalation). Sesi Anda telah dibatalkan.");
+        }
+        window.location.replace(_base('index.html'));
+        return false;
+      }
+    } else {
+      if (!getUsername()) {
+        window.location.replace(_base('index.html'));
+        return false;
+      }
     }
+
+    // Check RBAC permission for current page
+    const activePage = getActivePage();
+    if (activePage && activePage !== 'dashboard') {
+      const username = getUsername();
+      const user = getUserRecord(username);
+      if (typeof Security !== 'undefined' && Security.can) {
+        if (!Security.can(user, activePage)) {
+          Security.audit('PAGE_ACCESS_DENIED_RBAC', { username: user ? user.username : 'Unknown', page: activePage }, 'WARN', user);
+          alert("⛔ Akses Ditolak: Akun Anda tidak memiliki izin untuk mengakses halaman ini.");
+          window.location.replace(_base('dashboard/'));
+          return false;
+        }
+      }
+    }
+
     return true;
   }
 
@@ -143,6 +170,10 @@
     if (path.includes('peminjaman_admin')) return 'peminjaman_admin';
     if (path.includes('peminjaman'))       return 'peminjaman';
     if (path.includes('dashboard'))        return 'dashboard';
+    if (path.includes('attendance_review')) return 'attendance_review';
+    if (path.includes('violation_review'))  return 'violation_review';
+    if (path.includes('fingerprint'))       return 'fingerprint';
+    if (path.includes('payroll'))           return 'payroll';
     if (path.includes('absen'))            return 'absen';
     if (path.includes('cuti'))             return 'cuti';
     if (path.includes('pelanggaran'))      return 'pelanggaran';
@@ -156,8 +187,13 @@
   function getVisibleNav() {
     const username = getUsername();
     const user = getUserRecord(username);
-    const perms = user ? (user.permissions || []) : [];
-    return NAV_DEFS.filter(item => perms.includes(item.perm));
+    return NAV_DEFS.filter(item => {
+      if (typeof Security !== 'undefined' && Security.can) {
+        return Security.can(user, item.perm);
+      }
+      const perms = user ? (user.permissions || []) : [];
+      return perms.includes(item.perm) || perms.includes('*');
+    });
   }
 
   /* ── Notifications ────────────────────────────────────────────────── */

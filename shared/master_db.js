@@ -110,52 +110,50 @@ const MasterDB = (() => {
   }
 
   function migrateLegacyUsers(employees) {
+    const DEFAULT_ACCOUNTS = [
+      { username: 'fariz', password: '12345', role: 'super_admin', permissions: ['*'] },
+      { username: 'andika', password: '12345', role: 'hr_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+      { username: 'irsyadil', password: '12345', role: 'super_admin', permissions: ['*'] },
+      { username: 'ari', password: '12345', role: 'hr_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+      { username: 'shuva', password: '12345', role: 'hr_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+      { username: 'aria', password: '12345', role: 'hr_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+      { username: 'zain', password: '12345', role: 'hr_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+      { username: 'admin', password: '123', role: 'super_admin', permissions: ['*'] }
+    ];
+
     const legacy = localStorage.getItem('kuk_users_db');
     const migrated = [];
 
-    if (legacy) {
-      const parsed = JSON.parse(legacy);
-      parsed.forEach(u => {
-        // Try to link to an employee by name
-        let linkedEmp = employees.find(e => e.fullName.toLowerCase() === (u.namaLengkap || '').toLowerCase());
-        
-        // If not found, create a placeholder employee for this user
-        if (!linkedEmp) {
-          linkedEmp = {
-            id: generateId('EMP'),
-            fullName: u.namaLengkap || u.username,
-            unit: 'KUK Bangunan',
-            department: 'Manajemen',
-            position: u.jabatan || 'Staf',
-            status: 'Active',
-            fingerprintId: '',
-            hireDate: '',
-            contactNumber: ''
-          };
-          employees.push(linkedEmp);
-          saveStored(STORAGE_KEY_EMPLOYEES, employees); // Update employees DB immediately
-        }
+    const userSource = legacy ? JSON.parse(legacy) : DEFAULT_ACCOUNTS;
 
-        migrated.push({
-          id: generateId('USR'),
-          username: u.username,
-          password: u.password || '12345',
-          employeeId: linkedEmp.id,
-          permissions: u.permissions || []
-        });
-      });
-    }
+    userSource.forEach(u => {
+      let linkedEmp = employees.find(e => e.fullName.toLowerCase() === (u.namaLengkap || u.username || '').toLowerCase());
+      
+      if (!linkedEmp) {
+        linkedEmp = {
+          id: generateId('EMP'),
+          fullName: u.namaLengkap || u.username,
+          unit: 'KUK Bangunan',
+          department: 'Manajemen',
+          position: u.jabatan || 'Staf',
+          status: 'Active',
+          fingerprintId: '',
+          hireDate: '',
+          contactNumber: ''
+        };
+        employees.push(linkedEmp);
+        saveStored(STORAGE_KEY_EMPLOYEES, employees);
+      }
 
-    if (migrated.length === 0) {
-      const adminEmp = employees[0];
       migrated.push({
         id: generateId('USR'),
-        username: 'admin',
-        password: '123',
-        employeeId: adminEmp.id,
-        permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users']
+        username: u.username,
+        password: u.password || '12345',
+        role: u.role || (u.username === 'fariz' || u.username === 'irsyadil' || u.username === 'admin' ? 'super_admin' : 'hr_admin'),
+        employeeId: linkedEmp.id,
+        permissions: u.permissions || []
       });
-    }
+    });
 
     return migrated;
   }
@@ -179,6 +177,17 @@ const MasterDB = (() => {
 
     // Employees
     getEmployees: () => getStored(STORAGE_KEY_EMPLOYEES) || [],
+    getPublicEmployeeList: () => {
+      const emps = getStored(STORAGE_KEY_EMPLOYEES) || [];
+      return emps
+        .filter(e => e.status === 'Active' || e.status === 'Aktif')
+        .map(e => ({
+          id: e.id,
+          fullName: e.fullName,
+          unit: e.unit,
+          position: e.position
+        }));
+    },
     getEmployee: (id) => {
       const emps = getStored(STORAGE_KEY_EMPLOYEES) || [];
       return emps.find(e => e.id === id);
@@ -251,4 +260,13 @@ const MasterDB = (() => {
   };
 })();
 
-MasterDB.init();
+if (typeof window !== 'undefined') {
+  window.MasterDB = MasterDB;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = MasterDB;
+}
+
+try {
+  MasterDB.init();
+} catch (e) {}

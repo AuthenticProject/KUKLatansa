@@ -1,9 +1,12 @@
 /**
  * payroll_engine.js
- * Rule-based, snapshot-safe payroll engine.
+ * Rule-based, snapshot-safe, cryptographically sealed payroll engine.
+ * Includes RBAC protection, tamper-evident seals, and immutable lock enforcement.
  */
 
 const PayrollEngine = (() => {
+  'use strict';
+
   const DB_KEY = 'kuk_payroll_db';
 
   const RULES = {
@@ -14,7 +17,11 @@ const PayrollEngine = (() => {
   };
 
   function getPayrolls() {
-    return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    try {
+      return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    } catch (e) {
+      return [];
+    }
   }
 
   function savePayrolls(data) {
@@ -32,10 +39,23 @@ const PayrollEngine = (() => {
     return dates;
   }
 
+  function checkPayrollAccess() {
+    if (typeof Security !== 'undefined' && Security.can) {
+      const user = Security.getCurrentUser();
+      // Allow execution in testing or if user has payroll permission
+      if (user && !Security.can(user, 'payroll')) {
+        Security.audit('UNAUTHORIZED_PAYROLL_ACCESS_BLOCKED', { username: user.username, role: user.role }, 'CRITICAL', user);
+        throw new Error("Akses Ditolak: Anda tidak memiliki wewenang untuk mengakses atau memodifikasi modul Payroll.");
+      }
+    }
+  }
+
   /**
    * Generates or Regenerates a Payroll Run for a specific period.
    */
   function generatePayroll(periodName, startStr, endStr) {
+    checkPayrollAccess();
+
     if (typeof AttendanceEngine === 'undefined') {
       throw new Error("AttendanceEngine not loaded");
     }
@@ -44,18 +64,21 @@ const PayrollEngine = (() => {
     // Check if this period already exists and is locked
     const existingRunIndex = existingRuns.findIndex(r => r.periodName === periodName);
     if (existingRunIndex > -1 && existingRuns[existingRunIndex].status === 'LOCKED') {
-      throw new Error("Cannot regenerate a LOCKED payroll period.");
+      if (typeof Security !== 'undefined') {
+        Security.audit('LOCKED_PAYROLL_ALTERATION_ATTEMPT_BLOCKED', { periodName }, 'CRITICAL');
+      }
+      throw new Error("Dilarang mengubah atau me-rekalkulasi payroll yang sudah berstatus LOCKED (Terkunci Permanen).");
     }
 
     const dates = getDatesInRange(startStr, endStr);
     
     // employeeId -> aggregate data
     const empData = {};
-    const employees = typeof MasterDB !== 'undefined' ? MasterDB.getEmployees() : [];
+    const employees = typeof MasterDB !== 'undefined' && MasterDB.getEmployees ? MasterDB.getEmployees() : [];
 
     // Initialize all active employees
     employees.forEach(emp => {
-      if (emp.status === 'Active') {
+      if (emp.status === 'Active' || emp.status === 'Aktif') {
         empData[emp.id] = {
           employeeName: emp.fullName,
           unit: emp.unit,
@@ -99,7 +122,7 @@ const PayrollEngine = (() => {
           totalDeductions
         },
         takeHomePay: takeHomePay,
-        manualAdjustments: [] // For post-lock or pre-lock manual fixes
+        manualAdjustments: []
       };
     });
 
@@ -110,7 +133,8 @@ const PayrollEngine = (() => {
       endDate: endStr,
       generatedAt: new Date().toISOString(),
       status: 'CALCULATED',
-      slips: slips
+      slips: slips,
+      integritySeal: null
     };
 
     if (existingRunIndex > -1) {
@@ -120,13 +144,27 @@ const PayrollEngine = (() => {
     }
 
     savePayrolls(existingRuns);
+
+    if (typeof Security !== 'undefined') {
+      Security.audit('PAYROLL_CALCULATED', { periodName, totalSlips: slips.length }, 'INFO');
+    }
+
     return run;
   }
 
   function transitionState(runId, newState) {
+    checkPayrollAccess();
+
     const existing = getPayrolls();
     const run = existing.find(r => r.id === runId);
-    if (!run) throw new Error("Payroll Run not found");
+    if (!run) throw new Error("Payroll Run tidak ditemukan.");
+
+    if (run.status === 'LOCKED') {
+      if (typeof Security !== 'undefined') {
+        Security.audit('LOCKED_PAYROLL_STATE_CHANGE_BLOCKED', { runId, attemptedState: newState }, 'CRITICAL');
+      }
+      throw new Error("Payroll yang sudah berstatus LOCKED bersifat permanen dan tidak dapat diubah statusnya.");
+    }
 
     const validTransitions = {
       'CALCULATED': ['REVIEW', 'APPROVED'],
@@ -135,12 +173,29 @@ const PayrollEngine = (() => {
       'LOCKED': [] // Immutable
     };
 
-    if (!validTransitions[run.status].includes(newState)) {
-      throw new Error(\`Invalid transition from \${run.status} to \${newState}\`);
+    if (!validTransitions[run.status] || !validTransitions[run.status].includes(newState)) {
+      throw new Error(`Transisi status tidak valid dari ${run.status} ke ${newState}`);
     }
 
     run.status = newState;
     run.lastModified = new Date().toISOString();
+
+    // If entering LOCKED state, generate cryptographic Integrity Seal
+    if (newState === 'LOCKED') {
+      if (typeof Security !== 'undefined' && Security.generateIntegritySeal) {
+        run.integritySeal = Security.generateIntegritySeal({
+          id: run.id,
+          periodName: run.periodName,
+          startDate: run.startDate,
+          endDate: run.endDate,
+          slips: run.slips
+        });
+      }
+
+      if (typeof Security !== 'undefined') {
+        Security.audit('PAYROLL_LOCKED_SEALED', { runId, seal: run.integritySeal }, 'INFO');
+      }
+    }
     
     savePayrolls(existing);
     return run;
@@ -153,3 +208,10 @@ const PayrollEngine = (() => {
     transitionState
   };
 })();
+
+if (typeof window !== 'undefined') {
+  window.PayrollEngine = PayrollEngine;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PayrollEngine;
+}

@@ -24,7 +24,10 @@ const FormHelper = (() => {
     // Default option
     select.innerHTML = '<option value="">-- Pilih Nama Karyawan --</option>';
     
-    const emps = MasterDB.getEmployees().filter(e => e.status === 'Active');
+    // Privacy: Use getPublicEmployeeList to avoid leaking NIK, salary, etc.
+    const emps = typeof MasterDB.getPublicEmployeeList === 'function' 
+      ? MasterDB.getPublicEmployeeList() 
+      : MasterDB.getEmployees().filter(e => e.status === 'Active').map(e => ({ id: e.id, fullName: e.fullName, unit: e.unit, position: e.position }));
     
     // Sort alphabetically
     emps.sort((a, b) => a.fullName.localeCompare(b.fullName));
@@ -32,7 +35,7 @@ const FormHelper = (() => {
     emps.forEach(e => {
       const opt = document.createElement('option');
       opt.value = e.id;
-      opt.textContent = `${e.fullName} (${e.unit} - ${e.position})`;
+      opt.textContent = `${e.fullName} (${e.unit || '-'} - ${e.position || '-'})`;
       select.appendChild(opt);
     });
   }
@@ -68,33 +71,58 @@ const FormHelper = (() => {
       return;
     }
 
+    // Rate Limiter Check (Max 5 submissions per minute)
+    if (typeof Security !== 'undefined' && Security.checkRateLimit) {
+      const rate = Security.checkRateLimit('public_form_' + moduleName, { maxAttempts: 5, windowMs: 60000 });
+      if (!rate.allowed) {
+        showError(`Terlalu banyak pengajuan dalam waktu singkat. Mohon tunggu ${rate.resetInSeconds} detik sebelum mencoba kembali.`);
+        return;
+      }
+    }
+
     const btn = document.querySelector('#' + formId + ' .btn-submit');
-    const spinner = btn.querySelector('.spinner');
-    const btnText = btn.querySelector('.btn-text');
+    const spinner = btn ? btn.querySelector('.spinner') : null;
+    const btnText = btn ? btn.querySelector('.btn-text') : null;
     
     // Loading State
-    btn.disabled = true;
-    if(spinner) spinner.style.display = 'inline-block';
-    if(btnText) btnText.textContent = 'Memproses...';
+    if (btn) btn.disabled = true;
+    if (spinner) spinner.style.display = 'inline-block';
+    if (btnText) btnText.textContent = 'Memproses...';
 
-    // Build Payload
-    const payload = buildPayload();
+    // Build Payload & Sanitize
+    let payload = buildPayload();
+    if (typeof Security !== 'undefined' && Security.sanitizeObject) {
+      payload = Security.sanitizeObject(payload);
+    } else {
+      // Fallback sanitizer
+      for (const k of Object.keys(payload)) {
+        if (typeof payload[k] === 'string') {
+          payload[k] = payload[k].replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;'}[c])).trim();
+        }
+      }
+    }
+
     payload.refNumber = generateRef(moduleName);
     payload.module = moduleName;
     payload.timestamp = new Date().toISOString();
+    payload.status = 'PENDING';
 
-    // Simulate network delay
+    // Simulate safe async store
     setTimeout(() => {
       try {
         const subs = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
         subs.push(payload);
         localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(subs));
         
+        if (typeof Security !== 'undefined' && Security.audit) {
+          Security.audit('PUBLIC_FORM_SUBMITTED', { module: moduleName, refNumber: payload.refNumber, employeeId: payload.employeeId }, 'INFO');
+        }
+
         showSuccess(payload.refNumber);
       } catch (e) {
         showError(e.message);
       }
-    }, 1500);
+    }, 1200);
   }
 
   function showSuccess(ref) {
