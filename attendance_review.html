@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Review Kehadiran - KUK HR Portal</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#540000">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <style>
+    body {
+      background-color: var(--kuk-bg);
+      color: var(--kuk-text);
+      min-height: 100vh;
+      padding: 30px 20px 80px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .panel {
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      padding: 24px;
+      box-shadow: var(--kuk-shadow);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--kuk-text-muted);
+      text-transform: uppercase;
+    }
+
+    .form-group input, .form-group select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--kuk-border);
+      font-family: inherit;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+
+    .btn-primary { background: var(--kuk-primary); color: white; }
+    .btn-primary:hover { background: #3b0000; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px; border-bottom: 2px solid var(--kuk-border); color: var(--kuk-text-muted); font-size: 13px; text-transform: uppercase; }
+    td { padding: 12px; border-bottom: 1px solid var(--kuk-border); font-size: 14px; vertical-align: middle; }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      min-width: 90px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: 0.2s;
+    }
+    .badge:hover { filter: brightness(0.9); }
+
+    .status-PRESENT { background: #d1fae5; color: #059669; }
+    .status-LATE { background: #fef3c7; color: #d97706; }
+    .status-ABSENT { background: #fee2e2; color: #dc2626; }
+    .status-LEAVE { background: #dbeafe; color: #2563eb; }
+    .status-SICK { background: #e0e7ff; color: #4f46e5; }
+    .status-PERMISSION { background: #f3e8ff; color: #9333ea; }
+    .status-INCOMPLETE { background: #ffedd5; color: #ea580c; }
+    .status-OFF { background: #f3f4f6; color: #6b7280; }
+    .status-EXCUSED { background: #cffafe; color: #0891b2; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--kuk-surface);
+      border-radius: var(--kuk-radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="panel">
+      <div style="border-bottom: 2px solid var(--kuk-border); padding-bottom: 16px; margin-bottom: 16px;">
+        <h2 style="color:var(--kuk-primary); font-size:20px;">📅 Review Kehadiran Harian</h2>
+        <p style="color:var(--kuk-text-muted); font-size:14px;">Review hasil kalkulasi Engine Absensi dan sesuaikan secara manual jika diperlukan.</p>
+      </div>
+
+      <div class="filter-bar">
+        <div class="form-group">
+          <label>Pilih Tanggal</label>
+          <input type="date" id="filterDate">
+        </div>
+        <div class="form-group">
+          <label>Filter Unit</label>
+          <select id="filterUnit">
+            <option value="ALL">Semua Unit</option>
+            <option value="KUK Bangunan">KUK Bangunan</option>
+            <option value="KUK Palen">KUK Palen</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="loadData()">Tampilkan</button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table id="attendanceTable">
+          <thead>
+            <tr>
+              <th>Nama Karyawan</th>
+              <th>Unit</th>
+              <th>Jam Masuk</th>
+              <th>Jam Keluar</th>
+              <th>Status</th>
+              <th>Keterangan</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="adjModal">
+    <div class="modal">
+      <h3 style="color:var(--kuk-primary);">Sesuaikan Status</h3>
+      <p style="font-size:14px; color:var(--kuk-text-muted);" id="adjEmpName">Nama Karyawan</p>
+      
+      <div class="form-group">
+        <label>Status Baru</label>
+        <select id="adjStatus">
+          <option value="PRESENT">HADIR (PRESENT)</option>
+          <option value="LATE">TERLAMBAT (LATE)</option>
+          <option value="ABSENT">MANGKIR (ABSENT)</option>
+          <option value="LEAVE">CUTI (LEAVE)</option>
+          <option value="SICK">SAKIT (SICK)</option>
+          <option value="PERMISSION">IZIN (PERMISSION)</option>
+          <option value="OFF">LIBUR (OFF)</option>
+          <option value="EXCUSED">DINAS/TUGAS (EXCUSED)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Alasan / Bukti (Wajib)</label>
+        <textarea id="adjReason" placeholder="Tuliskan alasan perubahan status..." style="padding:10px; border-radius:8px; border:1px solid var(--kuk-border);"></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+        <button class="btn" style="background:#f1f5f9; color:var(--kuk-text);" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveAdjustment()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared/master_db.js"></script>
+  <script src="shared/attendance_engine.js"></script>
+  <script>
+    let currentSelectedEmpId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('filterDate').valueAsDate = new Date();
+      loadData();
+    });
+
+    function loadData() {
+      const date = document.getElementById('filterDate').value;
+      const unit = document.getElementById('filterUnit').value;
+      
+      if(!date) return;
+
+      const data = AttendanceEngine.getDailyAttendance(date);
+      const tbody = document.getElementById('attendanceBody');
+      tbody.innerHTML = '';
+
+      const filtered = unit === 'ALL' ? data : data.filter(d => d.unit === unit);
+
+      filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        let inTimeStr = row.inTime || '-';
+        let outTimeStr = row.outTime || '-';
+        let statusClass = `status-${row.status}`;
+        
+        let noteStr = '';
+        if (row.isOverride) {
+          noteStr = `✏️ Diubah manual: ${row.reason}`;
+        } else if (row.note) {
+          noteStr = row.note;
+        }
+
+        tr.innerHTML = \`
+          <td style="font-weight:600;">\${row.employeeName}</td>
+          <td style="font-size:13px;">\${row.unit}</td>
+          <td>\${inTimeStr}</td>
+          <td>\${outTimeStr}</td>
+          <td>
+            <div class="badge \${statusClass}" onclick="openModal('\${row.employeeId}', '\${row.employeeName}', '\${row.status}')">
+              \${row.status}
+            </div>
+          </td>
+          <td style="font-size:12px; color:var(--kuk-text-muted);">\${noteStr}</td>
+        \`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openModal(empId, empName, currentStatus) {
+      currentSelectedEmpId = empId;
+      document.getElementById('adjEmpName').textContent = empName;
+      document.getElementById('adjStatus').value = currentStatus;
+      document.getElementById('adjReason').value = '';
+      document.getElementById('adjModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('adjModal').classList.remove('active');
+      currentSelectedEmpId = null;
+    }
+
+    function saveAdjustment() {
+      const newStatus = document.getElementById('adjStatus').value;
+      const reason = document.getElementById('adjReason').value;
+      const date = document.getElementById('filterDate').value;
+
+      try {
+        const activeUser = JSON.parse(localStorage.getItem('kuk_user')) || { username: 'Admin' };
+        AttendanceEngine.adjustStatus(currentSelectedEmpId, date, newStatus, reason, activeUser.username);
+        closeModal();
+        loadData(); // Refresh table
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+  </script>
+  <script src="shared/shell.js" data-base="."></script>
+</body>
+</html>

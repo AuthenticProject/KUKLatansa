@@ -24,13 +24,13 @@
 
   /* ── Default users (fallback when localStorage not yet populated) ─── */
   const DEFAULT_USERS = [
-    { username: 'fariz',    password: '12345', role: 'super_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','users', 'fingerprint'] },
-    { username: 'andika',   password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint'] },
-    { username: 'irsyadil', password: '12345', role: 'super_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','users', 'fingerprint'] },
-    { username: 'ari',      password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint'] },
-    { username: 'shuva',    password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint'] },
-    { username: 'aria',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint'] },
-    { username: 'zain',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint'] }
+    { username: 'fariz',    password: '12345', role: 'super_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','users', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
+    { username: 'andika',   password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
+    { username: 'irsyadil', password: '12345', role: 'super_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','users', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
+    { username: 'ari',      password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
+    { username: 'shuva',    password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
+    { username: 'aria',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
+    { username: 'zain',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] }
   ];
 
   const ROLE_LABELS = {
@@ -71,6 +71,9 @@
     users:        `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/></svg>`,
     search:       `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
     fingerprint:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm10 6c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/><path d="M12 8v4l3 3"/></svg>`,
+    attendance_review: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/><circle cx="16" cy="16" r="6" fill="#fff"/><path d="M16 13v3l2 2"/></svg>`,
+    violation_review: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    payroll:      `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
     bell:         `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
     chevron:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
     menu:         `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
@@ -82,12 +85,15 @@
   /* ── Navigation definitions ───────────────────────────────────────── */
   const NAV_DEFS = [
     { id: 'dashboard',        label: 'Dashboard',           section: '',           href: 'dashboard/', perm: 'dashboard',        icon: ICON.dashboard },
+    { id: 'attendance_review',label: 'Review Kehadiran',    section: 'Operasional',href: 'attendance_review.html', perm: 'attendance_review', icon: ICON.attendance_review },
+    { id: 'violation_review', label: 'Review Pelanggaran',  section: 'Operasional',href: 'violation_review.html', perm: 'violation_review', icon: ICON.violation_review },
     { id: 'absen',            label: 'Absen Briefing',      section: 'Operasional',href: 'absen.html', perm: 'absen',            icon: ICON.absen },
     { id: 'fingerprint',      label: 'Import Fingerprint',  section: 'Operasional',href: 'fingerprint_import.html', perm: 'fingerprint', icon: ICON.fingerprint },
     { id: 'cuti',             label: 'Cuti',                section: 'Operasional',href: 'cuti.html',  perm: 'cuti',             icon: ICON.cuti },
     { id: 'pelanggaran',      label: 'Pelanggaran',         section: 'Operasional',href: 'pelanggaran.html', perm: 'pelanggaran', icon: ICON.pelanggaran },
     { id: 'tip',              label: 'Tip Kaca',            section: 'Operasional',href: 'tip.html',   perm: 'tip',              icon: ICON.tip },
     { id: 'peminjaman',       label: 'Pinjam Kendaraan',    section: 'Operasional',href: 'peminjaman.html', perm: 'peminjaman',  icon: ICON.peminjaman },
+    { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
     { id: 'karyawan',         label: 'Karyawan',            section: 'Database',   href: 'karyawan.html', perm: 'karyawan',     icon: ICON.karyawan },
     { id: 'peminjaman_admin', label: 'Admin Armada',        section: 'Database',   href: 'peminjaman_admin.html', perm: 'peminjaman_admin', icon: ICON.peminjaman_admin },
     { id: 'users',            label: 'Manajemen Pengguna',  section: 'Sistem',     href: 'users.html', perm: 'users',            icon: ICON.users },

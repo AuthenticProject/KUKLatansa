@@ -1695,39 +1695,286 @@
       </header>
 
       <!-- TAB: DASHBOARD -->
+      <!-- TAB: MANAGEMENT DASHBOARD (PHASE 8) -->
       <section id="tab-dashboard" class="content-section active">
-        <div class="stats-grid">
-          <div class="stat-card" style="border-left-color: var(--primary)">
-            <div class="stat-title">Jumlah Karyawan Aktif</div>
-            <div class="stat-val" id="dbTotalKaryawan">0</div>
-          </div>
-          <div class="stat-card" style="border-left-color: var(--success)">
-            <div class="stat-title">Total Hadir Briefing Hari Ini</div>
-            <div class="stat-val" id="dbTotalAbsen">0</div>
-          </div>
-          <div class="stat-card" style="border-left-color: var(--warning)">
-            <div class="stat-title">Sedang Cuti Hari Ini</div>
-            <div class="stat-val" id="dbTotalCuti">0</div>
-          </div>
-          <div class="stat-card" style="border-left-color: var(--danger)">
-            <div class="stat-title">Pelanggaran Tercatat (Bulan Ini)</div>
-            <div class="stat-val" id="dbTotalPelanggaran">0</div>
+        
+        <!-- Global Management Filter Bar -->
+        <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--kuk-primary, #540000); background: var(--surface); padding: 16px 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+            <div>
+              <h3 style="font-size:16px; font-weight:800; color:var(--kuk-primary, #540000); display:flex; align-items:center; gap:8px;">
+                <span>📊</span> Filter Eksekutif Manajemen
+              </h3>
+              <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Analisis real-time seluruh operasional KUK Bangunan & KUK Palen.</p>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
+              <!-- Unit Filter -->
+              <div style="display:flex; align-items:center; gap:6px;">
+                <label style="font-size:12px; font-weight:700; color:var(--text-muted);">UNIT:</label>
+                <select id="mgmtFilterUnit" class="form-control" style="padding:6px 12px; font-size:13px; border-radius:8px; border:1px solid var(--border); font-weight:600;" onchange="applyMgmtFilters()">
+                  <option value="ALL">🏢 Semua Unit</option>
+                  <option value="KUK Bangunan">🏗️ KUK Bangunan</option>
+                  <option value="KUK Palen">🏠 KUK Palen</option>
+                </select>
+              </div>
+
+              <!-- Date Range Filter -->
+              <div style="display:flex; align-items:center; gap:6px;">
+                <label style="font-size:12px; font-weight:700; color:var(--text-muted);">RENTANG:</label>
+                <select id="mgmtFilterRange" class="form-control" style="padding:6px 12px; font-size:13px; border-radius:8px; border:1px solid var(--border); font-weight:600;" onchange="handleRangePresetChange()">
+                  <option value="TODAY">Hari Ini</option>
+                  <option value="7DAYS">7 Hari Terakhir</option>
+                  <option value="MONTH">Bulan Ini</option>
+                  <option value="CUSTOM">Kustom Tanggal...</option>
+                </select>
+                <input type="date" id="mgmtFilterDate" class="form-control" style="padding:5px 10px; font-size:13px; border-radius:8px; border:1px solid var(--border);" onchange="applyMgmtFilters()">
+              </div>
+
+              <!-- Department Filter -->
+              <div style="display:flex; align-items:center; gap:6px;">
+                <label style="font-size:12px; font-weight:700; color:var(--text-muted);">DEPT:</label>
+                <select id="mgmtFilterDept" class="form-control" style="padding:6px 12px; font-size:13px; border-radius:8px; border:1px solid var(--border); font-weight:600;" onchange="applyMgmtFilters()">
+                  <option value="ALL">Semua Departemen</option>
+                  <option value="Logistik">Logistik & Pengiriman</option>
+                  <option value="Penjualan">Penjualan & Kasir</option>
+                  <option value="Gudang">Gudang & Stok</option>
+                  <option value="Produksi">Produksi & Kaca</option>
+                  <option value="HR / Admin">HR & Administrasi</option>
+                  <option value="Keuangan">Keuangan / Kas</option>
+                </select>
+              </div>
+
+              <button class="btn btn-outline btn-sm" onclick="applyMgmtFilters()" title="Muat Ulang Metrik">🔄 Refresh</button>
+            </div>
           </div>
         </div>
 
-        
-        <!-- Analitik Operasional Armada Kendaraan -->
+        <!-- 1. ACTION CENTER BANNER (URGENT TASKS) -->
+        <div id="mgmtActionCenter" class="card" style="margin-bottom: 24px; border: 1px solid #fcd34d; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 18px 22px; border-radius:14px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.08);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="width:42px; height:42px; border-radius:12px; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 4px 10px rgba(245,158,11,0.3);">
+                ⚡
+              </div>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <h4 style="font-size:16px; font-weight:800; color:#92400e;">Pusat Tindakan Manajemen (Action Center)</h4>
+                  <span id="mgmtUrgentBadge" class="badge" style="background:#ef4444; color:#fff; font-size:11px; padding:3px 8px; border-radius:999px;">0 Tugas Mendesak</span>
+                </div>
+                <p id="mgmtUrgentSummary" style="font-size:13px; color:#b45309; margin-top:2px;">Memeriksa pending approval cuti, pelanggaran belum diverifikasi, dan payroll...</p>
+              </div>
+            </div>
+            <div id="mgmtActionButtons" style="display:flex; gap:8px; flex-wrap:wrap;">
+              <!-- Dynamic quick action buttons -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. EXECUTIVE KPI CARDS -->
+        <div class="stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+          <!-- KPI 1: Headcount -->
+          <div class="stat-card" style="border-left: 4px solid var(--kuk-primary, #540000); background:var(--surface); padding:18px; border-radius:12px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="stat-title" style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Total Karyawan Aktif</div>
+              <span style="font-size:20px;">👥</span>
+            </div>
+            <div class="stat-val" id="kpiTotalKaryawan" style="font-size:26px; font-weight:800; color:var(--text); margin:6px 0 4px;">0</div>
+            <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between;">
+              <span>Bangunan: <strong id="kpiKaryawanBangunan" style="color:var(--text);">0</strong></span>
+              <span>Palen: <strong id="kpiKaryawanPalen" style="color:var(--text);">0</strong></span>
+            </div>
+          </div>
+
+          <!-- KPI 2: Attendance Rate -->
+          <div class="stat-card" style="border-left: 4px solid #10b981; background:var(--surface); padding:18px; border-radius:12px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="stat-title" style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Kehadiran Hari Ini</div>
+              <span style="font-size:20px;">⏱️</span>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:8px; margin:6px 0 4px;">
+              <div class="stat-val" id="kpiAttendanceRate" style="font-size:26px; font-weight:800; color:#10b981;">0%</div>
+              <span id="kpiWorkingRatio" style="font-size:13px; font-weight:600; color:var(--text-muted);">(0 / 0 Hadir)</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); display:flex; gap:10px;">
+              <span style="color:#059669;">Tepat: <strong id="kpiPresentCount">0</strong></span>
+              <span style="color:#d97706;">Telat: <strong id="kpiLateCount">0</strong></span>
+              <span style="color:#dc2626;">Mangkir: <strong id="kpiAbsentCount">0</strong></span>
+            </div>
+          </div>
+
+          <!-- KPI 3: Leaves & Excuses -->
+          <div class="stat-card" style="border-left: 4px solid #3b82f6; background:var(--surface); padding:18px; border-radius:12px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="stat-title" style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Cuti & Izin Aktif</div>
+              <span style="font-size:20px;">🏖️</span>
+            </div>
+            <div class="stat-val" id="kpiActiveLeaves" style="font-size:26px; font-weight:800; color:#3b82f6; margin:6px 0 4px;">0</div>
+            <div style="font-size:12px; color:var(--text-muted); display:flex; gap:10px;">
+              <span>Cuti: <strong id="kpiCountCuti">0</strong></span>
+              <span>Sakit: <strong id="kpiCountSakit">0</strong></span>
+              <span>Izin/Dinas: <strong id="kpiCountIzin">0</strong></span>
+            </div>
+          </div>
+
+          <!-- KPI 4: Fleet & Vehicles -->
+          <div class="stat-card" style="border-left: 4px solid #8b5cf6; background:var(--surface); padding:18px; border-radius:12px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="stat-title" style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Armada & Kendaraan</div>
+              <span style="font-size:20px;">🚚</span>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:8px; margin:6px 0 4px;">
+              <div class="stat-val" id="kpiArmadaTersedia" style="font-size:26px; font-weight:800; color:#8b5cf6;">0</div>
+              <span style="font-size:13px; font-weight:600; color:var(--text-muted);">Siap Pakai</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between;">
+              <span>Dipinjam: <strong id="kpiArmadaDipinjam" style="color:#d97706;">0</strong></span>
+              <span>Total Armada: <strong id="kpiArmadaTotal">0</strong></span>
+            </div>
+          </div>
+
+          <!-- KPI 5: Payroll Summary -->
+          <div class="stat-card" style="border-left: 4px solid #f59e0b; background:var(--surface); padding:18px; border-radius:12px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="stat-title" style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Status Payroll Berjalan</div>
+              <span style="font-size:20px;">💸</span>
+            </div>
+            <div class="stat-val" id="kpiPayrollAmount" style="font-size:20px; font-weight:800; color:var(--kuk-primary, #540000); margin:6px 0 4px;">Rp 0</div>
+            <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+              <span id="kpiPayrollPeriodName">Periode: -</span>
+              <span id="kpiPayrollStatusBadge" class="badge" style="font-size:10px; padding:2px 6px; border-radius:6px; background:#e2e8f0; color:#475569;">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. UNIT COMPARISON MATRIX (KUK Bangunan vs KUK Palen) -->
+        <div class="card" style="margin-bottom: 24px; border-top: 3px solid var(--kuk-gold, #996414);">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+                <span>⚖️</span> Komparasi Kinerja Unit: KUK Bangunan vs KUK Palen
+              </div>
+              <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Perbandingan metrik kunci operasional harian antar unit bisnis.</p>
+            </div>
+            <span class="badge" style="background:#f1f5f9; color:var(--text); font-size:12px;">Real-Time Sync</span>
+          </div>
+
+          <div style="padding: 20px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;" id="mgmtUnitComparisonGrid">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. ATTENDANCE OVERVIEW & 7-DAY TRENDS -->
+        <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:24px; margin-bottom:24px;">
+          <!-- Left: 7-Day Trend Chart / Bars -->
+          <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+                <span>📈</span> Tren Kehadiran Karyawan (7 Hari Terakhir)
+              </div>
+              <a href="../attendance_review.html" class="btn btn-outline btn-sm">Buka Review Kehadiran ↗</a>
+            </div>
+            <div style="padding: 20px;">
+              <div id="mgmtAttendanceTrendContainer" style="display:flex; flex-direction:column; gap:12px;">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Violation Breakdown & Rate -->
+          <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+                <span>⚠️</span> Distribusi Pelanggaran & Poin
+              </div>
+              <a href="../violation_review.html" class="btn btn-outline btn-sm">Review Pelanggaran ↗</a>
+            </div>
+            <div style="padding: 20px;">
+              <div id="mgmtViolationTrendContainer" style="margin-bottom:16px;">
+                <!-- Rendered by JS -->
+              </div>
+              <div style="border-top:1px solid var(--border-soft); padding-top:14px;">
+                <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:8px;">Top Akumulasi Poin Karyawan:</div>
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                  <tbody id="dbLeaderboardBody">
+                    <tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Memuat data...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. PENDING APPROVALS & REVIEWS (ACTIONABLE TABLES) -->
+        <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:24px; margin-bottom:24px;">
+          <!-- Pending Leaves -->
+          <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+                  <span>🏖️</span> Pengajuan Cuti Menunggu Persetujuan
+                </div>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Persetujuan langsung tanpa meninggalkan dashboard.</p>
+              </div>
+              <span id="mgmtPendingLeaveBadge" class="badge" style="background:#fef3c7; color:#d97706; font-size:11px;">0 Pending</span>
+            </div>
+            <div class="table-responsive" style="max-height:280px; overflow-y:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead>
+                  <tr style="background:var(--surface-2); border-bottom:1px solid var(--border);">
+                    <th style="padding:10px 12px; text-align:left;">Karyawan</th>
+                    <th style="padding:10px 12px; text-align:left;">Tipe / Periode</th>
+                    <th style="padding:10px 12px; text-align:center;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="mgmtPendingLeavesTbody">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pending Violations to Review -->
+          <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+                  <span>🔍</span> Tiket Pelanggaran Perlu Ditinjau
+                </div>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Hasil deteksi otomatis mesin absensi.</p>
+              </div>
+              <span id="mgmtPendingViolationBadge" class="badge" style="background:#fee2e2; color:#dc2626; font-size:11px;">0 Perlu Review</span>
+            </div>
+            <div class="table-responsive" style="max-height:280px; overflow-y:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead>
+                  <tr style="background:var(--surface-2); border-bottom:1px solid var(--border);">
+                    <th style="padding:10px 12px; text-align:left;">Karyawan</th>
+                    <th style="padding:10px 12px; text-align:left;">Pelanggaran</th>
+                    <th style="padding:10px 12px; text-align:center;">Status / Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="mgmtPendingViolationsTbody">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. FLEET UTILIZATION & BRIEFING STATUS -->
         <div class="card" style="margin-bottom: 24px; border-left: 4px solid #6366f1;">
           <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div>
               <div class="card-title" style="display:flex; align-items:center; gap:8px;">
                 <span>🚛</span> Status Utilisasi Armada & Biaya Operasional Kendaraan
               </div>
-              <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Monitoring real-time armada L300, Engkel, Viar, Forklift, pengeluaran BBM & servis berkala.</p>
+              <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Monitoring real-time armada L300, Engkel, Viar, Forklift & servis berkala.</p>
             </div>
             <div style="display:flex; gap:8px;">
-              <a href="../peminjaman.html" target="_blank" class="btn btn-primary btn-sm">🚘 Pinjam Mobil</a>
-              <a href="../peminjaman_admin.html" target="_blank" class="btn btn-outline btn-sm">📊 Admin Armada</a>
+              <a href="../peminjaman.html" class="btn btn-primary btn-sm">🚘 Pinjam Mobil</a>
+              <a href="../peminjaman_admin.html" class="btn btn-outline btn-sm">📊 Admin Armada</a>
             </div>
           </div>
 
@@ -1747,41 +1994,21 @@
           </div>
         </div>
 
-  <div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
-          <!-- Leaderboard Cuti & Absen Terakhir -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Aktivitas Hari Ini</div>
+        <!-- 7. RECENT ACTIVITY AUDIT LOG -->
+        <div class="card">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+              <span>🕒</span> Log Aktivitas & Audit Terkini (Lintas Modul)
             </div>
-            <div style="padding: 24px;">
-              <p style="margin-bottom:15px; font-size:14px; font-weight:600; color:var(--text-muted)">📋 Status
-                Kehadiran Briefing Pagi</p>
-              <div id="dbTodayBriefingStatus" style="font-size:15px; line-height:1.6;">-</div>
-            </div>
+            <span class="badge" style="background:#f1f5f9; color:var(--text-muted); font-size:11px;">10 Terakhir</span>
           </div>
-
-          <!-- Leaderboard Pelanggaran Terbanyak -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Akumulasi Poin Pelanggaran</div>
-            </div>
-            <div class="table-responsive">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Karyawan</th>
-                    <th style="text-align:right;">Poin</th>
-                  </tr>
-                </thead>
-                <tbody id="dbLeaderboardBody">
-                  <tr>
-                    <td colspan="2" style="text-align:center;">Memuat data...</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div style="padding: 16px 20px;">
+            <div id="mgmtRecentActivityFeed" style="display:flex; flex-direction:column; gap:10px;">
+              <!-- Rendered by JS -->
             </div>
           </div>
         </div>
+
       </section>
 
       <!-- TAB: REKAPAN CUTI -->
@@ -4668,7 +4895,7 @@
           }
 
           // Render sections
-          renderDashboard();
+          initManagementDashboard();
           renderGantt();
           renderKaryawan();
           renderAbsenLogger();
@@ -4733,230 +4960,390 @@
         localStorage.removeItem('kuk_tips_db');
       }
     }
+    /* ============================================================
+       PHASE 8: MANAGEMENT DASHBOARD CONTROLLER & RENDERER
+    ============================================================ */
+
+    let currentMgmtFilters = {
+      unit: 'ALL',
+      date: '',
+      department: 'ALL',
+      rangePreset: 'TODAY'
+    };
+
+    function initManagementDashboard() {
+      // Sync unit filter with shell storage if available
+      const savedUnit = localStorage.getItem('kuk_selected_unit');
+      if (savedUnit && savedUnit !== 'semua') {
+        const uSel = document.getElementById('mgmtFilterUnit');
+        if (uSel) {
+          if (savedUnit === 'bangunan') uSel.value = 'KUK Bangunan';
+          else if (savedUnit === 'palen') uSel.value = 'KUK Palen';
+        }
+      }
+
+      // Default date to today
+      const today = typeof DashboardEngine !== 'undefined' ? DashboardEngine.getTodayStr() : new Date().toISOString().split('T')[0];
+      const dInput = document.getElementById('mgmtFilterDate');
+      if (dInput && !dInput.value) {
+        dInput.value = today;
+      }
+
+      // Listen to shell unit change event
+      window.addEventListener('kukUnitChange', function(e) {
+        const uSel = document.getElementById('mgmtFilterUnit');
+        if (uSel && e.detail && e.detail.unit) {
+          const u = e.detail.unit;
+          if (u === 'bangunan') uSel.value = 'KUK Bangunan';
+          else if (u === 'palen') uSel.value = 'KUK Palen';
+          else uSel.value = 'ALL';
+          applyMgmtFilters();
+        }
+      });
+
+      renderDashboard();
+    }
+
+    function handleRangePresetChange() {
+      const preset = document.getElementById('mgmtFilterRange').value;
+      const dInput = document.getElementById('mgmtFilterDate');
+      const today = typeof DashboardEngine !== 'undefined' ? DashboardEngine.getTodayStr() : new Date().toISOString().split('T')[0];
+      
+      if (preset === 'TODAY') {
+        dInput.value = today;
+      }
+      applyMgmtFilters();
+    }
+
+    function applyMgmtFilters() {
+      const unit = document.getElementById('mgmtFilterUnit') ? document.getElementById('mgmtFilterUnit').value : 'ALL';
+      const date = document.getElementById('mgmtFilterDate') ? document.getElementById('mgmtFilterDate').value : '';
+      const dept = document.getElementById('mgmtFilterDept') ? document.getElementById('mgmtFilterDept').value : 'ALL';
+      const range = document.getElementById('mgmtFilterRange') ? document.getElementById('mgmtFilterRange').value : 'TODAY';
+
+      currentMgmtFilters = {
+        unit: unit,
+        date: date,
+        department: dept,
+        rangePreset: range
+      };
+
+      renderDashboard();
+    }
+
     function renderDashboard() {
-      const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
-      document.getElementById('dbTotalKaryawan').textContent = activeKaryawan.length;
+      if (typeof DashboardEngine === 'undefined') {
+        console.warn('DashboardEngine not loaded yet.');
+        return;
+      }
 
-      // Count today's leaves
-      const todayStr = getTodayStr();
-      const cutiToday = rawCutiData.filter(c => c.tanggal === todayStr);
-      document.getElementById('dbTotalCuti').textContent = cutiToday.length;
+      const filters = currentMgmtFilters;
+      const metrics = DashboardEngine.getMetrics(filters);
+      const actionItems = DashboardEngine.getActionItems(filters);
+      const unitComp = DashboardEngine.getUnitComparison(filters.date);
+      const attTrends = DashboardEngine.getAttendanceTrends(7, filters.unit);
+      const vioTrends = DashboardEngine.getViolationTrends(filters.unit);
+      const recentActs = DashboardEngine.getRecentActivities(8);
 
-      // Count today's briefing presence
-      const presentToday = rawAbsenData.filter(a => {
-        try {
-          const tgl = new Date(a.waktu);
-          const y = tgl.getFullYear();
-          const m = String(tgl.getMonth() + 1).padStart(2, '0');
-          const d = String(tgl.getDate()).padStart(2, '0');
-          return `${y}-${m}-${d}` === todayStr && a.status.toLowerCase() === 'hadir';
-        } catch { return false; }
-      });
-      document.getElementById('dbTotalAbsen').textContent = presentToday.length;
+      // --- 1. ACTION CENTER ---
+      const urgentBadge = document.getElementById('mgmtUrgentBadge');
+      const urgentSummary = document.getElementById('mgmtUrgentSummary');
+      const actionBtns = document.getElementById('mgmtActionButtons');
 
-      // Count this month's violations
-      const thisMonthPrefix = todayStr.substring(0, 7);
-      const violationsThisMonth = rawViolationsData.filter(v => {
-        try {
-          const tgl = new Date(v.waktu);
-          const y = tgl.getFullYear();
-          const m = String(tgl.getMonth() + 1).padStart(2, '0');
-          return `${y}-${m}` === thisMonthPrefix;
-        } catch { return false; }
-      });
-      document.getElementById('dbTotalPelanggaran').textContent = violationsThisMonth.length;
+      if (urgentBadge) {
+        urgentBadge.textContent = actionItems.length + ' Tugas Mendesak';
+        urgentBadge.style.background = actionItems.length > 0 ? '#ef4444' : '#10b981';
+      }
 
-      // Today's briefing summary text
-      const totalAbsenEntries = rawAbsenData.filter(a => {
-        try {
-          const tgl = new Date(a.waktu);
-          const y = tgl.getFullYear();
-          const m = String(tgl.getMonth() + 1).padStart(2, '0');
-          const d = String(tgl.getDate()).padStart(2, '0');
-          return `${y}-${m}-${d}` === todayStr;
-        } catch { return false; }
-      });
+      if (urgentSummary) {
+        if (actionItems.length === 0) {
+          urgentSummary.textContent = '✅ Semua tugas operasional, persetujuan cuti, dan pelanggaran telah tuntas.';
+        } else {
+          const leaveCount = actionItems.filter(i => i.type === 'LEAVE_APPROVAL').length;
+          const vioCount = actionItems.filter(i => i.type === 'VIOLATION_REVIEW').length;
+          const payCount = actionItems.filter(i => i.type === 'PAYROLL_ACTION').length;
+          const parts = [];
+          if (leaveCount) parts.push(`${leaveCount} Persetujuan Cuti`);
+          if (vioCount) parts.push(`${vioCount} Review Pelanggaran`);
+          if (payCount) parts.push(`${payCount} Approval Payroll`);
+          urgentSummary.textContent = 'Perhatian Diperlukan: ' + parts.join(' • ');
+        }
+      }
 
-      if (totalAbsenEntries.length === 0) {
-        document.getElementById('dbTodayBriefingStatus').innerHTML = `
-          <div style="background:var(--warning-light); color:#92400e; padding:12px; border-radius:8px; font-weight:600;">
-            ⚠️ Absensi Briefing Pagi hari ini (${formatIndoDate(todayStr)}) belum tercatat.
-          </div>`;
-      } else {
-        const hadir = totalAbsenEntries.filter(a => a.status.toLowerCase() === 'hadir').map(a => a.nama).join(', ');
-        const absen = totalAbsenEntries.filter(a => a.status.toLowerCase() === 'absen').map(a => a.nama).join(', ');
-        document.getElementById('dbTodayBriefingStatus').innerHTML = `
-          <p style="color:var(--success); font-weight:600;">🟢 HADIR (${totalAbsenEntries.filter(a => a.status.toLowerCase() === 'hadir').length}):</p>
-          <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">${hadir || '-'}</p>
-          <p style="color:var(--danger); font-weight:600;">🔴 ABSEN (${totalAbsenEntries.filter(a => a.status.toLowerCase() === 'absen').length}):</p>
-          <p style="font-size:13px; color:var(--text-muted);">${absen || '-'}</p>
+      if (actionBtns) {
+        actionBtns.innerHTML = '';
+        if (metrics.pending.leaves > 0) {
+          actionBtns.innerHTML += `<a href="../cuti.html" class="btn btn-sm" style="background:#f59e0b; color:#fff; font-weight:700;">🏖️ Review ${metrics.pending.leaves} Cuti</a>`;
+        }
+        if (metrics.pending.violations > 0) {
+          actionBtns.innerHTML += `<a href="../violation_review.html" class="btn btn-sm" style="background:#ef4444; color:#fff; font-weight:700;">⚠️ Tinjau ${metrics.pending.violations} Pelanggaran</a>`;
+        }
+        if (metrics.payroll.status === 'CALCULATED' || metrics.payroll.status === 'REVIEW') {
+          actionBtns.innerHTML += `<a href="../payroll_dashboard.html" class="btn btn-sm" style="background:#0ea5e9; color:#fff; font-weight:700;">💸 Proses Payroll</a>`;
+        }
+        actionBtns.innerHTML += `<a href="../attendance_review.html" class="btn btn-sm btn-outline" style="background:#fff; font-weight:700;">📅 Review Presensi</a>`;
+      }
+
+      // --- 2. EXECUTIVE KPI CARDS ---
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+      setText('kpiTotalKaryawan', metrics.headcount.total);
+      setText('kpiKaryawanBangunan', metrics.headcount.bangunan);
+      setText('kpiKaryawanPalen', metrics.headcount.palen);
+
+      setText('kpiAttendanceRate', metrics.attendance.rate + '%');
+      setText('kpiWorkingRatio', `(${metrics.attendance.totalWorking} / ${metrics.headcount.total} Hadir)`);
+      setText('kpiPresentCount', metrics.attendance.present);
+      setText('kpiLateCount', metrics.attendance.late);
+      setText('kpiAbsentCount', metrics.attendance.absent);
+
+      const totalActiveLeaves = metrics.attendance.leave + metrics.attendance.sick + metrics.attendance.permission + metrics.attendance.excused;
+      setText('kpiActiveLeaves', totalActiveLeaves);
+      setText('kpiCountCuti', metrics.attendance.leave);
+      setText('kpiCountSakit', metrics.attendance.sick);
+      setText('kpiCountIzin', metrics.attendance.permission + metrics.attendance.excused);
+
+      setText('kpiArmadaTersedia', metrics.armada.tersedia);
+      setText('kpiArmadaDipinjam', metrics.armada.dipinjam);
+      setText('kpiArmadaTotal', metrics.armada.total);
+
+      setText('kpiPayrollAmount', DashboardEngine.formatCurrency(metrics.payroll.totalAmount));
+      setText('kpiPayrollPeriodName', metrics.payroll.latestRun ? metrics.payroll.latestRun.periodName : 'Belum Dibuat');
+      const pBadge = document.getElementById('kpiPayrollStatusBadge');
+      if (pBadge) {
+        pBadge.textContent = metrics.payroll.status;
+        pBadge.style.background = metrics.payroll.status === 'LOCKED' ? '#d1fae5' : (metrics.payroll.status === 'APPROVED' ? '#dbeafe' : '#fef3c7');
+        pBadge.style.color = metrics.payroll.status === 'LOCKED' ? '#059669' : (metrics.payroll.status === 'APPROVED' ? '#2563eb' : '#d97706');
+      }
+
+      // --- 3. UNIT COMPARISON MATRIX ---
+      const unitGrid = document.getElementById('mgmtUnitComparisonGrid');
+      if (unitGrid) {
+        unitGrid.innerHTML = `
+          <div style="background:var(--surface-2); padding:18px; border-radius:12px; border-left:4px solid var(--kuk-primary, #540000);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h4 style="font-size:16px; font-weight:800; color:var(--kuk-primary, #540000);">🏗️ KUK Bangunan</h4>
+              <span class="badge" style="background:#e0e7ff; color:#4338ca; font-weight:700;">${unitComp.bangunan.headcount} Karyawan</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+              <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                <span style="color:var(--text-muted); font-size:11px;">TINGKAT KEHADIRAN</span>
+                <div style="font-size:18px; font-weight:800; color:#10b981;">${unitComp.bangunan.attendanceRate}%</div>
+                <div style="font-size:11px; color:var(--text-muted);">Tepat: ${unitComp.bangunan.present} | Telat: ${unitComp.bangunan.late}</div>
+              </div>
+              <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                <span style="color:var(--text-muted); font-size:11px;">MANGKIR & PELANGGARAN</span>
+                <div style="font-size:18px; font-weight:800; color:#ef4444;">${unitComp.bangunan.absent} Mangkir</div>
+                <div style="font-size:11px; color:var(--text-muted);">Total Pelanggaran: ${unitComp.bangunan.violations}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:var(--surface-2); padding:18px; border-radius:12px; border-left:4px solid var(--kuk-gold, #996414);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h4 style="font-size:16px; font-weight:800; color:var(--kuk-gold, #996414);">🏠 KUK Palen</h4>
+              <span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">${unitComp.palen.headcount} Karyawan</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+              <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                <span style="color:var(--text-muted); font-size:11px;">TINGKAT KEHADIRAN</span>
+                <div style="font-size:18px; font-weight:800; color:#10b981;">${unitComp.palen.attendanceRate}%</div>
+                <div style="font-size:11px; color:var(--text-muted);">Tepat: ${unitComp.palen.present} | Telat: ${unitComp.palen.late}</div>
+              </div>
+              <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                <span style="color:var(--text-muted); font-size:11px;">MANGKIR & PELANGGARAN</span>
+                <div style="font-size:18px; font-weight:800; color:#ef4444;">${unitComp.palen.absent} Mangkir</div>
+                <div style="font-size:11px; color:var(--text-muted);">Total Pelanggaran: ${unitComp.palen.violations}</div>
+              </div>
+            </div>
+          </div>
         `;
+      }
+
+      // --- 4. ATTENDANCE TREND BARS ---
+      const trendCont = document.getElementById('mgmtAttendanceTrendContainer');
+      if (trendCont) {
+        trendCont.innerHTML = '';
+        attTrends.forEach(t => {
+          const pctPresent = t.total > 0 ? Math.round(((t.present + t.late) / t.total) * 100) : 0;
+          trendCont.innerHTML += `
+            <div style="display:flex; align-items:center; gap:12px; font-size:13px;">
+              <span style="width:70px; font-weight:700; color:var(--text-muted);">${t.label}</span>
+              <div style="flex:1; height:20px; background:#f1f5f9; border-radius:6px; overflow:hidden; display:flex;">
+                <div style="width:${t.total > 0 ? (t.present/t.total)*100 : 0}%; background:#10b981;" title="Hadir Tepat: ${t.present}"></div>
+                <div style="width:${t.total > 0 ? (t.late/t.total)*100 : 0}%; background:#f59e0b;" title="Terlambat: ${t.late}"></div>
+                <div style="width:${t.total > 0 ? (t.absent/t.total)*100 : 0}%; background:#ef4444;" title="Mangkir: ${t.absent}"></div>
+                <div style="width:${t.total > 0 ? (t.other/t.total)*100 : 0}%; background:#3b82f6;" title="Cuti/Izin/Sakit: ${t.other}"></div>
+              </div>
+              <span style="width:45px; text-align:right; font-weight:800; color:${pctPresent > 80 ? '#10b981' : (pctPresent > 60 ? '#f59e0b' : '#ef4444')};">${pctPresent}%</span>
+            </div>
+          `;
+        });
+      }
+
+      // --- 5. VIOLATION TRENDS ---
+      const vioCont = document.getElementById('mgmtViolationTrendContainer');
+      if (vioCont) {
+        vioCont.innerHTML = '';
+        vioTrends.forEach(v => {
+          vioCont.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border-soft); font-size:13px;">
+              <span style="display:flex; align-items:center; gap:8px;">
+                <span style="width:10px; height:10px; border-radius:50%; background:${v.color}; display:inline-block;"></span>
+                ${v.label}
+              </span>
+              <strong style="color:var(--text); font-weight:800;">${v.count} Kasus</strong>
+            </div>
+          `;
+        });
       }
 
       // Leaderboard Pelanggaran Poin
       const pointsMap = {};
-      activeKaryawan.forEach(k => { pointsMap[k.nama] = 0; });
-      rawViolationsData.forEach(v => {
-        if (pointsMap[v.nama] !== undefined) {
-          pointsMap[v.nama] += Number(v.poin || 0);
-        }
-      });
-
-      const sortedKaryawan = Object.keys(pointsMap)
-        .map(nama => ({ name: nama, points: pointsMap[nama] }))
-        .sort((a, b) => b.points - a.points);
-
-      const leaderboardHtml = sortedKaryawan.map(item => `
-        <tr>
-          <td><strong>${item.name}</strong></td>
-          <td style="text-align:right; font-weight:bold; color:${item.points > 30 ? 'var(--danger)' : 'var(--text)'}">
-            ${item.points} Poin
-          </td>
-        </tr>
-      `).join('');
-      document.getElementById('dbLeaderboardBody').innerHTML = leaderboardHtml || '<tr><td colspan="2" style="text-align:center;">Tidak ada data.</td></tr>';
-    }
-
-    // --- TAB: REKAPAN CUTI & GANTT ---
-    function renderGantt() {
-      const fM = document.getElementById('filterMonth').value;
-      const fY = parseInt(document.getElementById('filterYear').value);
-      const totalDays = new Date(fY, parseInt(fM), 0).getDate();
-
-      const filteredCuti = rawCutiData.filter(d => String(d.bulan) === String(fM) && String(d.tahun) === String(fY));
-
-      const userCutiMap = {};
-      filteredCuti.forEach(c => {
-        if (!userCutiMap[c.idKaryawan]) userCutiMap[c.idKaryawan] = [];
-        userCutiMap[c.idKaryawan].push(parseInt(c.tanggal.split('-')[2]));
-      });
-
-      const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
-
-      const dailyLeavesMap = {};
-      activeKaryawan.forEach(k => {
-        const dates = userCutiMap[k.id] || [];
-        dates.forEach(d => {
-          if (!dailyLeavesMap[d]) dailyLeavesMap[d] = [];
-          dailyLeavesMap[d].push({ id: k.id, nama: k.nama, bagian: k.bagian });
-        });
-      });
-
-      // Render Header Row
-      let html = `<div class="g-row"><div class="g-name" style="background:#f1f5f9;">Nama Karyawan</div><div class="g-days">`;
-      for (let d = 1; d <= totalDays; d++) {
-        html += `<div class="g-day header-day">${d}</div>`;
-      }
-      html += `</div></div>`;
-
-      // Render rows per employee
-      activeKaryawan.forEach(k => {
-        const dates = userCutiMap[k.id] || [];
-        html += `<div class="g-row"><div class="g-name">${k.nama}</div><div class="g-days">`;
-
-        for (let d = 1; d <= totalDays; d++) {
-          const isWknd = new Date(fY, parseInt(fM) - 1, d).getDay() % 6 === 0;
-          const fullDate = `${fY}-${fM}-${String(d).padStart(2, '0')}`;
-          const others = (dailyLeavesMap[d] || []).filter(o => o.id !== k.id);
-          const bgLower = String(k.bagian || '').trim().toLowerCase();
-
-          if (dates.includes(d)) {
-            // Check Conflict
-            let conflictMsg = "";
-
-            // 1. Division conflict
-            if (others.some(o => String(o.bagian).toLowerCase() === bgLower)) {
-              conflictMsg = `⚠ KONFLIK bagian ${k.bagian}!`;
-            }
-
-            // 2. Kepala Toko & Admin conflict
-            if (bgLower === 'kepala toko' || bgLower === 'admin') {
-              const mgrConflict = others.find(o => {
-                const oBg = String(o.bagian).toLowerCase();
-                return oBg === 'kepala toko' || oBg === 'admin';
-              });
-              if (mgrConflict) conflictMsg = `⚠ BENTROK: Kepala Toko & Admin cuti bareng!`;
-            }
-
-            // 3. Pengiriman & Kepala Pengiriman conflict
-            if (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman') {
-              const delConflict = others.find(o => {
-                const oBg = String(o.bagian).toLowerCase();
-                return oBg === 'pengiriman' || oBg === 'kepala pengiriman';
-              });
-              if (delConflict) conflictMsg = `⚠ BENTROK: Pengiriman & Kepala Pengiriman cuti bareng!`;
-            }
-
-            const isConflict = conflictMsg !== "";
-            html += `<div class="g-day leave${isConflict ? ' conflict' : ''}" title="${isConflict ? conflictMsg : 'Cuti: ' + k.bagian}" onclick="openEditCutiModal('${k.id}', '${k.nama}', '${k.bagian}')"></div>`;
-          } else {
-            // Check restriction to block click cell
-            let blockMsg = "";
-
-            if (others.some(o => String(o.bagian).toLowerCase() === bgLower)) {
-              blockMsg = `Bagian ${k.bagian} sudah ada yang cuti hari ini.`;
-            }
-
-            if (bgLower === 'kepala toko' || bgLower === 'admin') {
-              const mgrConflict = others.find(o => {
-                const oBg = String(o.bagian).toLowerCase();
-                return oBg === 'kepala toko' || oBg === 'admin';
-              });
-              if (mgrConflict) blockMsg = `Batas Kepala Toko & Admin tercapai.`;
-            }
-
-            if (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman') {
-              const delConflict = others.find(o => {
-                const oBg = String(o.bagian).toLowerCase();
-                return oBg === 'pengiriman' || oBg === 'kepala pengiriman';
-              });
-              if (delConflict) blockMsg = `Batas Pengiriman & Kepala Pengiriman tercapai.`;
-            }
-
-            if (blockMsg !== "") {
-              html += `<div class="g-day div-booked ${isWknd ? 'weekend' : ''}" title="${blockMsg}" onclick="showToast('${blockMsg}', 'error')"></div>`;
-            } else {
-              html += `<div class="g-day ${isWknd ? 'weekend' : ''}" style="cursor:pointer;" onclick="openEditCutiModal('${k.id}', '${k.nama}', '${k.bagian}')"></div>`;
-            }
+      const activeEmps = typeof MasterDB !== 'undefined' && MasterDB.getEmployees ? MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif') : [];
+      activeEmps.forEach(k => { pointsMap[k.fullName || k.nama] = 0; });
+      if (typeof ViolationEngine !== 'undefined') {
+        const vList = ViolationEngine.getViolations();
+        vList.forEach(v => {
+          if (v.status !== 'REJECTED' && pointsMap[v.employeeName] !== undefined) {
+            pointsMap[v.employeeName] += 10; // 10 points per violation
           }
+        });
+      }
+      const sortedKaryawan = Object.keys(pointsMap)
+        .map(name => ({ name: name, points: pointsMap[name] }))
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 5);
+
+      const lbEl = document.getElementById('dbLeaderboardBody');
+      if (lbEl) {
+        lbEl.innerHTML = sortedKaryawan.map(item => `
+          <tr style="border-bottom:1px solid var(--border-soft);">
+            <td style="padding:6px 0;"><strong>${item.name}</strong></td>
+            <td style="padding:6px 0; text-align:right; font-weight:bold; color:${item.points > 20 ? '#ef4444' : '#64748b'};">
+              ${item.points} Poin
+            </td>
+          </tr>
+        `).join('') || '<tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Belum ada poin pelanggaran.</td></tr>';
+      }
+
+      // --- 6. PENDING LEAVE APPROVALS TABLE ---
+      const leaveBadge = document.getElementById('mgmtPendingLeaveBadge');
+      const leaveTbody = document.getElementById('mgmtPendingLeavesTbody');
+      const pendingLeaves = (DashboardEngine.getActionItems(filters) || []).filter(i => i.type === 'LEAVE_APPROVAL');
+
+      if (leaveBadge) leaveBadge.textContent = pendingLeaves.length + ' Pending';
+
+      if (leaveTbody) {
+        if (pendingLeaves.length === 0) {
+          leaveTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">✅ Tidak ada pengajuan cuti yang menunggu persetujuan.</td></tr>';
+        } else {
+          leaveTbody.innerHTML = pendingLeaves.map(item => {
+            const l = item.data;
+            return `
+              <tr style="border-bottom:1px solid var(--border-soft);">
+                <td style="padding:10px 12px;">
+                  <strong style="color:var(--text);">${l.employeeName || 'Karyawan'}</strong>
+                  <div style="font-size:11px; color:var(--text-muted);">${l.unit || '-'}</div>
+                </td>
+                <td style="padding:10px 12px;">
+                  <span class="badge" style="background:#e0e7ff; color:#3730a3; font-size:10px;">${l.leaveType || 'Cuti'}</span>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${l.startDate} s/d ${l.endDate}</div>
+                  <div style="font-size:11px; color:var(--text-light); font-style:italic;">"${l.reason || '-'}"</div>
+                </td>
+                <td style="padding:10px 12px; text-align:center; white-space:nowrap;">
+                  <button class="btn btn-sm" style="background:#10b981; color:#fff; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="inlineApproveLeave('${l.id}')">✓ Setujui</button>
+                  <button class="btn btn-sm" style="background:#ef4444; color:#fff; padding:4px 8px; font-size:11px;" onclick="inlineRejectLeave('${l.id}')">✕ Tolak</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
         }
-        html += `</div></div>`;
-      });
+      }
 
-      document.getElementById('ganttGrid').innerHTML = html;
-    }
+      // --- 7. PENDING VIOLATION REVIEWS TABLE ---
+      const vioBadge = document.getElementById('mgmtPendingViolationBadge');
+      const vioTbody = document.getElementById('mgmtPendingViolationsTbody');
+      const pendingVios = (DashboardEngine.getActionItems(filters) || []).filter(i => i.type === 'VIOLATION_REVIEW');
 
-    // --- REKAPAN ABSEN HARIAN & BULANAN ---
-    let currentAbsenSubTab = 'harian';
-    function switchSubTab(subId) {
-      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.sub-tab-content').forEach(c => c.classList.remove('active'));
+      if (vioBadge) vioBadge.textContent = pendingVios.length + ' Perlu Review';
 
-      currentAbsenSubTab = subId;
-      if (subId === 'harian') {
-        document.getElementById('subTabHarian').classList.add('active');
-        document.getElementById('subContent-harian').classList.add('active');
-        renderAbsenLogger();
-      } else {
-        document.getElementById('subTabBulanan').classList.add('active');
-        document.getElementById('subContent-bulanan').classList.add('active');
-        renderRekapBulanan();
+      if (vioTbody) {
+        if (pendingVios.length === 0) {
+          vioTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">✅ Seluruh tiket pelanggaran telah ditinjau.</td></tr>';
+        } else {
+          vioTbody.innerHTML = pendingVios.map(item => {
+            const v = item.data;
+            return `
+              <tr style="border-bottom:1px solid var(--border-soft);">
+                <td style="padding:10px 12px;">
+                  <strong style="color:var(--text);">${v.employeeName}</strong>
+                  <div style="font-size:11px; color:var(--text-muted);">${v.date}</div>
+                </td>
+                <td style="padding:10px 12px;">
+                  <span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:10px;">${v.ruleBroken}</span>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${v.calculatedValue || '-'}</div>
+                </td>
+                <td style="padding:10px 12px; text-align:center; white-space:nowrap;">
+                  <a href="../violation_review.html" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">🔍 Tindak Lanjut</a>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // --- 8. VEHICLE FLEET STATUS ---
+      renderVehicleGrid();
+
+      // --- 9. RECENT ACTIVITY FEED ---
+      const actFeed = document.getElementById('mgmtRecentActivityFeed');
+      if (actFeed) {
+        if (recentActs.length === 0) {
+          actFeed.innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding:10px;">Belum ada aktivitas tercatat.</div>';
+        } else {
+          actFeed.innerHTML = recentActs.map(a => `
+            <div style="display:flex; align-items:flex-start; gap:12px; padding:8px 0; border-bottom:1px solid var(--border-soft); font-size:13px;">
+              <span style="font-size:18px;">${a.icon}</span>
+              <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:var(--text);">${a.title}</strong>
+                  <span style="font-size:11px; color:var(--text-light);">${DashboardEngine.formatTime(a.timestamp)}</span>
+                </div>
+                <div style="color:var(--text-muted); font-size:12px; margin-top:2px;">${a.description}</div>
+              </div>
+              <span class="badge" style="font-size:10px; padding:2px 6px; border-radius:6px; background:${a.color === 'success' ? '#d1fae5' : (a.color === 'danger' ? '#fee2e2' : '#fef3c7')}; color:${a.color === 'success' ? '#059669' : (a.color === 'danger' ? '#dc2626' : '#d97706')};">${a.tag}</span>
+            </div>
+          `).join('');
+        }
       }
     }
 
-    // Absen Clock and Date Display
-    function updateClock() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/\./g, ':');
-      const clockEl = document.getElementById('absenClockText');
-      if (clockEl) clockEl.textContent = timeStr;
-
-      const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const dateEl = document.getElementById('absenDateText');
-      if (dateEl) dateEl.textContent = now.toLocaleDateString('id-ID', dateOptions);
+    function inlineApproveLeave(submissionId) {
+      try {
+        const activeUser = JSON.parse(localStorage.getItem('kuk_user')) || { username: 'Admin' };
+        DashboardEngine.approveLeave(submissionId, activeUser.username, 'Disetujui dari Dashboard Manajemen');
+        showToast('✅ Pengajuan cuti berhasil disetujui!', 'success');
+        renderDashboard();
+      } catch (e) {
+        alert('Gagal menyetujui: ' + e.message);
+      }
     }
 
-    // Render Absen Input List for today
+    function inlineRejectLeave(submissionId) {
+      const note = prompt('Masukkan alasan penolakan cuti:');
+      if (!note || !note.trim()) return;
+
+      try {
+        const activeUser = JSON.parse(localStorage.getItem('kuk_user')) || { username: 'Admin' };
+        DashboardEngine.rejectLeave(submissionId, activeUser.username, note);
+        showToast('Pengajuan cuti ditolak.', 'info');
+        renderDashboard();
+      } catch (e) {
+        alert('Gagal menolak: ' + e.message);
+      }
+    }
+
     function renderAbsenLogger() {
       const today = getTodayStr();
       const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
@@ -7915,6 +8302,10 @@
     }
   </script>
   <script src="../shared/master_db.js"></script>
+  <script src="../shared/attendance_engine.js"></script>
+  <script src="../shared/violation_engine.js"></script>
+  <script src="../shared/payroll_engine.js"></script>
+  <script src="../shared/dashboard_engine.js"></script>
   <script src="../shared/shell.js" data-base=".."></script>
 </body>
 

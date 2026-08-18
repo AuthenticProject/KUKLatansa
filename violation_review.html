@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Review Pelanggaran - KUK HR Portal</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#540000">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <style>
+    body {
+      background-color: var(--kuk-bg);
+      color: var(--kuk-text);
+      min-height: 100vh;
+      padding: 30px 20px 80px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .panel {
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      padding: 24px;
+      box-shadow: var(--kuk-shadow);
+    }
+
+    .header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--kuk-border);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+
+    .btn-primary { background: var(--kuk-primary); color: white; }
+    .btn-primary:hover { background: #3b0000; }
+    
+    .btn-secondary { background: transparent; border: 1px solid var(--kuk-border); color: var(--kuk-text); }
+    .btn-secondary:hover { background: #f1f5f9; }
+
+    .btn-action { background: #0ea5e9; color: white; }
+
+    /* Kanban/Grid */
+    .ticket-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .ticket-card {
+      border: 1px solid var(--kuk-border);
+      border-radius: 12px;
+      padding: 16px;
+      background: #fdfdfd;
+      transition: 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+    .ticket-card:hover { border-color: var(--kuk-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .b-auto { background: #fef3c7; color: #d97706; }
+    .b-review { background: #dbeafe; color: #2563eb; }
+    .b-verified { background: #e0e7ff; color: #4f46e5; }
+    .b-action { background: #fee2e2; color: #dc2626; }
+    .b-closed { background: #d1fae5; color: #059669; }
+    .b-rejected { background: #f3f4f6; color: #6b7280; }
+
+    .ticket-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .ticket-meta { font-size: 13px; color: var(--kuk-text-muted); margin-bottom: 12px; }
+    .ticket-val { font-size: 14px; font-family: monospace; background: #f1f5f9; padding: 6px; border-radius: 4px; color: var(--kuk-primary); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--kuk-surface);
+      border-radius: var(--kuk-radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .history-log {
+      font-size: 13px;
+      border-left: 2px solid var(--kuk-border);
+      padding-left: 12px;
+      margin-left: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="panel">
+      <div class="header-actions">
+        <div>
+          <h2 style="color:var(--kuk-primary); font-size:20px;">⚠️ Review Pelanggaran Kehadiran</h2>
+          <p style="color:var(--kuk-text-muted); font-size:14px;">Mesin otomatis flag pelanggaran absensi untuk direview HRD.</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <input type="date" id="scanDate" class="btn btn-secondary" style="background:#fff;">
+          <button class="btn btn-primary" onclick="runScan()">Jalankan Scan Engine</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom: 20px;">
+        <button class="btn btn-secondary" onclick="renderTickets('PENDING')">Perlu Review</button>
+        <button class="btn btn-secondary" onclick="renderTickets('ALL')">Semua Histori</button>
+      </div>
+
+      <div class="ticket-grid" id="ticketGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="ticketModal">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="mId" style="color:var(--kuk-primary);">VIO-XXXXXX</h3>
+        <span id="mBadge" class="badge">STATUS</span>
+      </div>
+      
+      <div style="background:#f9fafb; padding:12px; border-radius:8px; font-size:14px;">
+        <div><strong>Karyawan:</strong> <span id="mEmp"></span></div>
+        <div><strong>Tanggal:</strong> <span id="mDate"></span></div>
+        <div><strong>Rule Broken:</strong> <span id="mRule"></span></div>
+        <div style="margin-top:8px;" class="ticket-val" id="mVal"></div>
+      </div>
+
+      <h4>Histori Workflow</h4>
+      <div class="history-log" id="mHistory">
+        <!-- History JS -->
+      </div>
+
+      <div id="actionArea" style="margin-top:10px; padding-top:16px; border-top:1px solid var(--kuk-border);">
+        <label style="font-size:13px; font-weight:600; color:var(--kuk-text-muted);">Tindakan Reviewer (Wajib isi catatan)</label>
+        <textarea id="mNote" placeholder="Catatan hasil investigasi / tindakan..." style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--kuk-border); margin-top:6px; margin-bottom:12px; min-height:60px; font-family:inherit;"></textarea>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+          <button class="btn btn-secondary" onclick="updateTicket('REJECTED')">Tolak (Salah Sistem)</button>
+          <button class="btn btn-action" onclick="updateTicket('REVIEW')">Tandai Sedang Review</button>
+          <button class="btn btn-primary" onclick="updateTicket('VERIFIED')">Verifikasi Pelanggaran</button>
+          <button class="btn" style="background:#dc2626; color:white;" onclick="updateTicket('ACTION')">Beri SP / Tindakan</button>
+          <button class="btn" style="background:#059669; color:white; grid-column: span 2;" onclick="updateTicket('CLOSED')">Tutup Kasus (Selesai)</button>
+        </div>
+      </div>
+      
+      <button class="btn btn-secondary" style="margin-top:10px;" onclick="closeModal()">Tutup Jendela</button>
+    </div>
+  </div>
+
+  <script src="shared/master_db.js"></script>
+  <script src="shared/attendance_engine.js"></script>
+  <script src="shared/violation_engine.js"></script>
+  <script>
+    let currentTicketId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('scanDate').valueAsDate = new Date();
+      renderTickets('PENDING');
+    });
+
+    function runScan() {
+      const date = document.getElementById('scanDate').value;
+      if(!date) return alert("Pilih tanggal scan");
+
+      try {
+        const count = ViolationEngine.runDailyScan(date);
+        alert(\`Scan selesai. Ditemukan \${count} pelanggaran baru untuk tanggal \${date}.\`);
+        renderTickets('PENDING');
+      } catch (e) {
+        alert("Error: " + e.message);
+      }
+    }
+
+    function renderTickets(filter) {
+      const grid = document.getElementById('ticketGrid');
+      grid.innerHTML = '';
+
+      let tickets = ViolationEngine.getViolations();
+      // sort latest first
+      tickets.sort((a,b) => new Date(b.generatedTime) - new Date(a.generatedTime));
+
+      if (filter === 'PENDING') {
+        tickets = tickets.filter(t => t.status === 'AUTO GENERATED' || t.status === 'REVIEW' || t.status === 'VERIFIED' || t.status === 'ACTION');
+      }
+
+      if(tickets.length === 0) {
+        grid.innerHTML = '<p style="color:var(--kuk-text-muted);">Tidak ada tiket pelanggaran.</p>';
+        return;
+      }
+
+      tickets.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'ticket-card';
+        div.onclick = () => openModal(t.id);
+        
+        let bClass = 'b-auto';
+        if(t.status === 'REVIEW') bClass = 'b-review';
+        if(t.status === 'VERIFIED') bClass = 'b-verified';
+        if(t.status === 'ACTION') bClass = 'b-action';
+        if(t.status === 'CLOSED') bClass = 'b-closed';
+        if(t.status === 'REJECTED') bClass = 'b-rejected';
+
+        div.innerHTML = \`
+          <span class="badge \${bClass}">\${t.status}</span>
+          <div class="ticket-title">\${t.employeeName}</div>
+          <div class="ticket-meta">\${t.date} &bull; \${t.ruleBroken}</div>
+          <div class="ticket-val">\${t.calculatedValue}</div>
+        \`;
+        grid.appendChild(div);
+      });
+    }
+
+    function openModal(id) {
+      const tickets = ViolationEngine.getViolations();
+      const t = tickets.find(x => x.id === id);
+      if(!t) return;
+
+      currentTicketId = t.id;
+      document.getElementById('mId').textContent = t.id;
+      document.getElementById('mBadge').textContent = t.status;
+      document.getElementById('mEmp').textContent = t.employeeName;
+      document.getElementById('mDate').textContent = t.date;
+      document.getElementById('mRule').textContent = t.ruleBroken;
+      document.getElementById('mVal').textContent = t.calculatedValue;
+
+      const histDiv = document.getElementById('mHistory');
+      histDiv.innerHTML = '';
+      t.history.forEach(h => {
+        const dt = new Date(h.timestamp).toLocaleString('id-ID');
+        histDiv.innerHTML += \`
+          <div>
+            <strong style="color:var(--kuk-primary);">[\${h.state}]</strong> \${dt}<br>
+            <span style="color:#64748b;">Oleh: \${h.actor} - \${h.note}</span>
+          </div>
+        \`;
+      });
+
+      document.getElementById('mNote').value = '';
+      document.getElementById('ticketModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('ticketModal').classList.remove('active');
+      currentTicketId = null;
+    }
+
+    function updateTicket(newState) {
+      const note = document.getElementById('mNote').value;
+      if(!note.trim() && newState !== 'REVIEW') {
+        return alert("Catatan wajib diisi untuk tindakan ini.");
+      }
+
+      const activeUser = JSON.parse(localStorage.getItem('kuk_user')) || { username: 'Admin' };
+      
+      try {
+        ViolationEngine.transitionTicket(currentTicketId, newState, note || 'Dipindahkan ke Review', activeUser.username);
+        openModal(currentTicketId); // Refresh modal
+        renderTickets('PENDING'); // Refresh background
+      } catch (e) {
+        alert("Gagal update: " + e.message);
+      }
+    }
+  </script>
+  <script src="shared/shell.js" data-base="."></script>
+</body>
+</html>
