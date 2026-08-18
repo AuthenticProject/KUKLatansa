@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Form Peminjaman Kendaraan - KUK HR Portal</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #273549;
+      --surface-card: rgba(30, 41, 59, 0.82);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 20px 80px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Glow Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -150px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 16px 22px;
+      border-radius: 20px;
+    }
+    .top-nav .brand-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .top-nav .brand-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 8px 20px var(--primary-glow);
+    }
+    .top-nav h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .top-nav p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .btn-nav {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+    .btn-nav:hover {
+      background: var(--surface-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Card Form Panel */
+    .panel {
+      background: var(--surface-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .panel-header h2 {
+      font-size: 19px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 520px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .panel { padding: 22px; }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    input[type="text"],
+    input[type="tel"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 95px;
+    }
+    select {
+      cursor: pointer;
+    }
+    select option {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 8px;
+    }
+    select option:disabled {
+      color: #f87171;
+      font-style: italic;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      margin-top: 6px;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(59, 130, 246, 0.55);
+    }
+    .btn-submit:disabled {
+      background: #334155;
+      color: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* Combobox Kamar Terintegrasi */
+    .combobox-container {
+      position: relative;
+      width: 100%;
+    }
+    .combobox-input {
+      width: 100%;
+      padding-right: 36px !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: text;
+    }
+    .combobox-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      max-height: 230px;
+      overflow-y: auto;
+      background: var(--card-bg, #1e293b);
+      border: 1px solid var(--border, #334155);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+      z-index: 100;
+      display: none;
+    }
+    .combobox-dropdown.show {
+      display: block;
+    }
+    .combobox-option {
+      padding: 11px 14px;
+      font-size: 14px;
+      color: var(--text, #f8fafc);
+      cursor: pointer;
+      border-bottom: 1px solid var(--border, #334155);
+      transition: background 0.15s, color 0.15s;
+    }
+    .combobox-option:last-child {
+      border-bottom: none;
+    }
+    .combobox-option:hover, .combobox-option.active {
+      background: rgba(6, 182, 212, 0.18);
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 14px 22px;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--primary);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="container">
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="brand-info">
+        <div class="brand-icon">🚘</div>
+        <div>
+          <h1>Pengajuan Peminjaman Kendaraan</h1>
+          <p>KUK HR Portal &bull; Internal Operasional</p>
+        </div>
+      </div>
+      <div>
+        <a href="index.html" class="btn-nav">
+          <span>← Kembali ke Portal</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Active Loan / Sukses Panel -->
+    <div id="activeLoanPanel" class="panel" style="display: none;">
+      <div class="panel-header" style="background: linear-gradient(135deg, #059669, #10b981);">
+        <h2>🎉 Peminjaman Berhasil Dicatat!</h2>
+        <span style="font-size: 12px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-weight: 700;">Sedang Dipinjam</span>
+      </div>
+
+      <div style="padding: 24px; text-align: center;">
+        <div id="overdueAlertBanner" style="display: none; background: rgba(239, 68, 68, 0.18); border: 2px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #f87171; font-weight: 700; font-size: 14px; animation: pulse 1.5s infinite;">
+          ⚠️ WAKTU PEMINJAMAN TELAH MELEWATI BATAS PERKIRAAN KEMBALI! Mohon segera kembalikan kendaraan.
+        </div>
+
+        <div style="background: var(--card-bg, #1e293b); border: 1px solid var(--border, #334155); border-radius: 16px; padding: 24px; margin-bottom: 24px; text-align: left;">
+          <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #38bdf8;">Terima kasih sudah mengisi form</h3>
+          <p id="activeLoanMessage" style="font-size: 15px; color: #f8fafc; line-height: 1.65; margin: 0 0 16px 0;">
+            Anda sedang meminjam kendaraan <strong id="actKendaraanName" style="color:#facc15;">-</strong> (<strong id="actPlat">-</strong>).
+          </p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid var(--border, #334155);">
+            <div style="flex: 1; min-width: 140px;">
+              <div style="font-size: 12px; color: #94a3b8;">Mulai Pinjam</div>
+              <div id="actWaktuMulai" style="font-size: 14px; font-weight: 700; color: #f8fafc; margin-top: 4px;">-</div>
+            </div>
+            <div style="flex: 1; min-width: 140px;">
+              <div style="font-size: 12px; color: #94a3b8;">Perkiraan Kembali</div>
+              <div id="actWaktuKembali" style="font-size: 14px; font-weight: 700; color: #f87171; margin-top: 4px;">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Pertamina Card (Khusus L300 & Engkel) -->
+        <div id="pertaminaQrContainer" style="display: none; background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #ef4444; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+            <span style="background: #ef4444; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">SUBSIDI BBM PERTAMINA</span>
+            <span style="color: #38bdf8; font-weight: 700; font-size: 14px;">MyPertamina QR Pass</span>
+          </div>
+          <div style="font-size:12px; color:#94a3b8; text-align:center; margin-bottom:14px;">
+            Kendaraan: <strong id="qrKendaraanNama" style="color:#facc15;">-</strong> &bull; Plat: <strong id="qrPlatNomor" style="color:#fff;">-</strong>
+          </div>
+          <p style="font-size: 13px; color: #cbd5e1; margin: 0 0 16px 0; text-align:center;">
+            Tunjukkan QR Code ini kepada operator SPBU Pertamina saat pengisian Solar / BBM subsidi.
+          </p>
+
+          <!-- Area Barcode -->
+          <div id="qrBoxWrapper" style="text-align:center; margin-bottom:14px;">
+            <div id="qrBoxInner" style="background: #ffffff; padding: 18px; border-radius: 14px; display: inline-block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); max-width:100%;">
+              <!-- diisi oleh JS -->
+              <div id="qrLoadingState" style="width:180px; height:180px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;">
+                <div style="font-size:40px;">🔲</div>
+                <div style="font-size:11px; color:#64748b;">Memuat barcode...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tombol Aksi Barcode -->
+          <div id="qrActionButtons" style="display:none; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <a id="btnDownloadBarcode" download="Barcode_Pertamina.jpg" style="background:#10b981; color:#fff; padding:8px 18px; border-radius:20px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+              📥 Download Barcode
+            </a>
+            <button type="button" onclick="printBarcodeKendaraan()" style="background:#3b82f6; color:#fff; padding:8px 18px; border-radius:20px; font-size:12px; font-weight:700; border:none; cursor:pointer;">🖨️ Cetak Barcode</button>
+          </div>
+
+          <!-- Pesan tidak ada barcode -->
+          <div id="qrNoBarcodeMsg" style="display:none; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.4); border-radius:10px; padding:14px; font-size:13px; color:#fca5a5; text-align:center;">
+            ⚠️ Barcode kendaraan belum diupload oleh Admin.<br>
+            <span style="color:#94a3b8; font-size:12px;">Hubungi Admin KUK untuk mendapatkan Barcode Pertamina.</span>
+          </div>
+
+          <div style="font-size: 11px; color: #64748b; margin-top: 12px; text-align:center;">
+            📂 Barcode disimpan di: <a href="https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline;">Google Drive KUK</a>
+          </div>
+        </div>
+
+        <!-- Tombol Aksi Operasional (BBM & WhatsApp Dispatch) -->
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
+          <button type="button" class="btn-submit" onclick="openModalLogBbm()" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: auto; padding: 12px 20px; margin-top:0; font-size: 14px;">
+            <span>⛽ Catat Pengisian BBM & Struk</span>
+          </button>
+          <button type="button" class="btn-submit" onclick="dispatchLoanToWhatsApp()" style="background: linear-gradient(135deg, #10b981, #059669); width: auto; padding: 12px 20px; margin-top:0; font-size: 14px;">
+            <span>📲 Bagikan ke WhatsApp</span>
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn-submit" onclick="selesaiAtauPinjamBaru()" style="background: #334155; width: auto; padding: 12px 24px; margin-top:0; font-size: 14px;">
+            <span>✓ Selesai / Ajukan Peminjaman Baru</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Catat Pengisian BBM & Upload Struk -->
+    <div id="modalBbm" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:#1e293b; border:1px solid rgba(255,255,255,0.15); border-radius:20px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
+          <h3 style="margin:0; font-size:18px; color:#facc15; display:flex; align-items:center; gap:8px;">
+            <span>⛽</span> Catat Pengisian BBM & Struk SPBU
+          </h3>
+          <button type="button" onclick="closeModalLogBbm()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+        </div>
+
+        <form id="formLogBbm" onsubmit="handleSimpanLogBbm(event)">
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div>
+              <label class="form-label">Kendaraan</label>
+              <input type="text" id="bbmKendaraan" readonly style="background:rgba(15,23,42,0.6); color:#facc15; font-weight:700;">
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <label class="form-label">Total Rupiah (Rp) *</label>
+                <input type="number" id="bbmRupiah" placeholder="Contoh: 200000" required min="1000">
+              </div>
+              <div>
+                <label class="form-label">Jumlah Liter *</label>
+                <input type="number" id="bbmLiter" placeholder="Contoh: 29.5" step="0.1" required min="0.1">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <label class="form-label">Jenis BBM *</label>
+                <select id="bbmJenis" required>
+                  <option value="Biosolar Subsidi">Biosolar Subsidi</option>
+                  <option value="Dexlite">Dexlite</option>
+                  <option value="Pertamina Dex">Pertamina Dex</option>
+                  <option value="Pertalite">Pertalite</option>
+                  <option value="Pertamax">Pertamax</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">KM Speedometer (Odometer)</label>
+                <input type="number" id="bbmKm" placeholder="Contoh: 145200">
+              </div>
+            </div>
+
+            <div>
+              <label class="form-label">Lokasi SPBU</label>
+              <input type="text" id="bbmSpbu" placeholder="Contoh: SPBU Siman / Ponorogo Kota">
+            </div>
+
+            <div>
+              <label class="form-label">Upload Foto Struk / Nota SPBU</label>
+              <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+                <div id="bbmStrukPreview" style="width:100px; height:70px; border:1px dashed rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(15,23,42,0.8); overflow:hidden;">
+                  <span style="font-size:11px; color:#94a3b8;">Belum ada</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <label class="btn-submit" style="cursor:pointer; font-size:12px; padding:6px 14px; text-align:center; width:auto; margin:0; background:#0284c7;">
+                    📷 Foto Struk
+                    <input type="file" id="inBbmStrukFile" accept="image/*" style="display:none;" onchange="handleBbmStrukUpload(event)">
+                  </label>
+                  <button type="button" class="btn-submit" style="padding:4px 10px; background:#ef4444; font-size:11px; width:auto; margin:0;" onclick="clearBbmStruk()">🗑️ Hapus</button>
+                </div>
+              </div>
+              <input type="hidden" id="bbmStrukImage">
+            </div>
+
+            <div>
+              <label class="form-label">Catatan Tambahan</label>
+              <input type="text" id="bbmCatatan" placeholder="Keterangan pengisian (opsional)...">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:8px;">
+              <button type="submit" class="btn-submit" style="flex:1; background:linear-gradient(135deg, #10b981, #059669); margin-top:0;">
+                💾 Simpan & Kirim WhatsApp
+              </button>
+              <button type="button" onclick="closeModalLogBbm()" class="btn-submit" style="background:#475569; width:auto; margin-top:0;">
+                Batal
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main Card Form -->
+    <div id="formPanel" class="panel">
+      <div class="panel-header">
+        <h2>📝 Form Input Peminjaman Kendaraan</h2>
+        <span style="font-size: 12px; color: #34d399; font-weight: 600;">● Online</span>
+      </div>
+
+      <form id="formPeminjaman" onsubmit="handleAjukanPeminjaman(event)">
+        <div class="form-grid">
+          <!-- Nama Peminjam -->
+          <div class="form-group">
+            <label class="form-label">Nama Peminjam *</label>
+            <input type="text" id="inNama" placeholder="Contoh: Fariz Akbar" required>
+          </div>
+
+          <!-- Kamar / Instansi -->
+          <div class="form-group">
+            <label class="form-label">Kamar / Instansi *</label>
+            <div class="combobox-container" id="kamarComboboxContainer">
+              <input type="text" id="inKamar" class="combobox-input" placeholder="🔍 Ketik atau pilih Kamar / Instansi..." required autocomplete="off" onfocus="showKamarDropdown()" oninput="filterKamarDropdown()">
+              <div id="kamarDropdownList" class="combobox-dropdown"></div>
+            </div>
+          </div>
+
+          <!-- Kontak / No. HP -->
+          <div class="form-group">
+            <label class="form-label">Kontak / No. HP *</label>
+            <input type="tel" id="inKontak" placeholder="Contoh: 081234567890" required>
+          </div>
+
+          <!-- Pilih Kendaraan -->
+          <div class="form-group">
+            <label class="form-label">Pilih Kendaraan *</label>
+            <select id="inKendaraan" required onchange="onKendaraanSelectChange()">
+              <option value="" disabled selected>Memuat pilihan kendaraan...</option>
+            </select>
+          </div>
+
+          <!-- Upload Kartu SIM (Khusus L300 & Engkel) -->
+          <div class="form-group full" id="simUploadContainer" style="display: none; background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(250, 204, 21, 0.4); border-radius: 10px; padding: 14px; margin-top: 4px;">
+            <label class="form-label" style="color: #facc15; font-weight: 700;">Upload Foto Kartu SIM (Wajib untuk Peminjaman L300 & Truk Engkel) *</label>
+            <div style="font-size:11px; margin-bottom:6px; color:#cbd5e1;">
+              📂 Alokasi Drive: <a href="https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:underline;">Google Drive Folder SIM & Barcode</a>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+              <div id="simImagePreview" style="width:110px; height:65px; border:1px dashed rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(15,23,42,0.8); overflow:hidden;">
+                <span style="font-size:11px; color:#94a3b8;">Belum ada SIM</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label class="btn-submit" style="cursor:pointer; font-size:12px; padding:6px 14px; text-align:center; width:auto; margin:0; background:#0284c7;">
+                  📤 Upload Foto SIM
+                  <input type="file" id="inSimFile" accept="image/*" style="display:none;" onchange="handleSimUpload(event)">
+                </label>
+                <button type="button" class="btn-submit" style="padding:4px 10px; background:#ef4444; font-size:11px; width:auto; margin:0;" onclick="clearSimImage()">🗑️ Hapus SIM</button>
+              </div>
+            </div>
+            <input type="hidden" id="inSimImage">
+          </div>
+
+          <!-- Tanggal & Jam Mulai Pinjam -->
+          <div class="form-group">
+            <label class="form-label">Tgl & Jam Mulai Pinjam *</label>
+            <input type="datetime-local" id="inMulai" required>
+          </div>
+
+          <!-- Tanggal & Jam Rencana Kembali -->
+          <div class="form-group">
+            <label class="form-label">Tgl & Jam Rencana Kembali *</label>
+            <input type="datetime-local" id="inKembali" required>
+          </div>
+
+          <!-- Keperluan / Tujuan -->
+          <div class="form-group full">
+            <label class="form-label">Keperluan / Tujuan Peminjaman *</label>
+            <textarea id="inKeperluan" placeholder="Jelaskan keperluan operasional/tujuan pengiriman secara spesifik..." required></textarea>
+          </div>
+
+          <!-- SOP PEMINJAMAN KENDARAAN TB. KUK LATANSA -->
+          <div class="form-group full" style="margin-top: 10px;">
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 20px; color: #f8fafc; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+              <h3 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+                <span>📜</span> SOP PEMINJAMAN KENDARAAN TB. KUK Latansa
+              </h3>
+              <div style="max-height: 280px; overflow-y: auto; padding-right: 8px; font-size: 12.5px; line-height: 1.6; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">1. Tujuan</strong><br>
+                Menjamin penggunaan kendaraan operasional berjalan tertib, aman, dan terkontrol guna mengurangi kerusakan serta biaya perawatan.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">2. Ruang Lingkup</strong><br>
+                Berlaku untuk seluruh staff, karyawan TB. KUK Latansa, serta umum yang menggunakan kendaraan operasional.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">3. Jenis Kendaraan</strong><br>
+                • Truk Engkel<br>• L300<br>• VIAR<br>• Forklift</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">4. Ketentuan Umum</strong><br>
+                1. Kendaraan hanya digunakan untuk kepentingan operasional toko.<br>
+                2. Kepentingan operasional toko diatas segalanya.<br>
+                3. Wajib memiliki surat izin mengemudi ( SIM ).<br>
+                4. Setiap penggunaan wajib izin dan tercatat.<br>
+                5. Dilarang meminjamkan kendaraan ke orang lain tanpa izin, dan dengan sepengetahuan staff.<br>
+                6. Pengguna wajib memiliki kemampuan mengemudi sesuai jenis kendaraan.<br>
+                7. Pengguna bertanggung jawab penuh selama kendaraan dipakai.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">5. Prosedur Peminjaman</strong><br>
+                1. Mengisi form peminjaman kendaraan ( Via WhatsApp ).<br>
+                2. Memfotokan kartu SIM sebagai syarat peminjaman.<br>
+                3. Memfotokan indikator kendaraan dengan jelas.<br>
+                4. Memfotokan body kendaraan ( depan, samping kanan, samping kiri, belakang ).<br>
+                5. Menyebutkan :<br>
+                &nbsp;&nbsp;&bull; Nama peminjam, tahun pengabdian, kamar<br>
+                &nbsp;&nbsp;&bull; Jenis kendaraan<br>
+                &nbsp;&nbsp;&bull; Keperluan<br>
+                &nbsp;&nbsp;&bull; Tujuan<br>
+                &nbsp;&nbsp;&bull; Waktu pemakaian<br>
+                6. Mendapat persetujuan admin/penanggung jawab.<br>
+                7. Mengambil kunci kendaraan dari admin/penanggung jawab.<br>
+                8. Mengisi bahan bakar sesuai kesepakatan dengan penanggung jawab.<br>
+                9. Memarkirkan kendaraan pada tempatnya serta mengembalikan kunci kepada penanggung jawab.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">6. Pemeriksaan Sebelum Digunakan</strong><br>
+                1. Peminjam wajib mengecek :<br>
+                &nbsp;&nbsp;&bull; Bahan bakar<br>
+                &nbsp;&nbsp;&bull; Oli<br>
+                &nbsp;&nbsp;&bull; Rem<br>
+                &nbsp;&nbsp;&bull; Ban<br>
+                &nbsp;&nbsp;&bull; Lampu<br>
+                2. Jika ada kerusakan, wajib lapor sebelum digunakan.<br>
+                3. Jika ada kerusakan kemudian tidak melaporkan sebelum digunakan, maka peminjam yang akan bertanggung jawab atas kerusakan yang ada.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">7. Aturan Penggunaan</strong><br>
+                1. Gunakan kendaraan sesuai fungsi.<br>
+                2. Tidak ugal-ugalan atau melebihi kapasitas.<br>
+                3. Memakai seat belt atau sabuk pengaman.<br>
+                4. Menjaga kebersihan kendaraan.<br>
+                5. Tidak digunakan di luar jam operasional tanpa izin.<br>
+                6. Jika terjadi kecelakaan atau terjadi sesuatu wajib lapor kepada penanggung jawab.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">8. Pengembalian Kendaraan</strong><br>
+                1. Dikembalikan tepat waktu sesuai penulisan format peminjaman.<br>
+                2. Kondisi bersih dan aman.<br>
+                3. BBM minimal sama seperti saat dipinjam.<br>
+                4. Kunci dikembalikan ke penanggung jawab.<br>
+                5. Melaporkan kembali ke penanggung jawab.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">9. Tanggung Jawab</strong><br>
+                1. Kerusakan akibat kelalaian ditanggung peminjam.<br>
+                2. Keterlambatan pengembalian tanpa alasan dikenai sanksi.</p>
+
+                <p style="margin: 0 0 10px 0;"><strong style="color: #f1f5f9;">10. Sanksi</strong><br>
+                1. Teguran lisan.<br>
+                2. Teguran tertulis.<br>
+                3. Denda perbaikan.<br>
+                4. Larangan penggunaan kendaraan sementara ( Blacklist ).</p>
+
+                <p style="margin: 0;"><strong style="color: #f1f5f9;">11. Penutup</strong><br>
+                • SOP ini wajib dipatuhi oleh seluruh staff, karyawan, dan umum.<br>
+                • Pelanggaran akan ditindak sesuai aturan yang berlaku.<br>
+                • Ketentuan dapat berubah sewaktu waktu, melihat waktu dan situasi kondisi.</p>
+              </div>
+
+              <!-- Kolom Centang Persetujuan SOP -->
+              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);">
+                <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; color: #facc15; font-weight: 600; font-size: 13px;">
+                  <input type="checkbox" id="chkSetujuSop" required style="width: 18px; height: 18px; accent-color: #3b82f6; margin-top: 2px; cursor: pointer;">
+                  <span>Saya telah membaca, memahami, dan menyetujui seluruh peraturan SOP Peminjaman Kendaraan TB. KUK Latansa di atas. *</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tombol Ajukan -->
+          <div class="form-group full">
+            <button type="submit" class="btn-submit" id="btnSubmit">
+              <span>Ajukan Peminjaman</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="peminjaman_db.js"></script>
+  <script>
+    function showToast(message, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = (type === 'success' ? '✓ ' : '⚠️ ') + message;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(100%)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    function loadUserData() {
+      const user = sessionStorage.getItem('kuk_user');
+      if (user) {
+        document.getElementById('inNama').value = user.toUpperCase();
+      }
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      const localNow = new Date(now - offset).toISOString().slice(0, 16);
+      document.getElementById('inMulai').value = localNow;
+
+      const returnTime = new Date(now.getTime() + 4 * 3600 * 1000);
+      const localReturn = new Date(returnTime - offset).toISOString().slice(0, 16);
+      document.getElementById('inKembali').value = localReturn;
+    }
+
+    // Render dropdown kendaraan (L300, Engkel, Viar, Forklift)
+    // Jika sedang dipinjam, diberi keterangan & tidak bisa dipilih
+    function renderKendaraanDropdown() {
+      const list = PeminjamanDB.getKendaraanList();
+      const select = document.getElementById('inKendaraan');
+
+      select.innerHTML = '<option value="" disabled selected>-- Pilih Kendaraan --</option>';
+
+      list.forEach(item => {
+        const sedangDipinjam = PeminjamanDB.isKendaraanDipinjam(item.id);
+
+        const opt = document.createElement('option');
+        opt.value = item.id;
+
+        if (sedangDipinjam) {
+          opt.textContent = `${item.nama} - (Sedang Dipinjam)`;
+          opt.disabled = true;
+        } else {
+          opt.textContent = `${item.nama}`;
+        }
+
+        select.appendChild(opt);
+      });
+      onKendaraanSelectChange();
+    }
+
+    function showKamarDropdown() {
+      const input = document.getElementById('inKamar');
+      renderKamarDropdown(input ? input.value : '');
+      const dd = document.getElementById('kamarDropdownList');
+      if (dd) dd.classList.add('show');
+    }
+
+    function renderKamarDropdown(filterQuery = '') {
+      const dd = document.getElementById('kamarDropdownList');
+      if (!dd) return;
+      const daftar = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getDaftarKamar) 
+        ? PeminjamanDB.getDaftarKamar() 
+        : [];
+      
+      const q = filterQuery.toLowerCase().trim();
+      const filtered = daftar.filter(k => !q || k.toLowerCase().includes(q));
+
+      dd.innerHTML = '';
+      if (filtered.length === 0) {
+        dd.innerHTML = '<div class="combobox-option" style="color:#94a3b8; cursor:default;">Kamar tidak ditemukan</div>';
+      } else {
+        filtered.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'combobox-option';
+          div.textContent = item;
+          div.onclick = (e) => {
+            e.stopPropagation();
+            selectKamarOption(item);
+          };
+          dd.appendChild(div);
+        });
+      }
+    }
+
+    function filterKamarDropdown() {
+      const input = document.getElementById('inKamar');
+      renderKamarDropdown(input ? input.value : '');
+      const dd = document.getElementById('kamarDropdownList');
+      if (dd) dd.classList.add('show');
+    }
+
+    function onKendaraanSelectChange() {
+      const select = document.getElementById('inKendaraan');
+      if (!select) return;
+      const val = String(select.value || '').toUpperCase();
+      const optText = select.selectedIndex >= 0 ? String(select.options[select.selectedIndex].text || '').toUpperCase() : '';
+
+      const isL300OrEngkel = val.includes('L300') || val.includes('ENGKEL') || optText.includes('L300') || optText.includes('ENGKEL');
+
+      const simContainer = document.getElementById('simUploadContainer');
+      if (simContainer) {
+        if (isL300OrEngkel) {
+          simContainer.style.display = 'block';
+        } else {
+          simContainer.style.display = 'none';
+          clearSimImage();
+        }
+      }
+    }
+
+    function handleSimUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('inSimImage').value = base64;
+        document.getElementById('simImagePreview').innerHTML = `<img src="${base64}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+
+        if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.uploadFileToDrive) {
+          showToast('⬆️ Mengunggah foto SIM ke Google Drive KUK...', 'info');
+          const fileName = 'SIM_' + Date.now() + '.jpg';
+          PeminjamanDB.uploadFileToDrive(base64, fileName)
+            .then(res => {
+              if (res && res.success) {
+                // Simpan URL Drive agar bisa diakses nanti
+                if (res.downloadUrl) {
+                  document.getElementById('inSimImage').value = res.downloadUrl;
+                }
+                showToast('✅ Foto SIM berhasil disimpan di Google Drive!', 'success');
+              } else {
+                // Tetap pakai base64 lokal jika upload gagal
+                showToast('⚠️ Upload Drive gagal, foto tetap tersimpan lokal.', 'warn');
+              }
+            })
+            .catch(() => {
+              showToast('⚠️ Upload Drive gagal, foto tetap tersimpan lokal.', 'warn');
+            });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearSimImage() {
+      const fileIn = document.getElementById('inSimFile');
+      if (fileIn) fileIn.value = '';
+      document.getElementById('inSimImage').value = '';
+      document.getElementById('simImagePreview').innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum ada SIM</span>`;
+    }
+
+    function selectKamarOption(val) {
+      const input = document.getElementById('inKamar');
+      if (input) input.value = val;
+      const dd = document.getElementById('kamarDropdownList');
+      if (dd) dd.classList.remove('show');
+    }
+
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('kamarComboboxContainer');
+      const dd = document.getElementById('kamarDropdownList');
+      if (container && !container.contains(e.target) && dd) {
+        dd.classList.remove('show');
+      }
+    });
+
+    function handleAjukanPeminjaman(e) {
+      e.preventDefault();
+
+      const nama = (document.getElementById('inNama').value || '').trim();
+      const kamar = (document.getElementById('inKamar').value || '').trim();
+      const kontak = (document.getElementById('inKontak').value || '').trim();
+      const kendaraanId = document.getElementById('inKendaraan').value;
+      const waktuMulai = document.getElementById('inMulai').value;
+      const waktuRencanaKembali = document.getElementById('inKembali').value;
+      const keperluan = (document.getElementById('inKeperluan').value || '').trim();
+      const chkSetujuSop = document.getElementById('chkSetujuSop');
+      const simContainer = document.getElementById('simUploadContainer');
+      const simImageVal = document.getElementById('inSimImage') ? document.getElementById('inSimImage').value : '';
+
+      if (!nama || !kamar || !kontak || !kendaraanId || !waktuMulai || !waktuRencanaKembali || !keperluan) {
+        return showToast('Wajib mengisi semua kolom form tanpa ada yang dikosongkan!', 'error');
+      }
+
+      if (simContainer && simContainer.style.display !== 'none' && !simImageVal) {
+        return showToast('Peminjaman L300 / Truk Engkel WAJIB mengunggah foto kartu SIM!', 'error');
+      }
+
+      if (!chkSetujuSop || !chkSetujuSop.checked) {
+        return showToast('Anda wajib mencentang persetujuan seluruh peraturan SOP Peminjaman Kendaraan KUK!', 'error');
+      }
+
+      if (new Date(waktuRencanaKembali) < new Date(waktuMulai)) {
+        return showToast('Waktu rencana kembali tidak boleh lebih awal dari waktu mulai.', 'error');
+      }
+
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerHTML = `<span>Memproses Peminjaman...</span>`;
+
+      setTimeout(() => {
+        const saved = PeminjamanDB.savePeminjaman({
+          namaPeminjam: nama,
+          kamar: kamar,
+          divisi: kamar,
+          kontak: kontak,
+          kendaraanId: kendaraanId,
+          waktuMulai: waktuMulai,
+          waktuRencanaKembali: waktuRencanaKembali,
+          keperluan: keperluan
+        });
+
+        localStorage.setItem('kuk_active_loan', JSON.stringify(saved));
+        requestNotificationPermission();
+
+        showToast(`Berhasil! Peminjaman untuk ${saved.namaKendaraan} berhasil diajukan.`, 'success');
+
+        document.getElementById('inKeperluan').value = '';
+        if (chkSetujuSop) chkSetujuSop.checked = false;
+        btn.disabled = false;
+        btn.innerHTML = `
+          <span>Ajukan Peminjaman</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        `;
+
+        showActiveLoanScreen(saved);
+      }, 400);
+    }
+
+    function formatIndoDateTime(dtStr) {
+      if (!dtStr) return '-';
+      try {
+        const d = new Date(dtStr);
+        if (isNaN(d.getTime())) return dtStr;
+        return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' +
+               d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+      } catch(e) { return dtStr; }
+    }
+
+    let overdueTimer = null;
+
+    function requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function showActiveLoanScreen(loan) {
+      const actPanel = document.getElementById('activeLoanPanel');
+      const formPanel = document.getElementById('formPanel');
+      if (!actPanel || !formPanel) return;
+
+      actPanel.style.display = 'block';
+      formPanel.style.display = 'none';
+
+      const kendList = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanList) ? PeminjamanDB.getKendaraanList() : [];
+      let kend = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanById)
+        ? PeminjamanDB.getKendaraanById(loan.kendaraanId || loan.platKendaraan || loan.platNomor || loan.namaKendaraan)
+        : null;
+
+      if (!kend && kendList.length > 0) {
+        kend = kendList.find(k => k.id === loan.kendaraanId ||
+          String(k.plat||'').toLowerCase() === String(loan.platKendaraan || loan.platNomor || '').toLowerCase() ||
+          String(k.nama||'').toLowerCase() === String(loan.namaKendaraan || loan.kendaraanNama || '').toLowerCase() ||
+          (String(loan.namaKendaraan||'').toLowerCase().includes('l300') && String(k.nama||'').toLowerCase().includes('l300')) ||
+          (String(loan.namaKendaraan||'').toLowerCase().includes('engkel') && String(k.nama||'').toLowerCase().includes('engkel'))
+        );
+      }
+
+      const kendName = (kend && kend.nama) ? kend.nama : (loan.namaKendaraan || loan.kendaraanNama || '-');
+      const plat = (kend && kend.plat && kend.plat !== '-') ? kend.plat : (loan.platKendaraan || loan.platNomor || '-');
+      document.getElementById('actKendaraanName').textContent = kendName;
+      document.getElementById('actPlat').textContent = plat;
+      document.getElementById('actWaktuMulai').textContent = formatIndoDateTime(loan.waktuMulai);
+      document.getElementById('actWaktuKembali').textContent = formatIndoDateTime(loan.waktuRencanaKembali || loan.waktuKembali);
+
+      // Tampilkan QR Pertamina jika kendaraan adalah L300 atau Engkel
+      const qrBox = document.getElementById('pertaminaQrContainer');
+      const nameUpper = String(kendName || '').toUpperCase();
+      const isL300   = nameUpper.includes('L300')   || String(plat).toUpperCase().includes('L300')   || String(loan.kendaraanId||'').toUpperCase().includes('L300');
+      const isEngkel = nameUpper.includes('ENGKEL')  || String(plat).toUpperCase().includes('ENGKEL') || String(loan.kendaraanId||'').toUpperCase().includes('ENGKEL');
+      const needsBarcode = isL300 || isEngkel;
+
+      if (needsBarcode) {
+        qrBox.style.display = 'block';
+        document.getElementById('qrKendaraanNama').textContent = kendName;
+        document.getElementById('qrPlatNomor').textContent = plat;
+
+        // Cari URL barcode dari database kendaraan (hasil upload Drive)
+        let qrImgData = (kend && kend.qrImage && kend.qrImage !== '') ? kend.qrImage
+          : (loan.qrImage && loan.qrImage !== '' ? loan.qrImage : null);
+
+        if (!qrImgData) {
+          if (isL300) qrImgData = localStorage.getItem('kuk_qr_img_L300') || 'QR-L300.jpeg';
+          else if (isEngkel) qrImgData = localStorage.getItem('kuk_qr_img_ENGKEL') || 'qr-engkel.png';
+        }
+
+        const inner = document.getElementById('qrBoxInner');
+        const actionBtns = document.getElementById('qrActionButtons');
+        const noMsg = document.getElementById('qrNoBarcodeMsg');
+
+        if (qrImgData) {
+          // Barcode ada — tampilkan gambar
+          inner.innerHTML = `<img src="${qrImgData}" alt="Barcode Pertamina ${plat}" id="barcodeImgEl" style="max-width:280px; max-height:280px; border-radius:8px; display:block; margin:0 auto; box-shadow:0 4px 15px rgba(0,0,0,0.15);">`;
+          // Set tombol download
+          const dlBtn = document.getElementById('btnDownloadBarcode');
+          if (dlBtn) {
+            dlBtn.href = qrImgData;
+            dlBtn.download = 'Barcode_Pertamina_' + plat.replace(/[^a-zA-Z0-9]/g,'_') + '.jpg';
+          }
+          if (actionBtns) actionBtns.style.display = 'flex';
+          if (noMsg) noMsg.style.display = 'none';
+          window._currentBarcodeUrl = qrImgData;
+        } else {
+          // Belum ada barcode — tampilkan pesan admin
+          inner.innerHTML = '';
+          if (actionBtns) actionBtns.style.display = 'none';
+          if (noMsg) noMsg.style.display = 'block';
+          window._currentBarcodeUrl = null;
+        }
+      } else {
+        if (qrBox) qrBox.style.display = 'none';
+      }
+
+
+      // Mulai monitor keterlambatan
+      startOverdueMonitor(loan);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startOverdueMonitor(loan) {
+      if (overdueTimer) clearInterval(overdueTimer);
+
+      const checkOverdue = () => {
+        const rencanaStr = loan.waktuRencanaKembali || loan.waktuKembali;
+        if (!rencanaStr) return;
+
+        const targetTime = new Date(rencanaStr).getTime();
+        const now = Date.now();
+
+        const banner = document.getElementById('overdueAlertBanner');
+        if (now > targetTime) {
+          if (banner) banner.style.display = 'block';
+
+          // Kirim notifikasi ke device yang meminjam
+          if ('Notification' in window && Notification.permission === 'granted') {
+            const notifKey = 'notif_sent_' + loan.id;
+            if (!sessionStorage.getItem(notifKey)) {
+              new Notification('⚠️ Waktu Peminjaman Habis!', {
+                body: `Waktu rencana kembali untuk ${loan.namaKendaraan} (${loan.platKendaraan || ''}) telah lewat. Mohon segera kembalikan kendaraan.`,
+                icon: 'icon-192.png',
+                requireInteraction: true
+              });
+              sessionStorage.setItem(notifKey, '1');
+              if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
+            }
+          }
+        } else {
+          if (banner) banner.style.display = 'none';
+        }
+      };
+
+      checkOverdue();
+      overdueTimer = setInterval(checkOverdue, 10000);
+    }
+
+    function selesaiAtauPinjamBaru() {
+      if (overdueTimer) clearInterval(overdueTimer);
+      localStorage.removeItem('kuk_active_loan');
+      document.getElementById('activeLoanPanel').style.display = 'none';
+      document.getElementById('formPanel').style.display = 'block';
+      renderKendaraanDropdown();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function printBarcodeKendaraan() {
+      const url = window._currentBarcodeUrl;
+      if (!url) { showToast('Tidak ada barcode untuk dicetak.', 'error'); return; }
+
+      const kendNama = document.getElementById('qrKendaraanNama').textContent || '';
+      const platNo   = document.getElementById('qrPlatNomor').textContent || '';
+      const win = window.open('', '_blank', 'width=480,height=620');
+      win.document.write(`<!DOCTYPE html>
+<html><head><title>Barcode Pertamina ${platNo}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#fff; padding:20px; }
+  .header { text-align:center; margin-bottom:16px; }
+  .badge { background:#ef4444; color:#fff; padding:4px 14px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:0.5px; display:inline-block; margin-bottom:8px; }
+  h2 { font-size:16px; color:#1e293b; margin-bottom:4px; }
+  p  { font-size:12px; color:#64748b; }
+  .barcode-wrap { background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:16px; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-bottom:16px; }
+  .barcode-wrap img { max-width:100%; display:block; }
+  .footer { font-size:10px; color:#94a3b8; text-align:center; }
+  @media print { body { padding:0; } .barcode-wrap { box-shadow:none; border:none; } }
+</style></head>
+<body>
+  <div class="header">
+    <div class="badge">SUBSIDI BBM PERTAMINA</div>
+    <h2>MyPertamina QR Pass</h2>
+    <p>${kendNama} &bull; Plat: ${platNo}</p>
+  </div>
+  <div class="barcode-wrap">
+    <img src="${url}" alt="Barcode Pertamina ${platNo}">
+  </div>
+  <div class="footer">
+    TB. KUK Latansa &bull; Tunjukkan kepada operator SPBU saat pengisian BBM subsidi<br>
+    <small>Dicetak: ${new Date().toLocaleString('id-ID')}</small>
+  </div>
+  <script>window.onload = () => window.print();<\/script>
+</body></html>`);
+      win.document.close();
+    }
+
+    // --- LOG BBM & WHATSAPP DISPATCH HANDLERS ---
+    function openModalLogBbm() {
+      const stored = localStorage.getItem('kuk_active_loan');
+      if (!stored) return showToast('Tidak ada peminjaman aktif.', 'error');
+      const loan = JSON.parse(stored);
+      document.getElementById('bbmKendaraan').value = `${loan.namaKendaraan} (${loan.platKendaraan || '-'})`;
+      document.getElementById('modalBbm').style.display = 'flex';
+    }
+
+    function closeModalLogBbm() {
+      document.getElementById('modalBbm').style.display = 'none';
+    }
+
+    function handleBbmStrukUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('bbmStrukImage').value = base64;
+        document.getElementById('bbmStrukPreview').innerHTML = `<img src="${base64}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+        if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.uploadFileToDrive) {
+          PeminjamanDB.uploadFileToDrive(base64, 'STRUK_BBM_' + Date.now() + '.jpg')
+            .then(res => {
+              if (res && res.success && res.downloadUrl) {
+                document.getElementById('bbmStrukImage').value = res.downloadUrl;
+              }
+            });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearBbmStruk() {
+      const fileIn = document.getElementById('inBbmStrukFile');
+      if (fileIn) fileIn.value = '';
+      document.getElementById('bbmStrukImage').value = '';
+      document.getElementById('bbmStrukPreview').innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum ada</span>`;
+    }
+
+    function handleSimpanLogBbm(e) {
+      e.preventDefault();
+      const stored = localStorage.getItem('kuk_active_loan');
+      if (!stored) return showToast('Sesi peminjaman tidak aktif.', 'error');
+      const loan = JSON.parse(stored);
+
+      const rupiah = Number(document.getElementById('bbmRupiah').value) || 0;
+      const liter = Number(document.getElementById('bbmLiter').value) || 0;
+      const jenis = document.getElementById('bbmJenis').value;
+      const km = Number(document.getElementById('bbmKm').value) || 0;
+      const spbu = (document.getElementById('bbmSpbu').value || '').trim();
+      const struk = document.getElementById('bbmStrukImage').value || '';
+      const catatan = (document.getElementById('bbmCatatan').value || '').trim();
+
+      const newLog = PeminjamanDB.saveLogBbm({
+        peminjamanId: loan.id,
+        kendaraanId: loan.kendaraanId,
+        namaKendaraan: loan.namaKendaraan,
+        platKendaraan: loan.platKendaraan,
+        peminjamNama: loan.namaPeminjam,
+        jenisBbm: jenis,
+        jumlahLiter: liter,
+        totalRupiah: rupiah,
+        spbuLocation: spbu || 'SPBU Siman',
+        kmOdometer: km,
+        fotoStruk: struk,
+        catatan: catatan
+      });
+
+      showToast('✅ Log pengisian BBM berhasil disimpan!', 'success');
+      closeModalLogBbm();
+
+      // Buat WhatsApp Dispatch Link
+      const waUrl = PeminjamanDB.getWhatsAppBbmUrl(newLog);
+      if (waUrl) {
+        window.open(waUrl, '_blank');
+      }
+    }
+
+    function dispatchLoanToWhatsApp() {
+      const stored = localStorage.getItem('kuk_active_loan');
+      if (!stored) return showToast('Tidak ada peminjaman aktif.', 'error');
+      const loan = JSON.parse(stored);
+      const waUrl = PeminjamanDB.getWhatsAppLoanUrl(loan);
+      if (waUrl) {
+        window.open(waUrl, '_blank');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadUserData();
+      renderKendaraanDropdown();
+      renderKamarDropdown();
+      requestNotificationPermission();
+
+      // Cek sesi peminjaman aktif
+      const storedActive = localStorage.getItem('kuk_active_loan');
+      if (storedActive) {
+        try {
+          const activeLoan = JSON.parse(storedActive);
+          if (activeLoan && activeLoan.status === 'Aktif/Dipinjam') {
+            showActiveLoanScreen(activeLoan);
+          }
+        } catch(e) {}
+      }
+
+      if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.syncFromCloud) {
+        PeminjamanDB.syncFromCloud().then(() => {
+          renderKendaraanDropdown();
+          // Cek kembali status aktif dari cloud
+          const storedActive = localStorage.getItem('kuk_active_loan');
+          if (storedActive) {
+            try {
+              const activeLoan = JSON.parse(storedActive);
+              const cloudLoan = PeminjamanDB.getPeminjamanById(activeLoan.id);
+              if (cloudLoan && cloudLoan.status !== 'Aktif/Dipinjam') {
+                localStorage.removeItem('kuk_active_loan');
+                selesaiAtauPinjamBaru();
+              } else {
+                showActiveLoanScreen(activeLoan);
+              }
+            } catch(e) {}
+          }
+        });
+      }
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'kuk_db_kendaraan_v2' || e.key === 'kuk_active_loan') {
+          const storedActive = localStorage.getItem('kuk_active_loan');
+          if (storedActive) {
+            try {
+              const activeLoan = JSON.parse(storedActive);
+              if (activeLoan && activeLoan.status === 'Aktif/Dipinjam') {
+                showActiveLoanScreen(activeLoan);
+              }
+            } catch(err) {}
+          }
+        }
+      });
+    });
+  </script>
+  <script src="shared/shell.js" data-base="."></script>
+</body>
+</html>

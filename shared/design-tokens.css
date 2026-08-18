@@ -1,0 +1,110 @@
+/**
+ * KUK La Tansa — Design Tokens
+ * Visual Authority: docs/UI_UX_BRAND_GUIDELINE.md
+ *
+ * Primary identity: Maroon #540000
+ * Gold accent (#FFCC00): use SPARINGLY — active states, key highlights only.
+ * Do NOT create a generic blue admin-template appearance.
+ */
+
+/* ── Google Fonts — Outfit ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* ── Brand: Primary (Maroon) ────────────────────────────────────── */
+  --kuk-primary:            #540000;
+  --kuk-primary-hover:      #6A0A0A;
+  --kuk-primary-active:     #420000;
+  --kuk-primary-dark:       #380000;
+  --kuk-primary-light:      rgba(84, 0, 0, 0.07);
+  --kuk-primary-glow:       rgba(84, 0, 0, 0.18);
+
+  /* ── Brand: Gold (Sparingly — active/highlight only) ────────────── */
+  --kuk-gold:               #FFCC00;
+  --kuk-gold-deep:          #996414;
+  --kuk-gold-light:         rgba(255, 204, 0, 0.12);
+  --kuk-gold-border:        rgba(255, 204, 0, 0.35);
+
+  /* ── Surfaces ───────────────────────────────────────────────────── */
+  --kuk-bg:                 #F5F1F0;
+  --kuk-surface:            #FFFFFF;
+  --kuk-surface-muted:      #FAF8F7;
+  --kuk-surface-2:          #F5F1F0;
+  --kuk-surface-raised:     #FFFFFF;
+
+  /* ── Text ───────────────────────────────────────────────────────── */
+  --kuk-text:               #231818;
+  --kuk-text-muted:         #6F6464;
+  --kuk-text-light:         #9E9494;
+  --kuk-text-on-primary:    #FFFFFF;
+  --kuk-text-on-gold:       #231818;
+
+  /* ── Border ─────────────────────────────────────────────────────── */
+  --kuk-border:             #E5E5E5;
+  --kuk-border-soft:        rgba(229, 229, 229, 0.55);
+  --kuk-border-strong:      #CDCCCC;
+
+  /* ── Semantic: Danger ───────────────────────────────────────────── */
+  --kuk-danger:             #CC0000;
+  --kuk-danger-hover:       #AA0000;
+  --kuk-danger-light:       #FFF0F0;
+  --kuk-danger-border:      rgba(204, 0, 0, 0.2);
+
+  /* ── Semantic: Success ──────────────────────────────────────────── */
+  --kuk-success:            #16A34A;
+  --kuk-success-hover:      #15803D;
+  --kuk-success-light:      #F0FDF4;
+  --kuk-success-border:     rgba(22, 163, 74, 0.2);
+
+  /* ── Semantic: Warning ──────────────────────────────────────────── */
+  --kuk-warning:            #B45309;
+  --kuk-warning-light:      #FFFBEB;
+  --kuk-warning-border:     rgba(180, 83, 9, 0.2);
+
+  /* ── Semantic: Info ─────────────────────────────────────────────── */
+  --kuk-info:               #0369A1;
+  --kuk-info-light:         #F0F9FF;
+  --kuk-info-border:        rgba(3, 105, 161, 0.2);
+
+  /* ── Sidebar ────────────────────────────────────────────────────── */
+  --kuk-sidebar-bg:         #380000;
+  --kuk-sidebar-surface:    #420000;
+  --kuk-sidebar-hover:      rgba(255, 255, 255, 0.07);
+  --kuk-sidebar-active-bg:  rgba(255, 204, 0, 0.13);
+  --kuk-sidebar-border:     rgba(255, 255, 255, 0.07);
+  --kuk-sidebar-text:       rgba(255, 255, 255, 0.88);
+  --kuk-sidebar-muted:      rgba(255, 255, 255, 0.42);
+  --kuk-sidebar-icon:       rgba(255, 255, 255, 0.55);
+
+  /* ── Layout dimensions ──────────────────────────────────────────── */
+  --kuk-sidebar-w:          256px;
+  --kuk-sidebar-w-sm:       68px;
+  --kuk-topbar-h:           60px;
+
+  /* ── Border Radius ──────────────────────────────────────────────── */
+  --kuk-radius-xs:          4px;
+  --kuk-radius-sm:          6px;
+  --kuk-radius-md:          10px;
+  --kuk-radius-lg:          14px;
+  --kuk-radius-xl:          20px;
+  --kuk-radius-2xl:         28px;
+  --kuk-radius-full:        9999px;
+
+  /* ── Shadows ────────────────────────────────────────────────────── */
+  --kuk-shadow-xs:          0 1px 2px rgba(35, 24, 24, 0.05);
+  --kuk-shadow-sm:          0 2px 8px rgba(35, 24, 24, 0.06);
+  --kuk-shadow:             0 4px 16px rgba(35, 24, 24, 0.08);
+  --kuk-shadow-md:          0 8px 24px rgba(35, 24, 24, 0.10);
+  --kuk-shadow-lg:          0 16px 48px rgba(35, 24, 24, 0.14);
+  --kuk-shadow-primary:     0 4px 20px rgba(84, 0, 0, 0.30);
+
+  /* ── Motion ─────────────────────────────────────────────────────── */
+  --kuk-ease:               cubic-bezier(0.4, 0, 0.2, 1);
+  --kuk-ease-out:           cubic-bezier(0, 0, 0.2, 1);
+  --kuk-transition:         0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --kuk-transition-slow:    0.32s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  --kuk-font:               'Outfit', system-ui, -apple-system, sans-serif;
+  --kuk-font-mono:          'JetBrains Mono', 'Fira Code', monospace;
+}

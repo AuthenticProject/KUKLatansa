@@ -1,0 +1,19 @@
+UI/UX RULES FOR EVERY FUTURE ANTIGRAVITY TASK
+
+1. Read docs/UI_UX_BRAND_GUIDELINE.md before changing any UI.
+2. Treat that file as the visual source of truth.
+3. Primary interface colour: #540000 deep maroon.
+4. Accent: #FFCC00 gold, used sparingly.
+5. Secondary brand support: #996414.
+6. Neutral base: #FFFFFF and #E5E5E5.
+7. Semantic danger: #FF0000, not a general brand colour.
+8. Use Revans for brand/display typography when the approved font asset is available; otherwise use a highly legible UI fallback.
+9. Keep the UI premium, restrained, spacious, operational, and professional.
+10. Do not use emoji as core navigation icons.
+11. Do not create a different colour or component language per module.
+12. Every new screen must handle loading, empty, error, success, and permission-denied states.
+13. Always preserve responsive behavior for desktop, tablet, and mobile.
+14. Accessibility and usability outrank decorative effects.
+15. Never overuse gold, gradients, glassmorphism, shadows, or animation.
+16. Preserve official KUK logo proportions and assets.
+17. Use centralized design tokens; do not hard-code ad hoc colours throughout components.

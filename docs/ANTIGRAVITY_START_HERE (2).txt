@@ -1,0 +1,10 @@
+KUK LA TANSA — ANTIGRAVITY START HERE
+
+1. Read MASTER_PROMPT.md completely.
+2. Read masterplan.md completely.
+3. Audit the existing KUKRisingGiant project before making broad changes.
+4. Do not rebuild blindly; identify what is reusable.
+5. First deliver the audit + proposed refactor plan.
+6. Then implement Phase 1 only: app shell, auth/RBAC foundation, master data model, and design system.
+7. Do not implement payroll deductions until attendance and policy rules are defined/configurable.
+8. After each phase, run tests/build/lint where available and fix regressions.

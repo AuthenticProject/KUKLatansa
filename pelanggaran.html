@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Catat Pelanggaran Karyawan</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#dc2626">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --primary: #dc2626; /* Crimson Red for violations */
+      --primary-hover: #b91c1c;
+      --primary-light: #fef2f2;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --warning: #f59e0b;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px 100px;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="datetime-local"],
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 15px;
+      font-weight: 500;
+      outline: none;
+      transition: 0.2s;
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    input[readonly] {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+      border-color: var(--border);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      background: #cbd5e1;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .loader {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s infinite linear;
+      display: none;
+    }
+
+    .btn-submit.loading .loader {
+      display: block;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: white;
+      color: var(--text);
+      padding: 14px 24px;
+      border-radius: 100px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      font-weight: 500;
+      font-size: 14px;
+      border-left: 4px solid var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: auto;
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast.error {
+      border-left-color: var(--primary);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes toastIn {
+      0% {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes toastOut {
+      to {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .back-link a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .back-link a:hover {
+      color: var(--primary);
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 20px 10px 100px; }
+      .app-container { gap: 16px; }
+      .header h1 { font-size: 22px; }
+      .header p { font-size: 13px; }
+      .card { padding: 20px 16px; border-radius: 12px; }
+      .form-group label { font-size: 11px; }
+      input[type="text"], input[type="number"], input[type="datetime-local"], select { padding: 10px 12px; font-size: 14px; }
+      .btn-submit { padding: 14px; font-size: 14px; border-radius: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="app-container">
+    <div class="header">
+      <h1>Pencatatan Pelanggaran Karyawan</h1>
+      <p>Input data pelanggaran karyawan toko dengan akumulasi poin otomatis.</p>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label>Pilih Karyawan</label>
+        <select id="vpKaryawan">
+          <option value="" disabled selected>Memuat daftar karyawan...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Jenis Pelanggaran</label>
+        <select id="vpJenis" onchange="updateViolationPoints()">
+          <option value="" disabled selected>Pilih jenis pelanggaran...</option>
+          <optgroup label="Pelanggaran Ringan - 10 Poin">
+            <option value="Terlambat lebih dari 5 menit">Terlambat lebih dari 5 menit</option>
+            <option value="Tidak mengenakan seragam kerja">Tidak mengenakan seragam kerja</option>
+            <option value="Tidak melaksanakan tugas kebersihan dapur">Tidak melaksanakan tugas kebersihan dapur</option>
+            <option value="Menggunakan HP untuk kepentingan pribadi">Menggunakan HP untuk kepentingan pribadi</option>
+            <option value="Mengambil istirahat berlebihan">Mengambil istirahat berlebihan</option>
+          </optgroup>
+          <optgroup label="Pelanggaran Sedang - 20 Poin">
+            <option value="Merokok jam operasional">Merokok jam operasional</option>
+            <option value="Mengakhiri jam kerja sebelum waktunya">Mengakhiri jam kerja sebelum waktunya</option>
+            <option value="Mengabaikan instruksi dari staf">Mengabaikan instruksi dari staf</option>
+            <option value="Menerima ulasan negatif">Menerima ulasan negatif</option>
+            <option value="Tidak hadir tanpa izin">Tidak hadir tanpa izin</option>
+            <option value="Menggunakan fasilitas toko untuk kebutuhan pribadi">Menggunakan fasilitas toko untuk kebutuhan pribadi</option>
+            <option value="Melakukan aktivitas di luar tanggung jawab kerja saat operasional">Melakukan aktivitas di luar tanggung jawab kerja saat operasional</option>
+          </optgroup>
+          <optgroup label="Pelanggaran Berat - 50 Poin">
+            <option value="Tidak melaksanakan sholat dzuhur dan ashar">Tidak melaksanakan sholat dzuhur dan ashar</option>
+            <option value="Mengambil barang milik toko tanpa seizin staf">Mengambil barang milik toko tanpa seizin staf</option>
+          </optgroup>
+          <option value="Lainnya">Lainnya (Ketik manual...)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="vpCustomJenisGroup" style="display:none;">
+        <label>Ketik Jenis Pelanggaran Lainnya</label>
+        <input type="text" id="vpCustomJenis" placeholder="Ketik jenis pelanggaran jika tidak ada di list">
+      </div>
+
+      <div class="form-group">
+        <label>Poin Pelanggaran</label>
+        <input type="number" id="vpPoin" placeholder="Poin" min="0">
+      </div>
+
+      <div class="form-group">
+        <label>Tempat Kejadian</label>
+        <input type="text" id="vpTempat" placeholder="Contoh: Dapur, Area Kasir, Depan Toko">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Staf Penginput</label>
+        <select id="vpStaf">
+          <option value="" disabled selected>Pilih nama staf...</option>
+          <option value="fariz">fariz</option>
+          <option value="andika">andika</option>
+          <option value="irsyadil">irsyadil</option>
+          <option value="ari">ari</option>
+          <option value="shuva">shuva</option>
+          <option value="aria">aria</option>
+          <option value="zain">zain</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Waktu & Tanggal Kejadian</label>
+        <input type="text" id="vpWaktu" placeholder="Pilih waktu & tanggal...">
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="savePelanggaran()">
+        <span class="loader"></span>
+        <span id="btnText">Simpan Data Pelanggaran</span>
+      </button>
+    </div>
+
+    <div class="back-link">
+      <a href="index.html">← Kembali ke Portal</a>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
+    let dbKaryawan = [];
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = type === 'success'
+        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ${msg}`
+        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> ${msg}`;
+      container.appendChild(t);
+      setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
+    }
+
+    function filterDataByRole(dataArray) {
+      if (!Array.isArray(dataArray)) return dataArray;
+      const rawUser = sessionStorage.getItem('kuk_user');
+      if (!rawUser) return dataArray;
+      
+      const loggedUser = String(rawUser).toLowerCase().trim();
+
+      let hasUsersPerm = false;
+      const storedDb = localStorage.getItem('kuk_users_db');
+      if (storedDb) {
+        try {
+          const parsed = JSON.parse(storedDb);
+          const u = parsed.find(x => String(x.username).toLowerCase().trim() === loggedUser);
+          if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
+        } catch(e){}
+      } else {
+        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
+      }
+      if (hasUsersPerm) return dataArray;
+      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
+      return dataArray.filter(item => {
+        const nameStr = String(item.nama || '').toLowerCase().trim();
+        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
+        return isPalen ? isEmpPalen : !isEmpPalen;
+      });
+    }
+
+    function init() {
+      // Set default time to current local time (formatted for datetime-local)
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      const localISOTime = new Date(now - offset).toISOString().slice(0, 16);
+      
+      flatpickr("#vpWaktu", { 
+        enableTime: true, 
+        dateFormat: "Y-m-d\\TH:i", 
+        time_24hr: true, 
+        altInput: true, 
+        altFormat: "d M Y, H:i",
+        defaultDate: localISOTime
+      });
+
+      // Fetch employees list
+      fetch(`${SCRIPT_URL}?action=dashboard_data`)
+        .then(r => r.json())
+        .then(res => {
+          let tempKaryawan = (res.karyawan || []).filter(k => k.status.toLowerCase() !== 'nonaktif');
+          dbKaryawan = filterDataByRole(tempKaryawan);
+          const selKaryawan = document.getElementById('vpKaryawan');
+          
+          if (dbKaryawan.length === 0) {
+            selKaryawan.innerHTML = '<option value="" disabled>Tidak ada karyawan aktif.</option>';
+          } else {
+            selKaryawan.innerHTML = '<option value="" disabled selected>Pilih karyawan...</option>' + 
+              dbKaryawan.map(k => `<option value="${k.id}" data-nama="${k.nama}">${k.nama} (${k.bagian})</option>`).join('');
+          }
+        })
+        .catch(e => {
+          showToast('Gagal memuat daftar karyawan dari server.', 'error');
+          document.getElementById('vpKaryawan').innerHTML = '<option value="" disabled>Gagal memuat data.</option>';
+        });
+    }
+
+    function updateViolationPoints() {
+      const select = document.getElementById('vpJenis');
+      const customGroup = document.getElementById('vpCustomJenisGroup');
+      const inputPoin = document.getElementById('vpPoin');
+      const val = select.value;
+      
+      if (val === 'Lainnya') {
+        customGroup.style.display = 'block';
+        inputPoin.value = '';
+        inputPoin.removeAttribute('readonly');
+      } else {
+        customGroup.style.display = 'none';
+        
+        const p10 = [
+          "Terlambat lebih dari 5 menit", 
+          "Tidak mengenakan seragam kerja", 
+          "Tidak melaksanakan tugas kebersihan dapur", 
+          "Menggunakan HP untuk kepentingan pribadi", 
+          "Mengambil istirahat berlebihan"
+        ];
+        const p20 = [
+          "Merokok jam operasional", 
+          "Mengakhiri jam kerja sebelum waktunya", 
+          "Mengabaikan instruksi dari staf", 
+          "Menerima ulasan negatif", 
+          "Tidak hadir tanpa izin", 
+          "Menggunakan fasilitas toko untuk kebutuhan pribadi", 
+          "Melakukan aktivitas di luar tanggung jawab kerja saat operasional"
+        ];
+        const p50 = [
+          "Tidak melaksanakan sholat dzuhur dan ashar", 
+          "Mengambil barang milik toko tanpa seizin staf"
+        ];
+        
+        if (p10.includes(val)) {
+          inputPoin.value = 10;
+          inputPoin.setAttribute('readonly', 'true');
+        } else if (p20.includes(val)) {
+          inputPoin.value = 20;
+          inputPoin.setAttribute('readonly', 'true');
+        } else if (p50.includes(val)) {
+          inputPoin.value = 50;
+          inputPoin.setAttribute('readonly', 'true');
+        } else {
+          inputPoin.value = '';
+          inputPoin.removeAttribute('readonly');
+        }
+      }
+    }
+
+    function savePelanggaran() {
+      const idKaryawan = document.getElementById('vpKaryawan').value;
+      const selectKaryawan = document.getElementById('vpKaryawan');
+      const selectedOption = selectKaryawan.options[selectKaryawan.selectedIndex];
+      const nama = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+      
+      const selectJenis = document.getElementById('vpJenis').value;
+      let jenis = selectJenis;
+      if (selectJenis === 'Lainnya') {
+        jenis = document.getElementById('vpCustomJenis').value;
+      }
+      
+      const poin = Number(document.getElementById('vpPoin').value);
+      const tempat = document.getElementById('vpTempat').value;
+      const staf = document.getElementById('vpStaf').value;
+      const waktu = document.getElementById('vpWaktu').value;
+      
+      if (!idKaryawan) return showToast('Pilih karyawan terlebih dahulu!', 'error');
+      if (!jenis) return showToast('Pilih atau ketik jenis pelanggaran!', 'error');
+      if (poin === undefined || isNaN(poin) || poin < 0) return showToast('Poin harus berupa angka positif!', 'error');
+      if (!tempat) return showToast('Tempat kejadian wajib diisi!', 'error');
+      if (!staf) return showToast('Nama staf penginput wajib diisi!', 'error');
+      
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+      document.getElementById('btnText').textContent = 'Menyimpan...';
+      
+      const payload = {
+        action: 'save_pelanggaran',
+        idKaryawan,
+        nama,
+        jenis,
+        poin,
+        tempat,
+        staf,
+        waktu
+      };
+      
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+        .then(r => r.json())
+        .then(res => {
+          btn.classList.remove('loading');
+          if (res.result === 'success') {
+            showToast('Pelanggaran berhasil dicatat!', 'success');
+            document.getElementById('btnText').textContent = '✓ Berhasil Disimpan';
+            btn.style.background = 'var(--success)';
+            
+            // Reset form
+            document.getElementById('vpKaryawan').value = '';
+            document.getElementById('vpJenis').value = '';
+            document.getElementById('vpCustomJenisGroup').style.display = 'none';
+            document.getElementById('vpCustomJenis').value = '';
+            document.getElementById('vpPoin').value = '';
+            document.getElementById('vpPoin').removeAttribute('readonly');
+            document.getElementById('vpTempat').value = '';
+            document.getElementById('vpStaf').value = '';
+            
+            setTimeout(() => {
+              btn.style.background = 'var(--primary)';
+              document.getElementById('btnText').textContent = 'Simpan Data Pelanggaran';
+              btn.disabled = false;
+            }, 3000);
+          } else {
+            btn.disabled = false;
+            document.getElementById('btnText').textContent = 'Simpan Data Pelanggaran';
+            showToast(res.message || 'Gagal menyimpan pelanggaran.', 'error');
+          }
+        })
+        .catch(e => {
+          btn.classList.remove('loading');
+          btn.disabled = false;
+          document.getElementById('btnText').textContent = 'Simpan Data Pelanggaran';
+          showToast('Gagal terhubung ke server.', 'error');
+        });
+    }
+
+    init();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => {
+            console.log('SW registered', reg.scope);
+            reg.update();
+          })
+          .catch(err => console.error('SW failed', err));
+      });
+      
+      if (!localStorage.getItem('v10_pelanggaran_migrated')) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) { registration.unregister(); }
+        });
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+        localStorage.setItem('v10_pelanggaran_migrated', 'true');
+        setTimeout(() => window.location.reload(true), 1500);
+      }
+    }
+  </script>
+  <script src="shared/shell.js" data-base="."></script>
+</body>
+
+</html>

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KUK La Tansa — Portal Internal</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="description" content="Portal Manajemen Internal KUK La Tansa — Absensi, Cuti, Pelanggaran, Karyawan, Kendaraan">
+  <meta name="theme-color" content="#540000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
+  <style>
+    :root {
+      /* KUK Brand — Maroon identity, gold accent (sparingly) */
+      --bg:           #2A0000;
+      --surface:      rgba(255,255,255,0.06);
+      --surface2:     rgba(255,255,255,0.04);
+      --primary:      #FFCC00;
+      --primary-hover:#FFD633;
+      --primary-light: rgba(255,204,0,0.15);
+      --text:         #ffffff;
+      --text-muted:   rgba(255,255,255,0.55);
+      --border:       rgba(255,255,255,0.1);
+      --success:      #4ade80;
+      --danger:       #f87171;
+      --radius:       20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background: linear-gradient(160deg, #380000 0%, #540000 45%, #2A0000 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: -150px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(106,10,10,0.5) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -150px; right: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(255,204,0,0.06) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ===== LOGIN SCREEN ===== */
+    #loginScreen {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ===== PORTAL SCREEN ===== */
+    #portalScreen {
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 1;
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Brand */
+    .brand { text-align: center; }
+
+    .brand-logo {
+      width: 72px; height: 72px;
+      background: #FFCC00;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 28px rgba(255,204,0,0.35);
+      font-size: 13px;
+      font-weight: 900;
+      color: #231818;
+      letter-spacing: -0.04em;
+    }
+
+    .brand h1 {
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+    }
+
+    .brand p { font-size: 13.5px; color: var(--text-muted); margin-top: 6px; }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 28px;
+    }
+
+    /* Form elements */
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+    }
+
+    select, input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 500;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    select { appearance: none; cursor: pointer; }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    /* Password wrapper */
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 46px; }
+    .pw-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--text-muted);
+      cursor: pointer; padding: 4px;
+    }
+    .pw-toggle:hover { color: var(--text); }
+
+    /* Error message */
+    .err-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-size: 13px;
+      color: #fca5a5;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .err-msg.show { display: flex; }
+
+    /* Primary button */
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      border-radius: 13px;
+      background: #FFCC00;
+      color: #231818;
+      border: none;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      box-shadow: 0 4px 20px rgba(255,204,0,0.35);
+      font-family: 'Outfit', sans-serif;
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: #FFD633;
+      box-shadow: 0 8px 28px rgba(255,204,0,0.45);
+    }
+    .btn-primary:disabled {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      box-shadow: none; cursor: not-allowed;
+    }
+
+    /* Welcome bar */
+    .welcome-bar {
+      background: rgba(255,204,0,0.10);
+      border: 1px solid rgba(255,204,0,0.25);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .welcome-avatar {
+      width: 42px; height: 42px;
+      background: #FFCC00;
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 900; color: #231818; flex-shrink: 0;
+    }
+    .welcome-info h3 { font-size: 15px; font-weight: 700; }
+    .welcome-info p  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .btn-logout {
+      margin-left: auto;
+      background: rgba(248,113,113,0.12);
+      border: 1px solid rgba(248,113,113,0.25);
+      color: #fca5a5;
+      border-radius: 9px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Outfit', sans-serif;
+      flex-shrink: 0;
+    }
+    .btn-logout:hover { background: rgba(248,113,113,0.22); }
+
+    /* Section label */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    /* Menu Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .menu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px 16px 16px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      transition: transform 0.2s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .menu-card:active { transform: scale(0.97); }
+    .menu-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent, rgba(255,255,255,0.18));
+      box-shadow: 0 14px 36px rgba(0,0,0,0.35), 0 0 0 1px var(--accent, transparent);
+    }
+    .menu-card.blue   { --accent: rgba(255,204,0,0.7); }
+    .menu-card.green  { --accent: rgba(74,222,128,0.6); }
+    .menu-card.amber  { --accent: rgba(255,204,0,0.7); }
+    .menu-card.red    { --accent: rgba(248,113,113,0.6); }
+    .menu-card.purple { --accent: rgba(255,204,0,0.7); }
+    .menu-card.cyan   { --accent: rgba(103,232,249,0.5); }
+
+    .menu-icon {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      transition: transform 0.2s;
+    }
+    .menu-card:hover .menu-icon { transform: scale(1.1); }
+    .menu-card.blue   .menu-icon { background: rgba(255,204,0,0.15); }
+    .menu-card.green  .menu-icon { background: rgba(74,222,128,0.15); }
+    .menu-card.amber  .menu-icon { background: rgba(255,204,0,0.15); }
+    .menu-card.red    .menu-icon { background: rgba(248,113,113,0.15); }
+    .menu-card.purple .menu-icon { background: rgba(255,204,0,0.15); }
+    .menu-card.cyan   .menu-icon { background: rgba(103,232,249,0.12); }
+
+    .menu-card-label { font-size: 14px; font-weight: 700; }
+    .menu-card-desc  { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-top: -3px; }
+
+    .menu-arrow {
+      position: absolute; right: 12px; bottom: 12px;
+      color: var(--text-muted); opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      transform: translateX(-4px);
+    }
+    .menu-card:hover .menu-arrow { opacity: 0.6; transform: translateX(0); }
+
+    /* Full-width card */
+    .menu-card.full {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      padding: 16px 18px;
+      gap: 14px;
+    }
+    .menu-card.full .menu-info { flex: 1; }
+    .menu-card.full .menu-arrow {
+      position: static; opacity: 0.4; transform: none;
+    }
+    .menu-card.full:hover .menu-arrow { opacity: 0.8; transform: translateX(4px); }
+
+    /* Footer */
+    .footer-note { text-align: center; font-size: 12px; color: rgba(255,255,255,0.25); }
+
+    /* Toast */
+    .toast-container {
+      position: fixed; top: 20px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--surface);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 100px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      font-weight: 500; font-size: 14px;
+      border-left: 4px solid var(--primary);
+      display: flex; align-items: center; gap: 8px;
+      animation: toastIn 0.3s ease;
+      pointer-events: auto;
+      white-space: nowrap;
+    }
+    .toast.error   { border-left-color: var(--danger); }
+    .toast.success { border-left-color: var(--success); }
+
+    @keyframes toastIn  { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { to   { transform: translateY(-20px); opacity: 0; } }
+
+    /* Select arrow */
+    .sel-wrap { position: relative; }
+    .sel-wrap::after {
+      content: '';
+      position: absolute;
+      right: 16px; top: 50%;
+      transform: translateY(-60%) rotate(45deg);
+      width: 9px; height: 9px;
+      border-right: 2px solid var(--text-muted);
+      border-bottom: 2px solid var(--text-muted);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="loginScreen">
+    <div class="brand">
+      <div class="brand-logo">KUK</div>
+      <h1>KUK La Tansa</h1>
+      <p>Masuk untuk mengakses portal internal</p>
+    </div>
+
+    <div class="card" style="display:flex; flex-direction:column; gap:18px;">
+      <div class="form-group">
+        <label class="form-label">Pilih Pengguna</label>
+        <div class="sel-wrap">
+          <select id="loginUser">
+            <option value="fariz">fariz</option>
+            <option value="andika">andika</option>
+            <option value="irsyadil">irsyadil</option>
+            <option value="ari">ari</option>
+            <option value="shuva">shuva</option>
+            <option value="aria">aria</option>
+            <option value="zain">zain</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Kata Sandi</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPassword" placeholder="Masukkan password" autocomplete="current-password">
+          <button class="pw-toggle" id="pwToggle" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="err-msg" id="errMsg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="errText">Password salah, coba lagi.</span>
+      </div>
+
+      <button class="btn-primary" id="loginBtn" onclick="doLogin()">Masuk</button>
+    </div>
+
+    <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
+  </div>
+
+  <!-- ===== PORTAL SCREEN (after login) ===== -->
+  <div id="portalScreen">
+    <!-- Welcome bar -->
+    <div class="welcome-bar">
+      <div class="welcome-avatar" id="welcomeAvatarEl">U</div>
+      <div class="welcome-info">
+        <h3 id="welcomeName">Pengguna</h3>
+        <p>KUK La Tansa — Internal System</p>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Keluar</button>
+    </div>
+
+    <!-- Brand mini -->
+    <div style="text-align:center;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted);">Pilih Menu</div>
+    </div>
+
+    
+    <!-- Quick Search Command Button -->
+    <div style="margin-bottom: 2px;">
+      <button type="button" onclick="openCommandPalette()" style="width:100%; padding:11px 16px; background:var(--surface); border:1px solid var(--border); border-radius:14px; color:var(--text-muted); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:0.2s;"
+        onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--text)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)';">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span>🔍</span>
+          <span>Cari cepat menu, mobil, atau staf...</span>
+        </div>
+        <kbd style="background:var(--surface2); padding:3px 7px; border-radius:6px; font-size:11px; color:var(--text-muted); border:1px solid var(--border); font-family:monospace;">Ctrl+K</kbd>
+      </button>
+    </div>
+
+  <div class="menu-grid">
+      <!-- Absen -->
+      <a href="absen.html" id="menu-absen" class="menu-card blue" style="display:none;">
+        <div class="menu-icon">📋</div>
+        <div class="menu-card-label">Rekap Absen</div>
+        <div class="menu-card-desc">Briefing pagi harian</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Cuti -->
+      <a href="cuti.html" id="menu-cuti" class="menu-card green" style="display:none;">
+        <div class="menu-icon">🏖️</div>
+        <div class="menu-card-label">Pengajuan Cuti</div>
+        <div class="menu-card-desc">Pilih jadwal libur</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Pelanggaran -->
+      <a href="pelanggaran.html" id="menu-pelanggaran" class="menu-card amber" style="display:none;">
+        <div class="menu-icon">⚠️</div>
+        <div class="menu-card-label">Pelanggaran</div>
+        <div class="menu-card-desc">Catat pelanggaran</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Dashboard -->
+      <a href="dashboard/" id="menu-dashboard" class="menu-card red" style="display:none;">
+        <div class="menu-icon">📊</div>
+        <div class="menu-card-label">Dashboard</div>
+        <div class="menu-card-desc">Rekap & laporan</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Tip Kaca -->
+      <a href="tip.html" id="menu-tip" class="menu-card purple" style="display:none;">
+        <div class="menu-icon">🪟</div>
+        <div class="menu-card-label">Tip Kaca</div>
+        <div class="menu-card-desc">Input tip 3% kaca</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Peminjaman Kendaraan -->
+      <a href="peminjaman.html" id="menu-peminjaman" class="menu-card cyan" style="display:none;">
+        <div class="menu-icon">🚘</div>
+        <div class="menu-card-label">Pinjam Kendaraan</div>
+        <div class="menu-card-desc">Form & cek unit</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+    </div>
+
+    <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
+
+    // === AUTH CONFIG ===
+    const DEFAULT_USERS = [
+      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] }
+    ];
+
+    function getUsersDB() {
+      const stored = localStorage.getItem('kuk_users_db');
+      let result;
+      if (stored) {
+        try { result = JSON.parse(stored); } catch(e) { result = DEFAULT_USERS; }
+      } else {
+        result = DEFAULT_USERS.map(u => {
+          const oldPass = localStorage.getItem('kuk_pass_' + u.username);
+          if (oldPass) u.password = oldPass;
+          return u;
+        });
+      }
+      // Pastikan semua user memiliki permission peminjaman dan peminjaman_admin
+      result.forEach(u => {
+        u.permissions = u.permissions || [];
+        if (!u.permissions.includes('peminjaman')) u.permissions.push('peminjaman');
+        if (!u.permissions.includes('peminjaman_admin')) u.permissions.push('peminjaman_admin');
+        if (!u.permissions.includes('karyawan')) u.permissions.push('karyawan');
+      });
+      return result;
+    }
+
+    function initUserDropdown() {
+      const users = getUsersDB();
+      const sel = document.getElementById('loginUser');
+      sel.innerHTML = '';
+      users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.username;
+        opt.textContent = u.username;
+        sel.appendChild(opt);
+      });
+      
+      // Async fetch to update local users DB
+      fetch(`${SCRIPT_URL}?action=dashboard_data`)
+        .then(r => r.json())
+        .then(res => {
+          if (res.users && res.users.length > 0) {
+            localStorage.setItem('kuk_users_db', JSON.stringify(res.users));
+            // Reload dropdown
+            sel.innerHTML = '';
+            res.users.forEach(u => {
+              const opt = document.createElement('option');
+              opt.value = u.username;
+              opt.textContent = u.username;
+              sel.appendChild(opt);
+            });
+          }
+        })
+        .catch(e => console.log('Failed to sync users'));
+    }
+
+    // === TOAST ===
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    // === PASSWORD TOGGLE ===
+    document.getElementById('pwToggle').onclick = () => {
+      const inp = document.getElementById('loginPassword');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    };
+
+    // === ENTER KEY ===
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    
+    // === LOGIN ===
+    function doLogin() {
+      const user = document.getElementById('loginUser').value;
+      const pass = document.getElementById('loginPassword').value;
+      const errEl = document.getElementById('errMsg');
+
+      if (!pass) {
+        errEl.classList.add('show');
+        document.getElementById('errText').textContent = 'Harap masukkan kata sandi.';
+        return;
+      }
+
+      const users = getUsersDB();
+      const userObj = users.find(u => u.username === user);
+      if (!userObj) {
+        errEl.classList.add('show');
+        document.getElementById('errText').textContent = 'Pengguna tidak ditemukan.';
+        return;
+      }
+
+      if (pass !== userObj.password) {
+        errEl.classList.add('show');
+        document.getElementById('errText').textContent = 'Password salah, coba lagi.';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
+        return;
+      }
+
+      // Success
+      sessionStorage.setItem('kuk_user', user);
+      errEl.classList.remove('show');
+      showPortal(user);
+    }
+
+    // === SHOW PORTAL MENU ===
+    function showPortal(username) {
+      const users = getUsersDB();
+      const userObj = users.find(u => u.username === username);
+      if (!userObj) return doLogout();
+
+      const perms = userObj.permissions || [];
+      const menuMap = {
+        'absen': 'menu-absen',
+        'cuti': 'menu-cuti',
+        'pelanggaran': 'menu-pelanggaran',
+        'dashboard': 'menu-dashboard',
+        'tip': 'menu-tip',
+        'peminjaman': 'menu-peminjaman'
+      };
+
+      for (let key in menuMap) {
+        const el = document.getElementById(menuMap[key]);
+        if (el) {
+          el.style.display = perms.includes(key) ? 'flex' : 'none';
+        }
+      }
+
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('portalScreen').style.display = 'flex';
+      document.getElementById('welcomeName').textContent = username;
+      const avatarEl = document.getElementById('welcomeAvatarEl');
+      if (avatarEl) avatarEl.textContent = username[0].toUpperCase();
+
+      // H-1 rekontrak check
+      if (window.KaryawanDB && typeof window.KaryawanDB.checkAndNotifyH1Rekontrak === 'function') {
+        window.KaryawanDB.checkAndNotifyH1Rekontrak();
+      }
+    }
+
+    // === LOGOUT ===
+    function doLogout() {
+      sessionStorage.removeItem('kuk_user');
+      document.getElementById('portalScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('errMsg').classList.remove('show');
+    }
+
+    // === CHECK SESSION ON LOAD ===
+    window.addEventListener('DOMContentLoaded', () => {
+      initUserDropdown();
+      const saved = sessionStorage.getItem('kuk_user');
+      const users = getUsersDB();
+      if (saved && users.some(u => u.username === saved)) {
+        showPortal(saved);
+      }
+    });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => {
+            console.log('SW registered', reg.scope);
+            reg.update();
+          })
+          .catch(err => console.error('SW failed', err));
+      });
+
+      // Auto clear cache once for v10 migration
+      if (!localStorage.getItem('v10_migrated')) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (let registration of registrations) registration.unregister();
+        });
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+        localStorage.setItem('v10_migrated', 'true');
+        setTimeout(() => window.location.reload(true), 1000);
+      }
+    }
+  </script>
+  <script src="karyawan_db.js"></script>
+
+  <!-- MODAL GLOBAL COMMAND PALETTE (CTRL+K) -->
+  <div id="globalCommandPalette" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); backdrop-filter:blur(8px); z-index:9999; align-items:flex-start; justify-content:center; padding:60px 20px 20px;">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:18px; width:100%; max-width:580px; box-shadow:0 25px 60px rgba(0,0,0,0.5); overflow:hidden; display:flex; flex-direction:column;">
+      <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px;">
+        <span style="font-size:18px; color:var(--primary);">🔍</span>
+        <input type="text" id="cmdSearchInput" placeholder="Ketik untuk mencari menu, mobil, atau aksi..." oninput="handleCommandSearch(this.value)"
+               style="flex:1; border:none; background:transparent; font-size:15px; font-weight:600; outline:none; color:var(--text); font-family:inherit;">
+        <kbd style="background:var(--surface2); padding:3px 8px; border-radius:6px; font-size:11px; color:var(--text-muted); border:1px solid var(--border);">ESC</kbd>
+        <button onclick="closeCommandPalette()" style="background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer;">×</button>
+      </div>
+
+      <div style="max-height:360px; overflow-y:auto; padding:12px;" id="cmdResultsList">
+        <!-- Results injected here -->
+      </div>
+
+      <div style="padding:10px 20px; background:var(--surface2); border-top:1px solid var(--border); display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted);">
+        <span>Tekan <strong>Enter</strong> untuk navigasi instan</span>
+        <span>KUK Portal Hub</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="peminjaman_db.js"></script>
+  <script>
+    // --- GLOBAL COMMAND PALETTE (CTRL + K) ---
+    function openCommandPalette() {
+      const modal = document.getElementById('globalCommandPalette');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      const input = document.getElementById('cmdSearchInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+        handleCommandSearch('');
+      }
+    }
+
+    function closeCommandPalette() {
+      const modal = document.getElementById('globalCommandPalette');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function handleCommandSearch(query) {
+      const q = (query || '').toLowerCase().trim();
+      const listContainer = document.getElementById('cmdResultsList');
+      if (!listContainer) return;
+
+      const actions = [
+        { title: 'Form Peminjaman Kendaraan', category: 'Peminjaman', icon: '🚘', url: 'peminjaman.html' },
+        { title: 'Admin & Monitoring Armada', category: 'Peminjaman', icon: '📊', url: 'peminjaman_admin.html' },
+        { title: 'Catat Pengisian BBM & Struk SPBU', category: 'Operasional', icon: '⛽', url: 'peminjaman.html' },
+        { title: 'Absensi Briefing Karyawan', category: 'Absensi', icon: '📝', url: 'absen.html' },
+        { title: 'Pengajuan & Rekapan Cuti', category: 'Cuti', icon: '🏖️', url: 'cuti.html' },
+        { title: 'Pencatatan Pelanggaran & Tilang', category: 'Pelanggaran', icon: '⚠️', url: 'pelanggaran.html' },
+        { title: 'Dashboard Utama & Analytics', category: 'Manajemen', icon: '📈', url: 'dashboard/' },
+        { title: 'Rekapan Gaji & Cetak Slip PKWT', category: 'Keuangan', icon: '💵', url: 'karyawan.html' },
+        { title: 'Bagi Hasil & Manajemen Tip Kaca', category: 'Keuangan', icon: '💰', url: 'tip.html' },
+        { title: 'Manajemen Hak Akses Pengguna', category: 'Sistem', icon: '👤', url: 'users.html' }
+      ];
+
+      if (typeof KaryawanDB !== 'undefined' && KaryawanDB.getRekontrakList) {
+        const krys = KaryawanDB.getRekontrakList();
+        krys.forEach(k => {
+          actions.push({
+            title: `${k.namaLengkap} (${k.jabatan} - KUK ${(k.toko||'bangunan').toUpperCase()})`,
+            category: 'Karyawan',
+            icon: '👤',
+            url: 'karyawan.html'
+          });
+        });
+      }
+
+      if (typeof PeminjamanService !== 'undefined') {
+        const knds = PeminjamanService.getKendaraanList();
+        knds.forEach(k => {
+          actions.push({
+            title: `Armada: ${k.nama} (${k.plat || '-'})`,
+            category: 'Armada',
+            icon: k.icon || '🚚',
+            url: 'peminjaman_admin.html'
+          });
+        });
+      }
+
+      const filtered = actions.filter(a => !q || a.title.toLowerCase().includes(q) || a.category.toLowerCase().includes(q));
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">Tidak ada hasil ditemukan.</div>';
+        return;
+      }
+
+      listContainer.innerHTML = filtered.slice(0, 8).map((item, idx) => `
+        <a href="${item.url}" style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-radius:10px; text-decoration:none; color:var(--text); transition:background 0.15s; background:${idx === 0 ? 'var(--primary-light)' : 'transparent'}; margin-bottom:4px;"
+           onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='transparent'">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:18px;">${item.icon}</span>
+            <div>
+              <div style="font-weight:600; font-size:13px;">${item.title}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${item.category}</div>
+            </div>
+          </div>
+          <span style="font-size:12px; color:var(--primary); font-weight:700;">➔</span>
+        </a>
+      `).join('');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const modal = document.getElementById('globalCommandPalette');
+        if (modal && modal.style.display === 'flex') {
+          closeCommandPalette();
+        } else {
+          openCommandPalette();
+        }
+      }
+      if (e.key === 'Escape') {
+        closeCommandPalette();
+      }
+    });
+  </script>
+  
+</body>
+</html>

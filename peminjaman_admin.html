@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dashboard Peminjaman Kendaraan - KUK HR Portal</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #273549;
+      --surface-card: rgba(30, 41, 59, 0.85);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 24px 100px;
+      position: relative;
+    }
+
+    /* Ambient Glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; right: -150px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      padding: 16px 24px;
+      border-radius: var(--radius);
+    }
+    .brand-info { display: flex; align-items: center; gap: 14px; }
+    .brand-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .brand-info h1 {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+    }
+    .brand-info p { font-size: 13px; color: var(--text-muted); }
+    .nav-actions { display: flex; gap: 10px; }
+    .btn-nav {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px; font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-nav:hover { background: var(--surface2); transform: translateY(-2px); }
+
+    /* Summary Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .stat-icon {
+      width: 54px; height: 54px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .stat-card.all .stat-icon { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
+    .stat-card.active .stat-icon { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+    .stat-card.done .stat-icon { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+    .stat-card.problem .stat-icon { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+
+    .stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .stat-value { font-size: 26px; font-weight: 800; color: var(--text); margin-top: 4px; }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 22px;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      padding: 9px 18px;
+      border-radius: 100px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+    .pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+    }
+    .search-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 10px 14px 10px 40px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+    .search-wrap input:focus { border-color: var(--primary); }
+    .search-wrap svg {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    /* Table Container */
+    .table-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 16px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 16px 20px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.03); }
+
+    .user-info h4 { font-size: 14px; font-weight: 700; color: var(--text); }
+    .user-info p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+    .vehicle-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+    .plat-chip {
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .time-info {
+      font-size: 13px;
+      color: var(--text);
+    }
+    .time-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 100px;
+      display: inline-block;
+    }
+    .status-badge.aktif {
+      background: rgba(59, 130, 246, 0.18);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+    .status-badge.selesai {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .status-badge.rusak {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    /* Action Buttons */
+    .action-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-action.selesai {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .btn-action.selesai:hover {
+      background: #10b981; color: #fff;
+    }
+    .btn-action.rusak {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .btn-action.rusak:hover {
+      background: #ef4444; color: #fff;
+    }
+    .btn-action.cetak {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    .btn-action.cetak:hover {
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+      transform: translateY(-1px);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+
+    .modal-card {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 520px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+    .modal-header h3 {
+      font-size: 18px; font-weight: 800; color: var(--text);
+    }
+    .btn-close {
+      background: none; border: none;
+      color: var(--text-muted); cursor: pointer;
+      font-size: 24px;
+    }
+    .form-group {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .form-group label {
+      font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+    }
+    .modal-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: #0f172a;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .modal-input:focus { border-color: var(--primary); }
+    textarea.modal-input { min-height: 90px; resize: vertical; }
+
+    /* Modal Surat Print Layout */
+    .modal-surat {
+      max-width: 760px;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 12px;
+      padding: 36px 44px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .surat-container {
+      font-family: 'Times New Roman', Times, serif;
+      color: #000;
+      line-height: 1.55;
+    }
+
+    /* Print Only CSS */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed; top: 24px; right: 24px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+    }
+    .toast {
+      background: #1e293b; color: #f8fafc;
+      padding: 14px 22px; border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--primary);
+      font-size: 14px; font-weight: 600;
+      pointer-events: auto;
+    }
+    .toast.success { border-left-color: var(--success); }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- MODAL LAPORKAN KERUSAKAN -->
+  <div class="modal-backdrop" id="modalKerusakan">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚠️ Laporkan Kerusakan Kendaraan</h3>
+        <button class="btn-close" onclick="closeModalKerusakan()">×</button>
+      </div>
+
+      <form onsubmit="handleSimpanKerusakan(event)">
+        <input type="hidden" id="modalLoanId">
+
+        <div class="form-group">
+          <label>Detail Kendaraan & Peminjam</label>
+          <input type="text" id="modalLoanInfo" class="modal-input" readonly style="background: #1e293b; font-weight: 700;">
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal Kejadian *</label>
+          <input type="date" id="modalTanggalKejadian" class="modal-input" required>
+        </div>
+
+        <div class="form-group">
+          <label>Detail Kerusakan & Kronologi Singkat *</label>
+          <textarea id="modalDetailKerusakan" class="modal-input" placeholder="Contoh: Bumper depan penyok akibat benturan ringan saat parkir..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Estimasi Biaya Perbaikan (Rp) *</label>
+          <input type="number" id="modalEstimasiBiaya" class="modal-input" placeholder="Contoh: 1500000" min="0" required>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <button type="button" onclick="closeModalKerusakan()" style="flex: 1; padding: 14px; border-radius: 12px; background: #334155; color: #fff; border: none; font-weight: 700; cursor: pointer;">
+            Batal
+          </button>
+          <button type="submit" style="flex: 1.5; padding: 14px; border-radius: 12px; background: var(--danger); color: #fff; border: none; font-weight: 700; cursor: pointer;">
+            Simpan & Ubah Status
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CETAK SURAT GANTI RUGI -->
+  <div class="modal-backdrop" id="modalSurat">
+    <div class="modal-card modal-surat" id="printContainer">
+      <!-- Area yang akan dicetak -->
+      <div id="printArea" class="surat-container">
+        <!-- KOP SURAT RESMI -->
+        <div style="border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px; text-align: center;">
+          <h2 style="font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase;">PT. KOPERASI ASURANSI INDONESIA (KUK HR PORTAL)</h2>
+          <p style="font-size: 13px; margin: 4px 0 0;">DIVISI MANAJEMEN ASET & OPERASIONAL KENDARAAN</p>
+          <p style="font-size: 12px; margin: 2px 0 0;">Gedung Kantor Utama &bull; Internal Use Record System</p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h3 style="font-size: 16px; font-weight: bold; text-decoration: underline; margin: 0;">SURAT PERNYATAAN KESANGGUPAN GANTI RUGI</h3>
+          <p style="font-size: 13px; margin: 4px 0 0;" id="suratNomor">Nomor: SPGR/KUK/2026/07-001</p>
+        </div>
+
+        <p style="font-size: 14px; margin-bottom: 14px;">
+          Yang bertanda tangan di bawah ini:
+        </p>
+
+        <table style="width: 100%; font-size: 14px; margin-bottom: 18px;">
+          <tr>
+            <td style="width: 180px; padding: 4px 0;">Nama Peminjam</td>
+            <td style="width: 15px;">:</td>
+            <td style="font-weight: bold;" id="suratNama">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Divisi / Instansi</td>
+            <td>:</td>
+            <td id="suratDivisi">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">No. Kontak / HP</td>
+            <td>:</td>
+            <td id="suratKontak">-</td>
+          </tr>
+        </table>
+
+        <p style="font-size: 14px; margin-bottom: 14px;">
+          Sehubungan dengan penggunaan/peminjaman kendaraan operasional dinas dengan rincian:
+        </p>
+
+        <table style="width: 100%; font-size: 14px; margin-bottom: 18px;">
+          <tr>
+            <td style="width: 180px; padding: 4px 0;">Jenis / Nama Kendaraan</td>
+            <td style="width: 15px;">:</td>
+            <td style="font-weight: bold;" id="suratKendaraan">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Nomor Polisi (Plat)</td>
+            <td>:</td>
+            <td style="font-weight: bold;" id="suratPlat">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Tanggal Peminjaman / Kejadian</td>
+            <td>:</td>
+            <td id="suratTanggal">-</td>
+          </tr>
+        </table>
+
+        <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 6px; margin-bottom: 18px;">
+          <p style="font-size: 13px; font-weight: bold; margin: 0 0 6px;">DETAIL KERUSAKAN YANG DILAPORKAN:</p>
+          <p style="font-size: 14px; margin: 0 0 10px;" id="suratDetailKerusakan">-</p>
+          <p style="font-size: 13px; font-weight: bold; margin: 0;">
+            ESTIMASI BIAYA PERBAIKAN: <span id="suratEstimasiBiaya" style="color: #dc2626; font-size: 15px;">Rp 0</span>
+          </p>
+        </div>
+
+        <p style="font-size: 14px; text-align: justify; margin-bottom: 28px; line-height: 1.6;">
+          Dengan ini menyatakan bertanggung jawab penuh atas kerusakan yang terjadi pada kendaraan dinas tersebut dan <b>bersedia menanggung sepenuhnya biaya perbaikan/ganti rugi</b> sesuai estimasi atau tagihan bengkel resmi yang ditunjuk oleh pihak KUK HR Portal.
+        </p>
+
+        <!-- Bagian Tanda Tangan -->
+        <div style="display: flex; justify-content: space-between; margin-top: 36px; font-size: 14px;">
+          <div style="text-align: center; width: 220px;">
+            <p style="margin: 0;">Mengetahui,</p>
+            <p style="margin: 4px 0 0;">Kepala Bagian Operasional / HR</p>
+            <div id="admSuratTtdKoordBox" style="min-height: 70px; display:flex; align-items:center; justify-content:center;"></div>
+            <p style="font-weight: bold; text-decoration: underline; margin: 0;">( Koordinator KUK )</p>
+          </div>
+
+          <div style="text-align: center; width: 220px;">
+            <p style="margin: 0;" id="suratTempatTanggal">Jakarta, 12 Juli 2026</p>
+            <p style="margin: 4px 0 0;">Yang Menyatakan (Peminjam)</p>
+            <div id="admSuratTtdPeminjamBox" style="min-height: 70px; display:flex; align-items:center; justify-content:center;"></div>
+            <p style="font-weight: bold; text-decoration: underline; margin: 0;" id="suratTtdNama">( Nama Peminjam )</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol Aksi Cetak (Sembunyi saat Print) -->
+      <div class="no-print" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 10px;">
+        <button type="button" onclick="closeModalSurat()" style="padding: 12px 20px; border-radius: 10px; background: #64748b; color: #fff; border: none; font-weight: 700; cursor: pointer;">
+          Tutup
+        </button>
+        <button type="button" onclick="cetakSuratSekarang()" style="padding: 12px 24px; border-radius: 10px; background: #2563eb; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <span>🖨️ Cetak / Simpan PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Top Nav -->
+    <header class="top-nav">
+      <div class="brand-info">
+        <div class="brand-icon">📊</div>
+        <div>
+          <h1>Dashboard Administrasi Peminjaman & Armada</h1>
+          <p>Operasional Kendaraan, Log BBM, & Servis Rutin &bull; KUK HR Portal</p>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a href="index.html" class="btn-nav">
+          <span>← Portal Utama</span>
+        </a>
+        <a href="peminjaman.html" class="btn-nav" style="background: var(--primary); color: #fff; border: none;">
+          <span>+ Form Peminjaman Baru</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Navigasi Tab Utama -->
+    <div style="display:flex; gap:10px; border-bottom:1px solid var(--border); padding-bottom:12px; flex-wrap:wrap;">
+      <button class="pill active" id="tabBtnPinjam" onclick="switchMainTab('pinjam')" style="font-size:14px; padding:10px 22px;">
+        📋 Riwayat Peminjaman
+      </button>
+      <button class="pill" id="tabBtnBbm" onclick="switchMainTab('bbm')" style="font-size:14px; padding:10px 22px;">
+        ⛽ Log BBM & Struk SPBU
+      </button>
+      <button class="pill" id="tabBtnServis" onclick="switchMainTab('servis')" style="font-size:14px; padding:10px 22px;">
+        🛠️ Jadwal & Servis Armada
+      </button>
+    </div>
+
+    <!-- ================= TAB 1: PEMINJAMAN ================= -->
+    <div id="tabContentPinjam">
+      <!-- Stats Summary -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card all">
+          <div class="stat-icon">📋</div>
+          <div>
+            <div class="stat-label">Total Peminjaman</div>
+            <div class="stat-value" id="statAll">0</div>
+          </div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-icon">🚘</div>
+          <div>
+            <div class="stat-label">Aktif / Dipinjam</div>
+            <div class="stat-value" id="statActive">0</div>
+          </div>
+        </div>
+        <div class="stat-card done">
+          <div class="stat-icon">✅</div>
+          <div>
+            <div class="stat-label">Selesai</div>
+            <div class="stat-value" id="statDone">0</div>
+          </div>
+        </div>
+        <div class="stat-card problem">
+          <div class="stat-icon">⚠️</div>
+          <div>
+            <div class="stat-label">Rusak / Bermasalah</div>
+            <div class="stat-value" id="statProblem">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="filter-bar" style="margin-bottom:20px;">
+        <div class="filter-pills" id="filterPills">
+          <button class="pill active" onclick="setFilter('Semua')">Semua Status</button>
+          <button class="pill" onclick="setFilter('Aktif/Dipinjam')">Aktif / Dipinjam</button>
+          <button class="pill" onclick="setFilter('Selesai')">Selesai</button>
+          <button class="pill" onclick="setFilter('Rusak/Bermasalah')">Rusak / Bermasalah</button>
+        </div>
+
+        <div class="search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Cari nama atau plat..." oninput="renderTable()">
+        </div>
+      </div>
+
+      <!-- Table Section -->
+      <div class="table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama Peminjam</th>
+                <th>Kendaraan</th>
+                <th>Waktu Pinjam</th>
+                <th>Waktu Kembali</th>
+                <th>Status</th>
+                <th>Aksi & Notifikasi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TAB 2: LOG BBM & STRUK SPBU ================= -->
+    <div id="tabContentBbm" style="display:none;">
+      <!-- Stats BBM -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card" style="border-left:4px solid #f59e0b;">
+          <div class="stat-icon" style="background:rgba(245,158,11,0.18); color:#f59e0b;">⛽</div>
+          <div>
+            <div class="stat-label">Total Pengisian BBM</div>
+            <div class="stat-value" id="statBbmTotalTransaksi">0</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #10b981;">
+          <div class="stat-icon" style="background:rgba(16,185,129,0.18); color:#10b981;">📊</div>
+          <div>
+            <div class="stat-label">Total Volume (Liter)</div>
+            <div class="stat-value" id="statBbmTotalLiter">0 L</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #3b82f6;">
+          <div class="stat-icon" style="background:rgba(59,130,246,0.18); color:#3b82f6;">💰</div>
+          <div>
+            <div class="stat-label">Total Biaya BBM</div>
+            <div class="stat-value" id="statBbmTotalBiaya">Rp 0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table BBM Section -->
+      <div class="table-card">
+        <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:16px; font-weight:700; color:#f8fafc;">📋 Rekap Pengisian Bahan Bakar Armada</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Kendaraan</th>
+                <th>Peminjam / Petugas</th>
+                <th>Tgl & Jam</th>
+                <th>Jenis BBM</th>
+                <th>Liter & Rupiah</th>
+                <th>Odometer & SPBU</th>
+                <th>Struk / Bukti</th>
+              </tr>
+            </thead>
+            <tbody id="tableBbmBody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TAB 3: JADWAL & SERVIS ARMADA ================= -->
+    <div id="tabContentServis" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+        <h3 style="font-size:18px; font-weight:700; color:#f8fafc;">🛠️ Manajemen Perawatan & Servis Berkala Armada</h3>
+        <button class="pill active" onclick="openModalServis()" style="padding:10px 18px; background:linear-gradient(135deg, #3b82f6, #1d4ed8);">
+          + Tambah Jadwal Servis
+        </button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Armada</th>
+                <th>Jenis Perawatan / Servis</th>
+                <th>Tgl Servis & KM</th>
+                <th>Next Servis</th>
+                <th>Estimasi Biaya</th>
+                <th>Bengkel / PIC</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableServisBody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TAMBAH / EDIT SERVIS -->
+  <div class="modal-backdrop" id="modalServis">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalServisTitle">🛠️ Tambah Jadwal Servis Armada</h3>
+        <button class="btn-close" onclick="closeModalServis()">×</button>
+      </div>
+
+      <form onsubmit="handleSimpanServis(event)">
+        <input type="hidden" id="modalServisId">
+
+        <div class="form-group">
+          <label>Pilih Armada Kendaraan *</label>
+          <select id="modalServisKendaraan" class="modal-input" required>
+            <option value="KND-L300">Mitsubishi L300 (L300)</option>
+            <option value="KND-ENGKEL">Truk Engkel (Engkel)</option>
+            <option value="KND-VIAR">Viar Roda Tiga (Viar)</option>
+            <option value="KND-FORKLIFT">Forklift (Forklift)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Jenis Perawatan / Servis *</label>
+          <input type="text" id="modalServisJenis" class="modal-input" placeholder="Contoh: Ganti Oli Mesin, Kampas Rem, Uji KIR, Pajak STNK" required>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Tanggal Servis *</label>
+            <input type="date" id="modalServisTanggal" class="modal-input" required>
+          </div>
+          <div class="form-group">
+            <label>KM Saat Servis</label>
+            <input type="number" id="modalServisKm" class="modal-input" placeholder="Contoh: 140000">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Jadwal Servis Berikutnya</label>
+            <input type="date" id="modalServisNextDate" class="modal-input">
+          </div>
+          <div class="form-group">
+            <label>Target KM Berikutnya</label>
+            <input type="number" id="modalServisNextKm" class="modal-input" placeholder="Contoh: 145000">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Estimasi Biaya (Rp)</label>
+            <input type="number" id="modalServisBiaya" class="modal-input" placeholder="Contoh: 500000">
+          </div>
+          <div class="form-group">
+            <label>Bengkel / Teknisi</label>
+            <input type="text" id="modalServisBengkel" class="modal-input" placeholder="Contoh: Bengkel GAS Gontor">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Catatan Tambahan</label>
+          <textarea id="modalServisCatatan" class="modal-input" placeholder="Keterangan suku cadang atau rekomendasi teknisi..."></textarea>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:10px;">
+          <button type="button" onclick="closeModalServis()" style="flex:1; padding:14px; border-radius:12px; background:#334155; color:#fff; border:none; font-weight:700; cursor:pointer;">
+            Batal
+          </button>
+          <button type="submit" style="flex:1.5; padding:14px; border-radius:12px; background:var(--primary); color:#fff; border:none; font-weight:700; cursor:pointer;">
+            Simpan Jadwal Servis
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="peminjaman_db.js"></script>
+  <script>
+    let currentFilter = 'Semua';
+    let currentMainTab = 'pinjam';
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = (type === 'success' ? '✓ ' : '⚠️ ') + msg;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(100%)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    function switchMainTab(tab) {
+      currentMainTab = tab;
+      document.getElementById('tabBtnPinjam').classList.toggle('active', tab === 'pinjam');
+      document.getElementById('tabBtnBbm').classList.toggle('active', tab === 'bbm');
+      document.getElementById('tabBtnServis').classList.toggle('active', tab === 'servis');
+
+      document.getElementById('tabContentPinjam').style.display = tab === 'pinjam' ? 'block' : 'none';
+      document.getElementById('tabContentBbm').style.display = tab === 'bbm' ? 'block' : 'none';
+      document.getElementById('tabContentServis').style.display = tab === 'servis' ? 'block' : 'none';
+
+      if (tab === 'pinjam') renderTable();
+      if (tab === 'bbm') renderBbmTable();
+      if (tab === 'servis') renderServisTable();
+    }
+
+    function setFilter(status) {
+      currentFilter = status;
+      const buttons = document.querySelectorAll('#filterPills .pill');
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(status) || (status === 'Semua' && btn.textContent.includes('Semua')));
+      });
+      renderTable();
+    }
+
+    function updateStats(list) {
+      document.getElementById('statAll').textContent = list.length;
+      document.getElementById('statActive').textContent = list.filter(i => i.status === 'Aktif/Dipinjam').length;
+      document.getElementById('statDone').textContent = list.filter(i => i.status === 'Selesai').length;
+      document.getElementById('statProblem').textContent = list.filter(i => i.status === 'Rusak/Bermasalah').length;
+    }
+
+    function renderTable() {
+      const allList = PeminjamanDB.getPeminjamanList();
+      updateStats(allList);
+
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      const filtered = allList.filter(item => {
+        const matchStatus = currentFilter === 'Semua' || item.status === currentFilter;
+        const matchQuery = !query ||
+          item.namaPeminjam.toLowerCase().includes(query) ||
+          item.platKendaraan.toLowerCase().includes(query) ||
+          item.namaKendaraan.toLowerCase().includes(query) ||
+          item.divisi.toLowerCase().includes(query);
+        return matchStatus && matchQuery;
+      });
+
+      const tbody = document.getElementById('tableBody');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+              Tidak ada data peminjaman yang sesuai dengan filter pencarian.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        let statusClass = 'aktif';
+        if (item.status === 'Selesai') statusClass = 'selesai';
+        if (item.status === 'Rusak/Bermasalah') statusClass = 'rusak';
+
+        const pinjamStr = formatDateTime(item.waktuMulai);
+        const kembaliRencanaStr = formatDateTime(item.waktuRencanaKembali);
+        const kembaliAktualStr = item.waktuAktualKembali ? formatDateTime(item.waktuAktualKembali) : null;
+
+        const waUrl = PeminjamanDB.getWhatsAppLoanUrl(item);
+        const waReminderUrl = PeminjamanDB.getWhatsAppOverdueUrl(item);
+
+        return `
+          <tr>
+            <td>
+              <div class="user-info">
+                <h4>${item.namaPeminjam}</h4>
+                <p>${item.divisi} &bull; ${item.kontak}</p>
+              </div>
+            </td>
+
+            <td>
+              <div class="vehicle-badge">
+                <span class="plat-chip">${item.platKendaraan}</span>
+                <span>${item.namaKendaraan}</span>
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Tujuan: ${item.keperluan}
+              </div>
+            </td>
+
+            <td>
+              <div class="time-info">${pinjamStr}</div>
+            </td>
+
+            <td>
+              ${
+                item.status === 'Selesai' && kembaliAktualStr
+                  ? `<div class="time-info" style="color: #34d399;">Kembali: ${kembaliAktualStr}</div>`
+                  : `<div class="time-info">Rencana: ${kembaliRencanaStr}</div>`
+              }
+              ${
+                item.status === 'Rusak/Bermasalah' && item.kerusakan
+                  ? `<div class="time-sub" style="color: #f87171;">Dilaporkan: ${formatDateOnly(item.kerusakan.tanggalKejadian)}</div>`
+                  : ''
+              }
+            </td>
+
+            <td>
+              <span class="status-badge ${statusClass}">${item.status}</span>
+            </td>
+
+            <td>
+              <div class="action-group">
+                ${
+                  item.status === 'Aktif/Dipinjam'
+                    ? `
+                      <button class="btn-action selesai" onclick="handleSelesai('${item.id}', '${item.platKendaraan}')">
+                        <span>✓ Selesai</span>
+                      </button>
+                      <button class="btn-action rusak" onclick="openModalKerusakan('${item.id}')">
+                        <span>⚠️ Laporkan Kerusakan</span>
+                      </button>
+                      <a href="${waReminderUrl}" target="_blank" class="btn-action" style="background:#10b981; color:#fff; text-decoration:none;">
+                        <span>📲 WA Reminder</span>
+                      </a>
+                    `
+                    : ''
+                }
+                ${
+                  item.status === 'Rusak/Bermasalah'
+                    ? `
+                      <button class="btn-action cetak" onclick="openModalSurat('${item.id}')">
+                        <span>🖨️ Cetak Surat Ganti Rugi</span>
+                      </button>
+                    `
+                    : ''
+                }
+                ${
+                  item.status === 'Selesai'
+                    ? `<span style="font-size: 12px; color: var(--text-muted);">Tuntas</span>`
+                    : ''
+                }
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // --- TAB 2: RENDER LOG BBM ---
+    function renderBbmTable() {
+      const list = PeminjamanDB.getLogBbmList ? PeminjamanDB.getLogBbmList() : [];
+      let totalLiter = 0;
+      let totalBiaya = 0;
+
+      list.forEach(b => {
+        totalLiter += Number(b.jumlahLiter) || 0;
+        totalBiaya += Number(b.totalRupiah) || 0;
+      });
+
+      document.getElementById('statBbmTotalTransaksi').textContent = list.length;
+      document.getElementById('statBbmTotalLiter').textContent = totalLiter.toFixed(1) + ' L';
+      document.getElementById('statBbmTotalBiaya').textContent = 'Rp ' + totalBiaya.toLocaleString('id-ID');
+
+      const tbody = document.getElementById('tableBbmBody');
+      if (!tbody) return;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada log pengisian BBM.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => `
+        <tr>
+          <td>
+            <div class="vehicle-badge">
+              <span class="plat-chip">${item.platKendaraan}</span>
+              <span>${item.namaKendaraan}</span>
+            </div>
+          </td>
+          <td><b>${item.peminjamNama}</b></td>
+          <td>${formatDateTime(item.tanggal)}</td>
+          <td><span style="background:rgba(245,158,11,0.18); color:#fbbf24; padding:3px 8px; border-radius:6px; font-weight:700; font-size:12px;">${item.jenisBbm}</span></td>
+          <td>
+            <div style="font-weight:700; color:#34d399;">Rp ${Number(item.totalRupiah).toLocaleString('id-ID')}</div>
+            <div style="font-size:12px; color:#94a3b8;">${item.jumlahLiter} Liter</div>
+          </td>
+          <td>
+            <div>${item.spbuLocation || '-'}</div>
+            <div style="font-size:12px; color:#94a3b8;">${item.kmOdometer ? item.kmOdometer.toLocaleString('id-ID') + ' KM' : '-'}</div>
+          </td>
+          <td>
+            ${
+              item.fotoStruk 
+                ? `<a href="${item.fotoStruk}" target="_blank" style="color:#38bdf8; font-weight:600; text-decoration:underline; font-size:12px;">🔍 Lihat Struk</a>`
+                : `<span style="color:#64748b; font-size:12px;">Tanpa Struk</span>`
+            }
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // --- TAB 3: RENDER JADWAL SERVIS ---
+    function renderServisTable() {
+      const list = PeminjamanDB.getJadwalServisList ? PeminjamanDB.getJadwalServisList() : [];
+      const tbody = document.getElementById('tableServisBody');
+      if (!tbody) return;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada jadwal servis armada.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => {
+        const isOverdue = item.status === 'Terjadwal' && item.nextServisDate && (new Date(item.nextServisDate) < new Date());
+        const statusBadge = item.status === 'Selesai' 
+          ? `<span style="background:rgba(16,185,129,0.18); color:#34d399; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;">✓ Selesai</span>`
+          : (isOverdue 
+            ? `<span style="background:rgba(239,68,68,0.18); color:#f87171; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;">⚠️ Jatuh Tempo</span>`
+            : `<span style="background:rgba(245,158,11,0.18); color:#fbbf24; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;">⏳ Terjadwal</span>`);
+
+        return `
+          <tr>
+            <td>
+              <div class="vehicle-badge">
+                <span class="plat-chip">${item.platKendaraan}</span>
+                <span>${item.namaKendaraan}</span>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:700;">${item.jenisServis}</div>
+              <div style="font-size:12px; color:#94a3b8;">${item.catatan || '-'}</div>
+            </td>
+            <td>
+              <div>${formatDateOnly(item.tanggalServis)}</div>
+              <div style="font-size:12px; color:#94a3b8;">${item.kmSaatServis ? item.kmSaatServis.toLocaleString('id-ID') + ' KM' : '-'}</div>
+            </td>
+            <td>
+              <div style="color:${isOverdue ? '#f87171' : '#f8fafc'}; font-weight:700;">${item.nextServisDate ? formatDateOnly(item.nextServisDate) : '-'}</div>
+              <div style="font-size:12px; color:#94a3b8;">${item.nextServisKm ? 'Target: ' + item.nextServisKm.toLocaleString('id-ID') + ' KM' : ''}</div>
+            </td>
+            <td style="font-weight:700; color:#60a5fa;">Rp ${Number(item.estimasiBiaya).toLocaleString('id-ID')}</td>
+            <td>${item.bengkel || '-'}</td>
+            <td>${statusBadge}</td>
+            <td>
+              <div style="display:flex; gap:6px;">
+                ${
+                  item.status !== 'Selesai'
+                    ? `<button onclick="handleStatusServis('${item.id}', 'Selesai')" style="background:#10b981; color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">✓ Selesai</button>`
+                    : ''
+                }
+                <button onclick="handleHapusServis('${item.id}')" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openModalServis(id = null) {
+      document.getElementById('modalServisId').value = '';
+      document.getElementById('modalServisTitle').textContent = '🛠️ Tambah Jadwal Servis Armada';
+      document.getElementById('modalServisTanggal').value = new Date().toISOString().split('T')[0];
+      document.getElementById('modalServisJenis').value = '';
+      document.getElementById('modalServisKm').value = '';
+      document.getElementById('modalServisNextDate').value = '';
+      document.getElementById('modalServisNextKm').value = '';
+      document.getElementById('modalServisBiaya').value = '';
+      document.getElementById('modalServisBengkel').value = 'Bengkel GAS (Gontor Auto Service)';
+      document.getElementById('modalServisCatatan').value = '';
+
+      document.getElementById('modalServis').classList.add('show');
+    }
+
+    function closeModalServis() {
+      document.getElementById('modalServis').classList.remove('show');
+    }
+
+    function handleSimpanServis(e) {
+      e.preventDefault();
+      const kendSelect = document.getElementById('modalServisKendaraan');
+      const kendId = kendSelect.value;
+      const kendText = kendSelect.options[kendSelect.selectedIndex].text;
+      const [namaKendaraan, platKendaraan] = kendText.split(' (');
+
+      PeminjamanDB.saveJadwalServis({
+        id: document.getElementById('modalServisId').value || undefined,
+        kendaraanId: kendId,
+        namaKendaraan: namaKendaraan.trim(),
+        platKendaraan: (platKendaraan || '').replace(')', '').trim(),
+        jenisServis: document.getElementById('modalServisJenis').value.trim(),
+        tanggalServis: document.getElementById('modalServisTanggal').value,
+        kmSaatServis: document.getElementById('modalServisKm').value,
+        nextServisDate: document.getElementById('modalServisNextDate').value,
+        nextServisKm: document.getElementById('modalServisNextKm').value,
+        estimasiBiaya: document.getElementById('modalServisBiaya').value,
+        bengkel: document.getElementById('modalServisBengkel').value.trim(),
+        catatan: document.getElementById('modalServisCatatan').value.trim()
+      });
+
+      closeModalServis();
+      showToast('Jadwal perawatan armada berhasil disimpan.');
+      renderServisTable();
+    }
+
+    function handleStatusServis(id, status) {
+      PeminjamanDB.updateStatusServis(id, status);
+      showToast('Status servis diperbarui.');
+      renderServisTable();
+    }
+
+    function handleHapusServis(id) {
+      if (!confirm('Hapus riwayat/jadwal servis ini?')) return;
+      PeminjamanDB.deleteJadwalServis(id);
+      showToast('Jadwal servis dihapus.');
+      renderServisTable();
+    }
+
+    function formatDateTime(dtStr) {
+      if (!dtStr) return '-';
+      const dt = new Date(dtStr);
+      return dt.toLocaleString('id-ID', {
+        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function formatDateOnly(dtStr) {
+      if (!dtStr) return '-';
+      const dt = new Date(dtStr);
+      return dt.toLocaleDateString('id-ID', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
+    }
+
+    function formatRupiah(num) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+    }
+
+    // --- AKSI SELESAI ---
+    function handleSelesai(id, plat) {
+      if (!confirm(`Konfirmasi: Apakah kendaraan ${plat} sudah kembali dengan aman?`)) return;
+
+      const result = PeminjamanDB.selesaikanPeminjaman(id);
+      if (result.success) {
+        showToast(`Peminjaman kendaraan ${plat} telah diselesaikan.`);
+        renderTable();
+      } else {
+        showToast('Gagal mengubah status.', 'error');
+      }
+    }
+
+    // --- MODAL KERUSAKAN ---
+    function openModalKerusakan(id) {
+      const item = PeminjamanDB.getPeminjamanById(id);
+      if (!item) return;
+
+      document.getElementById('modalLoanId').value = item.id;
+      document.getElementById('modalLoanInfo').value = `${item.platKendaraan} - ${item.namaKendaraan} (Peminjam: ${item.namaPeminjam})`;
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('modalTanggalKejadian').value = today;
+      document.getElementById('modalDetailKerusakan').value = '';
+      document.getElementById('modalEstimasiBiaya').value = '';
+
+      document.getElementById('modalKerusakan').classList.add('show');
+    }
+
+    function closeModalKerusakan() {
+      document.getElementById('modalKerusakan').classList.remove('show');
+    }
+
+    function handleSimpanKerusakan(e) {
+      e.preventDefault();
+      const id = document.getElementById('modalLoanId').value;
+      const tanggal = document.getElementById('modalTanggalKejadian').value;
+      const detail = document.getElementById('modalDetailKerusakan').value;
+      const estimasi = document.getElementById('modalEstimasiBiaya').value;
+
+      const result = PeminjamanDB.laporkanKerusakan(id, detail, estimasi, tanggal);
+      if (result.success) {
+        closeModalKerusakan();
+        showToast('Kerusakan berhasil dicatat & status diubah menjadi Bermasalah.');
+        renderTable();
+      } else {
+        showToast('Gagal menyimpan laporan kerusakan.', 'error');
+      }
+    }
+
+    // --- MODAL & CETAK SURAT GANTI RUGI ---
+    function openModalSurat(id) {
+      const item = PeminjamanDB.getPeminjamanById(id);
+      if (!item || !item.kerusakan) {
+        return showToast('Data kerusakan tidak ditemukan.', 'error');
+      }
+
+      document.getElementById('suratNomor').textContent = `Nomor: SPGR/KUK/${new Date().getFullYear()}/07-${item.id.slice(-4)}`;
+      document.getElementById('suratNama').textContent = item.namaPeminjam;
+      document.getElementById('suratDivisi').textContent = item.divisi;
+      document.getElementById('suratKontak').textContent = item.kontak;
+
+      document.getElementById('suratKendaraan').textContent = item.namaKendaraan;
+      document.getElementById('suratPlat').textContent = item.platKendaraan;
+      document.getElementById('suratTanggal').textContent = formatDateOnly(item.waktuMulai);
+
+      document.getElementById('suratDetailKerusakan').textContent = item.kerusakan.detail;
+      document.getElementById('suratEstimasiBiaya').textContent = formatRupiah(item.kerusakan.estimasiBiaya);
+
+      document.getElementById('suratTempatTanggal').textContent = `Jakarta, ${formatDateOnly(new Date().toISOString())}`;
+      document.getElementById('suratTtdNama').textContent = `( ${item.namaPeminjam} )`;
+
+      function getAdminTtdHtml(query) {
+        if (!query) return '<div style="height:70px;"></div>';
+        try {
+          const raw = localStorage.getItem('kuk_users_db');
+          if (!raw) return '<div style="height:70px;"></div>';
+          const users = JSON.parse(raw);
+          const q = String(query).toLowerCase().trim();
+          const match = users.find(u => {
+            if (!u.ttd) return false;
+            const uname = String(u.username || '').toLowerCase().trim();
+            const fname = String(u.namaLengkap || '').toLowerCase().trim();
+            const role = String(u.jabatan || '').toLowerCase().trim();
+            return uname === q || fname === q || role === q || fname.includes(q) || (uname && q.includes(uname));
+          });
+          if (match && match.ttd) {
+            return `<div style="margin: 4px 0;"><img src="${match.ttd}" style="max-height: 60px; max-width: 140px; object-fit: contain; display: block; margin: 4px auto;" alt="TTD"></div>`;
+          }
+        } catch(e) {}
+        return '<div style="height:70px;"></div>';
+      }
+
+      const koordBox = document.getElementById('admSuratTtdKoordBox');
+      if (koordBox) koordBox.innerHTML = getAdminTtdHtml('Koordinator');
+
+      const peminjamBox = document.getElementById('admSuratTtdPeminjamBox');
+      if (peminjamBox) peminjamBox.innerHTML = getAdminTtdHtml(item.namaPeminjam);
+
+      document.getElementById('modalSurat').classList.add('show');
+    }
+
+    function closeModalSurat() {
+      document.getElementById('modalSurat').classList.remove('show');
+    }
+
+    function cetakSuratSekarang() {
+      window.print();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTable();
+    });
+  </script>
+  <script src="shared/shell.js" data-base="."></script>
+</body>
+</html>
