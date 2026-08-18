@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Peminjaman Kendaraan - KUK La Tansa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/form_layout.css">
+</head>
+<body>
+  <div class="form-container">
+    
+    <!-- STATE: FORM -->
+    <div id="formPanel" class="state-panel active">
+      <div class="form-header">
+        <h1>Peminjaman Kendaraan</h1>
+        <p>Form izin penggunaan kendaraan operasional KUK</p>
+      </div>
+
+      <form id="publicForm" onsubmit="event.preventDefault(); submitPeminjamanForm();">
+        <div class="form-group">
+          <label>Karyawan (Peminjam)</label>
+          <select id="empId" required>
+            <!-- Populated by FormHelper -->
+          </select>
+          <div class="error-msg">Silakan pilih karyawan.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Kendaraan Operasional</label>
+          <select id="vehicleId" required>
+            <option value="">-- Pilih Kendaraan --</option>
+            <!-- Populated dynamically -->
+          </select>
+          <div class="error-msg">Wajib memilih kendaraan.</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label>Tgl. Pinjam</label>
+            <input type="date" id="borrowDate" required>
+          </div>
+          <div class="form-group">
+            <label>Rencana Kembali</label>
+            <input type="date" id="returnDate" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tujuan / Keperluan</label>
+          <textarea id="purpose" placeholder="Tujuan perjalanan dan keperluan dinas..." required></textarea>
+          <div class="error-msg">Wajib diisi.</div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <div class="spinner"></div>
+          <span class="btn-text">Ajukan Pinjaman</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- STATE: SUCCESS -->
+    <div id="successPanel" class="state-panel">
+      <div class="state-icon">✅</div>
+      <h2 class="state-title">Pengajuan Diterima</h2>
+      <p class="state-desc">Peminjaman kendaraan menunggu persetujuan admin operasional.</p>
+      <div class="ref-box" id="refNumberDisplay">REF-0000</div>
+      <button class="btn-secondary" onclick="FormHelper.resetForm('publicForm')">Pinjam Kendaraan Lain</button>
+    </div>
+
+    <!-- STATE: ERROR -->
+    <div id="errorPanel" class="state-panel">
+      <div class="state-icon">❌</div>
+      <h2 class="state-title" style="color:var(--form-danger)">Pengajuan Gagal</h2>
+      <p class="state-desc" id="errorMsgDisplay">Terjadi kesalahan saat memproses data.</p>
+      <button class="btn-secondary" onclick="FormHelper.resetForm('publicForm')">Coba Lagi</button>
+    </div>
+
+  </div>
+
+  <script src="../shared/master_db.js"></script>
+  <script src="shared/form_helper.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      FormHelper.populateEmployeeDropdown('empId');
+      
+      const vSelect = document.getElementById('vehicleId');
+      if(typeof MasterDB !== 'undefined') {
+        const vehicles = MasterDB.getVehicles();
+        vehicles.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.id;
+          opt.textContent = `${v.name} (${v.plate}) - ${v.status}`;
+          if(v.status !== 'Tersedia') opt.disabled = true;
+          vSelect.appendChild(opt);
+        });
+      }
+    });
+
+    function submitPeminjamanForm() {
+      FormHelper.submitForm('publicForm', 'VEHICLE', () => {
+        return {
+          employeeId: document.getElementById('empId').value,
+          vehicleId: document.getElementById('vehicleId').value,
+          borrowDate: document.getElementById('borrowDate').value,
+          returnDate: document.getElementById('returnDate').value,
+          purpose: document.getElementById('purpose').value
+        };
+      });
+    }
+  </script>
+</body>
+</html>

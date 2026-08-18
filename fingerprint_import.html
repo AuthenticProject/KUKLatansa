@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Import Fingerprint - KUK HR Portal</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#540000">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  
+  <style>
+    body {
+      background-color: var(--kuk-bg);
+      color: var(--kuk-text);
+      min-height: 100vh;
+      padding: 30px 20px 80px;
+      position: relative;
+      overflow-x: hidden;
+      font-family: var(--kuk-font);
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .panel {
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: var(--kuk-shadow);
+    }
+
+    .panel-header {
+      border-bottom: 2px solid var(--kuk-border);
+      padding-bottom: 16px;
+    }
+    .panel-header h2 {
+      font-size: 20px;
+      color: var(--kuk-primary);
+      margin-bottom: 4px;
+    }
+    .panel-header p {
+      font-size: 14px;
+      color: var(--kuk-text-muted);
+    }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--kuk-border);
+      z-index: 1;
+    }
+    .step {
+      position: relative;
+      z-index: 2;
+      background: var(--kuk-surface);
+      padding: 0 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--kuk-text-muted);
+    }
+    .step.active .step-circle {
+      background: var(--kuk-primary);
+      color: white;
+      border-color: var(--kuk-primary);
+    }
+    .step.active {
+      color: var(--kuk-primary);
+      font-weight: 700;
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--kuk-surface);
+      border: 2px solid var(--kuk-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    /* Upload Area */
+    .upload-zone {
+      border: 2px dashed var(--kuk-border);
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      background: #fdfdfd;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .upload-zone:hover {
+      border-color: var(--kuk-primary);
+      background: #fff;
+    }
+    .upload-zone input[type="file"] {
+      display: none;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+    .btn-primary { background: var(--kuk-primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: #6b0000; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-outline { background: transparent; border: 1px solid var(--kuk-border); color: var(--kuk-text); }
+    .btn-outline:hover { background: #f1f5f9; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+    .stat-card { padding: 16px; border-radius: 12px; border: 1px solid var(--kuk-border); text-align: center; }
+    .stat-card h3 { font-size: 28px; margin-bottom: 4px; }
+    .stat-card p { font-size: 12px; color: var(--kuk-text-muted); font-weight: 600; text-transform: uppercase; }
+
+    .step-content { display: none; }
+    .step-content.active { display: block; animation: fadeIn 0.4s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: left; padding: 12px; border-bottom: 2px solid var(--kuk-border); color: var(--kuk-text-muted); font-size: 13px; text-transform: uppercase; }
+    td { padding: 12px; border-bottom: 1px solid var(--kuk-border); font-size: 14px; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .bg-green { background: #d1fae5; color: #10b981; }
+    .bg-red { background: #fee2e2; color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="panel" style="padding-bottom: 0; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;">
+      <div class="panel-header">
+        <h2>📥 Import Data Fingerprint</h2>
+        <p>Unggah file Excel (.xls / .xlsx) dari mesin sidik jari untuk merekam raw attendance.</p>
+      </div>
+
+      <div class="stepper">
+        <div class="step active" id="step1Indicator">
+          <div class="step-circle">1</div>
+          <span>Upload</span>
+        </div>
+        <div class="step" id="step2Indicator">
+          <div class="step-circle">2</div>
+          <span>Validasi</span>
+        </div>
+        <div class="step" id="step3Indicator">
+          <div class="step-circle">3</div>
+          <span>Selesai</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: UPLOAD -->
+    <div class="panel step-content active" id="step1">
+      <label class="upload-zone">
+        <div style="font-size: 40px; margin-bottom: 16px;">📊</div>
+        <h3 style="margin-bottom: 8px; color: var(--kuk-primary);">Pilih File Excel</h3>
+        <p style="color: var(--kuk-text-muted); margin-bottom: 16px;">Klik untuk memilih atau drag & drop file ke sini.</p>
+        <div class="btn btn-primary" style="display:inline-block; pointer-events:none;">Pilih File</div>
+        <input type="file" id="excelFile" accept=".xls,.xlsx" onchange="handleFileUpload(event)">
+      </label>
+      <div id="uploadError" style="color:var(--kuk-danger); text-align:center; margin-top:10px; font-weight:600; display:none;"></div>
+    </div>
+
+    <!-- STEP 2: PREVIEW -->
+    <div class="panel step-content" id="step2">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+        <h3 style="color:var(--kuk-primary);">Hasil Pembacaan</h3>
+        <button class="btn btn-outline" onclick="resetFlow()">Batal / Ulangi</button>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3 id="stTotal">0</h3>
+          <p>Total Baris</p>
+        </div>
+        <div class="stat-card" style="border-color: #10b981;">
+          <h3 id="stValid" style="color: #10b981;">0</h3>
+          <p>Valid & Cocok</p>
+        </div>
+        <div class="stat-card" style="border-color: #ef4444;">
+          <h3 id="stUnmatched" style="color: #ef4444;">0</h3>
+          <p>Karyawan Tidak Dikenal</p>
+        </div>
+        <div class="stat-card" style="border-color: #f59e0b;">
+          <h3 id="stDup" style="color: #f59e0b;">0</h3>
+          <p>Duplikat (Diabaikan)</p>
+        </div>
+      </div>
+
+      <div id="unmatchedWarning" style="margin-top:20px; padding:16px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; display:none;">
+        <strong style="color:#ef4444;">⚠️ Perhatian:</strong> Terdapat baris dengan PIN/ID yang tidak terdaftar di Master Karyawan. 
+        Anda tetap bisa melanjutkan, namun data tersebut akan ditandai "TIDAK DIKETAHUI". 
+        Pastikan Anda mendaftarkan Fingerprint ID di menu Data Karyawan.
+      </div>
+
+      <div style="margin-top: 30px; text-align: right;">
+        <button class="btn btn-primary" id="btnConfirmImport" onclick="confirmImport()" style="font-size:16px; padding:14px 28px;">Simpan Data Impor</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: SUCCESS -->
+    <div class="panel step-content" id="step3">
+      <div style="text-align:center; padding: 40px 20px;">
+        <div style="font-size:64px; margin-bottom:16px;">✅</div>
+        <h2 style="color:var(--kuk-primary); margin-bottom:8px;">Import Berhasil Disimpan</h2>
+        <p style="color:var(--kuk-text-muted); margin-bottom:24px;">Data absensi mentah telah diamankan ke database lokal secara immutable.</p>
+        <button class="btn btn-outline" onclick="resetFlow()">Import File Lain</button>
+      </div>
+    </div>
+
+    <!-- HISTORY / RAW VIEWER -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>🕒 Histori Raw Fingerprint</h2>
+        <p>Semua data yang berhasil diimpor akan tampil di sini. Data ini bersifat read-only (immutable).</p>
+      </div>
+      <div style="overflow-x:auto; max-height: 400px; overflow-y:auto;">
+        <table id="rawTable">
+          <thead>
+            <tr>
+              <th>Tgl Impor</th>
+              <th>PIN/ID</th>
+              <th>Nama Karyawan</th>
+              <th>Tanggal Scan</th>
+              <th>Jam Scan</th>
+            </tr>
+          </thead>
+          <tbody id="rawTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared/master_db.js"></script>
+  <script src="shared/fingerprint_engine.js"></script>
+  <script>
+    let currentProcessedRows = [];
+
+    function setStep(step) {
+      document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+      
+      document.getElementById('step1Indicator').classList.remove('active');
+      document.getElementById('step2Indicator').classList.remove('active');
+      document.getElementById('step3Indicator').classList.remove('active');
+      
+      for(let i=1; i<=step; i++) {
+        document.getElementById('step' + i + 'Indicator').classList.add('active');
+      }
+    }
+
+    function resetFlow() {
+      document.getElementById('excelFile').value = '';
+      document.getElementById('uploadError').style.display = 'none';
+      currentProcessedRows = [];
+      setStep(1);
+      renderRawTable();
+    }
+
+    async function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if(!file) return;
+
+      document.getElementById('uploadError').style.display = 'none';
+      
+      try {
+        const jsonRows = await FingerprintEngine.parseExcelFile(file);
+        const stats = FingerprintEngine.mapColumnsAndValidate(jsonRows);
+        
+        // Update UI
+        document.getElementById('stTotal').textContent = stats.total;
+        document.getElementById('stValid').textContent = stats.valid;
+        document.getElementById('stUnmatched').textContent = stats.unmatched;
+        document.getElementById('stDup').textContent = stats.duplicates;
+
+        if(stats.unmatched > 0) {
+          document.getElementById('unmatchedWarning').style.display = 'block';
+        } else {
+          document.getElementById('unmatchedWarning').style.display = 'none';
+        }
+
+        currentProcessedRows = stats.processedRows;
+
+        if (currentProcessedRows.length === 0) {
+          throw new Error("Semua data adalah duplikat atau tidak valid.");
+        }
+
+        setStep(2);
+
+      } catch (err) {
+        document.getElementById('uploadError').textContent = err.message;
+        document.getElementById('uploadError').style.display = 'block';
+        document.getElementById('excelFile').value = '';
+      }
+    }
+
+    function confirmImport() {
+      if(currentProcessedRows.length === 0) return;
+      
+      const savedCount = FingerprintEngine.commitImport(currentProcessedRows);
+      
+      if(savedCount > 0) {
+        setStep(3);
+        renderRawTable();
+      } else {
+        alert("Gagal menyimpan data ke storage.");
+      }
+    }
+
+    function renderRawTable() {
+      const tbody = document.getElementById('rawTableBody');
+      tbody.innerHTML = '';
+      
+      let rawData = FingerprintEngine.getRawData() || [];
+      // Show latest first
+      rawData = rawData.slice().reverse();
+
+      if(rawData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--kuk-text-muted);">Belum ada data fingerprint.</td></tr>';
+        return;
+      }
+
+      rawData.forEach(r => {
+        const tr = document.createElement('tr');
+        const imported = new Date(r.importedAt).toLocaleDateString('id-ID');
+        const nameDisplay = r.employeeId ? r.employeeName : `<span class="badge bg-red">TIDAK DIKETAHUI</span>`;
+        
+        tr.innerHTML = \`
+          <td style="color:var(--kuk-text-muted); font-size:12px;">\${imported}</td>
+          <td style="font-weight:600;">\${r.pin}</td>
+          <td>\${nameDisplay}</td>
+          <td style="font-weight:600;">\${r.date}</td>
+          <td style="color:var(--kuk-primary); font-weight:700;">\${r.time}</td>
+        \`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderRawTable();
+    });
+  </script>
+  <script src="shared/shell.js" data-base="."></script>
+</body>
+</html>

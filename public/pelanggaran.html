@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Form Pelanggaran - KUK La Tansa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/form_layout.css">
+</head>
+<body>
+  <div class="form-container">
+    
+    <!-- STATE: FORM -->
+    <div id="formPanel" class="state-panel active">
+      <div class="form-header">
+        <h1>Laporan Pelanggaran</h1>
+        <p>Form pelaporan pelanggaran atau SP</p>
+      </div>
+
+      <form id="publicForm" onsubmit="event.preventDefault(); submitPelanggaranForm();">
+        <div class="form-group">
+          <label>Karyawan Pelanggar</label>
+          <select id="empId" required>
+            <!-- Populated by FormHelper -->
+          </select>
+          <div class="error-msg">Silakan pilih karyawan.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Pelapor</label>
+          <input type="text" id="reporter" placeholder="Nama Pelapor" required>
+          <div class="error-msg">Wajib diisi.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal Kejadian</label>
+          <input type="date" id="date" required>
+          <div class="error-msg">Wajib diisi.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Tingkat Pelanggaran</label>
+          <select id="level" required>
+            <option value="">-- Pilih Tingkat --</option>
+            <option value="Teguran Lisan">Teguran Lisan</option>
+            <option value="SP 1">Surat Peringatan 1</option>
+            <option value="SP 2">Surat Peringatan 2</option>
+            <option value="SP 3 / PHK">Surat Peringatan 3 / Pemutusan Hubungan Kerja</option>
+          </select>
+          <div class="error-msg">Wajib dipilih.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Deskripsi Kejadian</label>
+          <textarea id="description" placeholder="Jelaskan secara kronologis kejadian pelanggaran" required></textarea>
+          <div class="error-msg">Wajib diisi.</div>
+        </div>
+
+        <button type="submit" class="btn-submit" style="background-color: var(--form-danger);">
+          <div class="spinner"></div>
+          <span class="btn-text">Kirim Laporan</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- STATE: SUCCESS -->
+    <div id="successPanel" class="state-panel">
+      <div class="state-icon">✅</div>
+      <h2 class="state-title">Laporan Tersimpan</h2>
+      <p class="state-desc">Laporan pelanggaran telah masuk ke sistem HRD.</p>
+      <div class="ref-box" id="refNumberDisplay">REF-0000</div>
+      <button class="btn-secondary" onclick="FormHelper.resetForm('publicForm')">Kirim Laporan Lain</button>
+    </div>
+
+    <!-- STATE: ERROR -->
+    <div id="errorPanel" class="state-panel">
+      <div class="state-icon">❌</div>
+      <h2 class="state-title" style="color:var(--form-danger)">Gagal</h2>
+      <p class="state-desc" id="errorMsgDisplay">Terjadi kesalahan saat memproses data.</p>
+      <button class="btn-secondary" onclick="FormHelper.resetForm('publicForm')">Coba Lagi</button>
+    </div>
+
+  </div>
+
+  <script src="../shared/master_db.js"></script>
+  <script src="shared/form_helper.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      FormHelper.populateEmployeeDropdown('empId');
+    });
+
+    function submitPelanggaranForm() {
+      FormHelper.submitForm('publicForm', 'PELANGGARAN', () => {
+        return {
+          employeeId: document.getElementById('empId').value,
+          reporter: document.getElementById('reporter').value,
+          date: document.getElementById('date').value,
+          level: document.getElementById('level').value,
+          description: document.getElementById('description').value
+        };
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Morning Briefing - KUK La Tansa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/form_layout.css">
+</head>
+<body>
+  <div class="form-container">
+    
+    <!-- STATE: FORM -->
+    <div id="formPanel" class="state-panel active">
+      <div class="form-header">
+        <h1>Form Absen & Briefing</h1>
+        <p>Absensi kehadiran harian / Morning Briefing</p>
+      </div>
+
+      <form id="publicForm" onsubmit="event.preventDefault(); submitAbsenForm();">
+        <div class="form-group">
+          <label>Nama Karyawan</label>
+          <select id="empId" required>
+            <!-- Populated by FormHelper -->
+          </select>
+          <div class="error-msg">Silakan pilih nama karyawan.</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input type="date" id="date" required>
+            <div class="error-msg">Wajib diisi.</div>
+          </div>
+          <div class="form-group">
+            <label>Shift / Waktu</label>
+            <select id="shift" required>
+              <option value="Pagi">Pagi</option>
+              <option value="Siang">Siang</option>
+              <option value="Malam">Malam</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Lokasi (Toko/Unit)</label>
+          <select id="location" required>
+            <option value="KUK Bangunan">KUK Bangunan</option>
+            <option value="KUK Palen">KUK Palen</option>
+            <option value="Luar Kota / Dinas">Luar Kota / Dinas</option>
+          </select>
+          <div class="error-msg">Wajib dipilih.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Catatan Briefing (Opsional)</label>
+          <textarea id="notes" placeholder="Catatan tugas hari ini" style="min-height: 60px;"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <div class="spinner"></div>
+          <span class="btn-text">Kirim Absen</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- STATE: SUCCESS -->
+    <div id="successPanel" class="state-panel">
+      <div class="state-icon">✅</div>
+      <h2 class="state-title">Absen Berhasil</h2>
+      <p class="state-desc">Kehadiran Anda telah tercatat.</p>
+      <div class="ref-box" id="refNumberDisplay">REF-0000</div>
+      <button class="btn-secondary" onclick="FormHelper.resetForm('publicForm')">Kirim Absen Lain</button>
+    </div>
+
+    <!-- STATE: ERROR -->
+    <div id="errorPanel" class="state-panel">
+      <div class="state-icon">❌</div>
+      <h2 class="state-title" style="color:var(--form-danger)">Absen Gagal</h2>
+      <p class="state-desc" id="errorMsgDisplay">Terjadi kesalahan saat memproses data.</p>
+      <button class="btn-secondary" onclick="FormHelper.resetForm('publicForm')">Coba Lagi</button>
+    </div>
+
+  </div>
+
+  <script src="../shared/master_db.js"></script>
+  <script src="shared/form_helper.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      FormHelper.populateEmployeeDropdown('empId');
+      // Auto-set date to today
+      document.getElementById('date').valueAsDate = new Date();
+    });
+
+    function submitAbsenForm() {
+      FormHelper.submitForm('publicForm', 'ABSEN', () => {
+        return {
+          employeeId: document.getElementById('empId').value,
+          date: document.getElementById('date').value,
+          shift: document.getElementById('shift').value,
+          location: document.getElementById('location').value,
+          notes: document.getElementById('notes').value
+        };
+      });
+    }
+  </script>
+</body>
+</html>
