@@ -3,302 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Manajemen Pengguna</title>
+  <title>Manajemen Pengguna - KUK HR</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#64748b">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#540000">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="shortcut icon" href="favicon-32x32.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <style>
-    :root {
-      --bg: #fafafa;
-      --surface: #ffffff;
-      --primary: #64748b;
-      --primary-hover: #475569;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --success: #10b981;
-      --danger: #ef4444;
-      --radius: 16px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    /* Styling according to new Maroon/Gold Phase 1 tokens */
+    body { 
+      background-color: var(--kuk-bg); 
+      color: var(--kuk-text); 
+      padding: 40px 20px 100px; 
+      min-height: 100vh; 
+      font-family: var(--kuk-font);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 40px 20px 100px; min-height: 100vh; }
-    .app-container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .app-container { width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
     .header { text-align: center; margin-bottom: 10px; }
-    .header h1 { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
-    .header p { font-size: 15px; color: var(--text-muted); margin-top: 8px; }
+    .header h1 { font-size: 28px; font-weight: 700; color: var(--kuk-primary); letter-spacing: -0.5px; }
+    .header p { font-size: 15px; color: var(--kuk-text-muted); margin-top: 8px; }
     
-    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; border: 1px solid rgba(255, 255, 255, 0.8); }
+    .card { background: var(--kuk-surface); border-radius: var(--kuk-radius); box-shadow: var(--kuk-shadow); padding: 24px; border: 1px solid var(--kuk-border); }
     
-    .btn { padding: 12px 16px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .btn { padding: 10px 16px; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: var(--kuk-primary); color: white; }
+    .btn-primary:hover { background: #6b0000; transform: translateY(-1px); }
+    .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--kuk-danger); }
     .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
     
-    .user-list { display: flex; flex-direction: column; gap: 12px; }
-    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; }
-    .user-info h3 { font-size: 16px; margin-bottom: 4px; }
-    .user-info p { font-size: 12px; color: var(--text-muted); }
+    .user-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #fdfdfd; border: 1px solid var(--kuk-border); border-radius: 12px; }
+    .user-info h3 { font-size: 16px; margin-bottom: 4px; color: var(--kuk-primary); }
+    .user-info p { font-size: 13px; color: var(--kuk-text-muted); }
     
     .actions { display: flex; gap: 8px; }
-    
-    .back-link { text-align: center; margin-top: 10px; }
-    .back-link a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; }
-    .back-link a:hover { color: var(--primary); }
     
     /* Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
     .modal-overlay.show { display: flex; }
-    .modal { background: var(--surface); width: 100%; max-width: 400px; border-radius: var(--radius); padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.3s ease; }
-    .modal h2 { margin-bottom: 16px; font-size: 20px; }
+    .modal { background: var(--kuk-surface); width: 100%; max-width: 450px; border-radius: var(--kuk-radius); padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { margin-bottom: 16px; font-size: 20px; color: var(--kuk-primary); }
     @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-group input[type="text"] { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 15px; font-weight: 500; outline: none; background: #f8fafc; color: var(--text); }
-    .form-group input:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1); }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--kuk-text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input[type="text"], .form-group input[type="password"], .form-group select { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--kuk-border); font-size: 15px; font-weight: 500; outline: none; background: #f8fafc; color: var(--kuk-text); font-family: var(--kuk-font); }
+    .form-group input:focus, .form-group select:focus { border-color: var(--kuk-primary); background: var(--kuk-surface); box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1); }
     
     .perm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .perm-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .perm-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
     
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
-    
-    /* Toast */
-    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-    .toast { background: white; color: var(--text); padding: 14px 24px; border-radius: 100px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); font-weight: 500; font-size: 14px; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 10px; animation: toastIn 0.3s ease; pointer-events: auto; }
-    .toast.success { border-left-color: var(--success); }
-    @keyframes toastIn { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-    @keyframes toastOut { to { transform: translateY(-20px); opacity: 0; } }
-
-    @media (max-width: 480px) {
-      body { padding: 20px 10px 100px; }
-      .app-container { gap: 16px; }
-      .header h1 { font-size: 22px; }
-      .header p { font-size: 13px; }
-      .card { padding: 16px 12px; }
-      .user-item { padding: 12px; }
-      .user-info h3 { font-size: 15px; }
-      .btn { padding: 10px 12px; font-size: 13px; }
-      .modal { padding: 20px 16px; }
-      .perm-item { font-size: 13px; }
-    }
   </style>
 </head>
 <body>
-  <div class="toast-container" id="toastContainer"></div>
-  
   <div class="app-container">
     <div class="header">
-      <h1>Manajemen Pengguna</h1>
-      <p>Atur akun dan hak akses portal untuk setiap staf.</p>
+      <h1>Manajemen Staff & Akses</h1>
+      <p>Kelola akses login untuk karyawan KUK</p>
     </div>
-    
+
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="font-size: 18px;">Daftar Pengguna</h2>
-        <button class="btn btn-primary" onclick="openModal()">+ Tambah User</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 style="font-size:18px; color:var(--kuk-primary);">Daftar Pengguna</h2>
+        <button class="btn btn-primary" onclick="openModal()">+ Tambah Akun</button>
       </div>
-      
       <div class="user-list" id="userList">
-        <!-- Rendered via JS -->
+        <!-- List users -->
       </div>
-    </div>
-    
-    <div class="back-link">
-      <a href="index.html">← Kembali ke Portal</a>
     </div>
   </div>
 
-  <!-- Modul Service Drive Upload -->
-  <script src="peminjaman_db.js"></script>
-
-  <!-- Modal Tambah/Edit User -->
   <div class="modal-overlay" id="userModal">
     <div class="modal">
-      <h2 id="modalTitle">Tambah Pengguna</h2>
+      <h2 id="modalTitle">Tambah Akun</h2>
+      
       <div class="form-group">
-        <label>Username *</label>
+        <label>Hubungkan ke Karyawan</label>
+        <select id="employeeSelect">
+          <!-- Populated by JS -->
+        </select>
+        <small style="color:var(--kuk-danger); font-size:11px; display:block; margin-top:4px;">*User harus terhubung dengan data Master Karyawan.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Username</label>
         <input type="text" id="usernameInput" placeholder="Masukkan username">
       </div>
       <div class="form-group">
-        <label>Kata Sandi *</label>
-        <input type="text" id="passwordInput" placeholder="Masukkan kata sandi">
+        <label>Kata Sandi</label>
+        <input type="password" id="passwordInput" placeholder="Minimal 5 karakter">
       </div>
+      
       <div class="form-group">
-        <label>Nama Lengkap (Untuk Format Surat) *</label>
-        <input type="text" id="namaLengkapInput" placeholder="Contoh: Ari Setiawan, S.E.">
-      </div>
-      <div class="form-group">
-        <label>Jabatan / Peran Pengguna *</label>
-        <select id="jabatanInput" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; background: #f8fafc; font-family: inherit;">
-          <option value="Bendahara / Finance">Bendahara / Finance (TTD Slip & Surat Gaji)</option>
-          <option value="Pimpinan Toko / Direktur">Pimpinan Toko / Direktur (TTD Kontrak & Laporan)</option>
-          <option value="HRD / Staff Personalia">HRD / Staff Personalia</option>
-          <option value="Penanggung Jawab Operasional">Penanggung Jawab Operasional</option>
-          <option value="Staf Toko">Staf Toko</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Upload Tanda Tangan (TTD)</label>
-        <div style="font-size:11px; margin-bottom:6px; color:#94a3b8;">
-          📂 Alokasi Drive: <a href="https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:underline;">Google Drive Folder TTD & Barcode</a>
-        </div>
-        <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
-          <div id="ttdPreviewBox" style="width:110px; height:55px; border:1px dashed var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; background:#0f172a; overflow:hidden;">
-            <span style="font-size:11px; color:#94a3b8;">Belum TTD</span>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <label class="btn btn-primary" style="cursor:pointer; font-size:12px; padding:6px 10px; text-align:center;">
-              📤 Upload TTD
-              <input type="file" id="ttdFileInput" accept="image/*" style="display:none;" onchange="handleTtdFileChange(event)">
-            </label>
-            <button type="button" class="btn btn-danger" style="font-size:12px; padding:4px 8px;" onclick="clearTtdFile()">🗑️ Hapus TTD</button>
-          </div>
-        </div>
-        <input type="hidden" id="ttdBase64Input">
-      </div>
-      <div class="form-group">
-        <label>Akses Menu</label>
+        <label>Akses Menu (Permissions)</label>
         <div class="perm-grid" id="permContainer">
           <label class="perm-item"><input type="checkbox" value="absen"> Rekap Absen</label>
           <label class="perm-item"><input type="checkbox" value="cuti"> Cuti</label>
           <label class="perm-item"><input type="checkbox" value="pelanggaran"> Pelanggaran</label>
           <label class="perm-item"><input type="checkbox" value="dashboard"> Dashboard</label>
           <label class="perm-item"><input type="checkbox" value="tip"> Tip Kaca</label>
+          <label class="perm-item"><input type="checkbox" value="karyawan"> Data Karyawan</label>
+          <label class="perm-item"><input type="checkbox" value="peminjaman"> Kendaraan</label>
           <label class="perm-item"><input type="checkbox" value="users"> User Admin</label>
         </div>
       </div>
       
       <div class="modal-actions">
-        <button class="btn" style="background: var(--surface); border: 1px solid var(--border);" onclick="closeModal()">Batal</button>
-        <button class="btn btn-primary" onclick="saveUser()">Simpan</button>
+        <button class="btn" style="background: var(--kuk-surface); border: 1px solid var(--kuk-border);" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveUser()">Simpan Akun</button>
       </div>
     </div>
   </div>
 
+  <script src="shared/master_db.js"></script>
+  <script src="shared/shell.js" data-base="."></script>
   <script>
-    const DEFAULT_USERS = [
-      { username: 'fariz', password: '12345', namaLengkap: 'Fariz Akbar', jabatan: 'Pimpinan Toko / Direktur', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
-      { username: 'ari', password: '12345', namaLengkap: 'Ari Setiawan, S.E.', jabatan: 'Bendahara / Finance', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'andika', password: '12345', namaLengkap: 'Andika Wijaya', jabatan: 'Staf Toko', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'irsyadil', password: '12345', namaLengkap: 'Irsyadil', jabatan: 'HRD / Staff Personalia', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
-      { username: 'shuva', password: '12345', namaLengkap: 'Shuva', jabatan: 'Staf Toko', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'aria', password: '12345', namaLengkap: 'Aria', jabatan: 'Staf Toko', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'zain', password: '12345', namaLengkap: 'Zain', jabatan: 'Staf Toko', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] }
-    ];
-
-    let usersDB = [];
-    let editingUser = null;
-
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = `toast ${type}`;
-      t.innerHTML = type === 'success' ? `✓ ${msg}` : `! ${msg}`;
-      container.appendChild(t);
-      setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
-    }
-
-    function initDB() {
-      const stored = localStorage.getItem('kuk_users_db');
-      if (stored) {
-        usersDB = JSON.parse(stored);
-      } else {
-        usersDB = DEFAULT_USERS.map(u => {
-          const oldPass = localStorage.getItem('kuk_pass_' + u.username);
-          if (oldPass) u.password = oldPass;
-          return u;
-        });
-        localStorage.setItem('kuk_users_db', JSON.stringify(usersDB));
-      }
-      renderUsers();
-    }
+    let editingUserId = null;
 
     function renderUsers() {
       const list = document.getElementById('userList');
       list.innerHTML = '';
       
-      usersDB.forEach((u, i) => {
+      const users = MasterDB.getUsersWithEmployee();
+      
+      if (users.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--kuk-text-muted);">Belum ada pengguna.</div>';
+        return;
+      }
+
+      users.forEach(u => {
         const div = document.createElement('div');
         div.className = 'user-item';
         
         const permsText = u.permissions && u.permissions.length > 0 
           ? u.permissions.join(', ') 
-          : 'Tidak ada akses';
+          : 'Tidak ada akses khusus';
           
-        const isDriveUrl = u.ttd && (u.ttd.startsWith('http') || u.ttd.startsWith('https'));
-        const ttdBadge = u.ttd 
-          ? `<span style="display:inline-block; margin-top:4px; font-size:11px; background:#10b98125; color:#10b981; padding:2px 8px; border-radius:6px; font-weight:600;">✓ TTD Tersedia ${isDriveUrl ? '(Drive ☁️)' : ''}</span>` 
-          : '<span style="display:inline-block; margin-top:4px; font-size:11px; color:#94a3b8;">Belum ada TTD</span>';
+        const empName = u.employee ? u.employee.fullName : '<span style="color:var(--kuk-danger)">[Tidak Terhubung]</span>';
+        const empPos = u.employee ? u.employee.position : '';
         
         div.innerHTML = `
           <div class="user-info">
-            <h3>${u.username} ${u.namaLengkap ? `<small style="font-weight:400; color:#94a3b8;">(${u.namaLengkap})</small>` : ''}</h3>
-            <p style="color:#2563eb; font-weight:600; margin-top:2px;">Peran/Jabatan: ${u.jabatan || 'Staf Toko'}</p>
+            <h3>${u.username}</h3>
+            <p style="color:var(--kuk-accent); font-weight:600; margin-top:2px;">Karyawan: ${empName} ${empPos ? `(${empPos})` : ''}</p>
             <p style="margin-top:2px;">Akses: ${permsText}</p>
-            ${ttdBadge}
           </div>
           <div class="actions">
-            <button class="btn" style="background: #e2e8f0;" onclick="editUser(${i})">Edit</button>
-            <button class="btn btn-danger" onclick="deleteUser(${i})">Hapus</button>
+            <button class="btn" style="background: var(--kuk-bg); border: 1px solid var(--kuk-border);" onclick="editUser('${u.id}')">Edit</button>
+            <button class="btn btn-danger" onclick="deleteUser('${u.id}')">Hapus</button>
           </div>
         `;
         list.appendChild(div);
       });
     }
 
-    function editUser(index) {
-      openModal(index);
+    function populateEmployeeSelect() {
+      const select = document.getElementById('employeeSelect');
+      select.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
+      const emps = MasterDB.getEmployees();
+      emps.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.textContent = `${e.fullName} (${e.unit} - ${e.position})`;
+        select.appendChild(opt);
+      });
     }
 
-    function openModal(index = null) {
-      editingUser = index;
-      document.getElementById('modalTitle').textContent = index !== null ? 'Edit Pengguna' : 'Tambah Pengguna';
+    function openModal() {
+      editingUserId = null;
+      document.getElementById('modalTitle').textContent = 'Tambah Akun';
+      document.getElementById('usernameInput').value = '';
+      document.getElementById('passwordInput').value = '';
+      populateEmployeeSelect();
+      document.getElementById('employeeSelect').value = '';
+      document.querySelectorAll('#permContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
       
-      const uInput = document.getElementById('usernameInput');
-      const pInput = document.getElementById('passwordInput');
-      const nInput = document.getElementById('namaLengkapInput');
-      const jInput = document.getElementById('jabatanInput');
-      const ttdInput = document.getElementById('ttdBase64Input');
-      const ttdPrev = document.getElementById('ttdPreviewBox');
-      const checkboxes = document.querySelectorAll('#permContainer input[type="checkbox"]');
+      document.getElementById('userModal').classList.add('show');
+    }
+
+    function editUser(id) {
+      editingUserId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Akun';
       
-      if (index !== null) {
-        const u = usersDB[index];
-        uInput.value = u.username;
-        pInput.value = u.password;
-        nInput.value = u.namaLengkap || '';
-        jInput.value = u.jabatan || 'Staf Toko';
-        ttdInput.value = u.ttd || '';
-        if (u.ttd) {
-          ttdPrev.innerHTML = `<img src="${u.ttd}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
-        } else {
-          ttdPrev.innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum TTD</span>`;
-        }
-        checkboxes.forEach(cb => {
-          cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
-        });
-      } else {
-        uInput.value = '';
-        pInput.value = '';
-        nInput.value = '';
-        jInput.value = 'Staf Toko';
-        ttdInput.value = '';
-        ttdPrev.innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum TTD</span>`;
-        checkboxes.forEach(cb => cb.checked = false);
-      }
+      const u = MasterDB.getUser(id);
+      if(!u) return;
+
+      document.getElementById('usernameInput').value = u.username;
+      document.getElementById('passwordInput').value = u.password;
+      populateEmployeeSelect();
+      document.getElementById('employeeSelect').value = u.employeeId;
+      
+      document.querySelectorAll('#permContainer input[type="checkbox"]').forEach(cb => {
+        cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
+      });
       
       document.getElementById('userModal').classList.add('show');
     }
@@ -307,89 +209,54 @@
       document.getElementById('userModal').classList.remove('show');
     }
 
-    function handleTtdFileChange(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const username = document.getElementById('usernameInput').value.trim() || 'User';
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const base64 = evt.target.result;
-        document.getElementById('ttdBase64Input').value = base64;
-        document.getElementById('ttdPreviewBox').innerHTML = `<img src="${base64}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
-
-        if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.uploadFileToDrive) {
-          showToast('⬆️ Mengunggah TTD ke Google Drive KUK...', 'info');
-          const fileName = 'TTD_' + username.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now() + '.png';
-          PeminjamanDB.uploadFileToDrive(base64, fileName)
-            .then(res => {
-              if (res && res.success && res.downloadUrl) {
-                document.getElementById('ttdBase64Input').value = res.downloadUrl;
-                showToast('✅ TTD berhasil disimpan ke Google Drive KUK!', 'success');
-              } else {
-                showToast('⚠️ Upload Drive gagal, TTD tersimpan secara lokal.', 'warning');
-              }
-            })
-            .catch(err => {
-              console.warn('[Drive TTD Error]', err);
-              showToast('⚠️ Upload Drive gagal, TTD tersimpan secara lokal.', 'warning');
-            });
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function clearTtdFile() {
-      document.getElementById('ttdFileInput').value = '';
-      document.getElementById('ttdBase64Input').value = '';
-      document.getElementById('ttdPreviewBox').innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum TTD</span>`;
-    }
-
     function saveUser() {
       const username = document.getElementById('usernameInput').value.trim();
       const password = document.getElementById('passwordInput').value.trim();
-      const namaLengkap = document.getElementById('namaLengkapInput').value.trim();
-      const jabatan = document.getElementById('jabatanInput').value;
-      const ttd = document.getElementById('ttdBase64Input').value;
+      const employeeId = document.getElementById('employeeSelect').value;
       
-      if (!username || !password) {
-        return showToast('Username dan kata sandi wajib diisi!', 'error');
+      if (!username || !password || !employeeId) {
+        alert('Username, Kata Sandi, dan Karyawan wajib diisi!');
+        return;
       }
       
       const checkboxes = document.querySelectorAll('#permContainer input[type="checkbox"]:checked');
       const permissions = Array.from(checkboxes).map(cb => cb.value);
       
-      if (editingUser !== null) {
-        const existing = usersDB.findIndex(u => u.username === username);
-        if (existing !== -1 && existing !== editingUser) {
-          return showToast('Username sudah digunakan!', 'error');
+      const allUsers = MasterDB.getUsers();
+      
+      if (!editingUserId) {
+        // Create new
+        if (allUsers.some(u => u.username === username)) {
+          alert('Username sudah ada!');
+          return;
         }
-        usersDB[editingUser] = { ...usersDB[editingUser], username, password, namaLengkap, jabatan, ttd, permissions };
-        showToast('Data pengguna berhasil diubah.', 'success');
+        MasterDB.saveUser({ username, password, employeeId, permissions });
       } else {
-        if (usersDB.some(u => u.username === username)) {
-          return showToast('Username sudah ada!', 'error');
+        // Edit existing
+        const existing = allUsers.find(u => u.username === username);
+        if (existing && existing.id !== editingUserId) {
+          alert('Username sudah digunakan!');
+          return;
         }
-        usersDB.push({ username, password, namaLengkap, jabatan, ttd, permissions });
-        showToast('Pengguna baru berhasil ditambahkan.', 'success');
+        const currentUser = MasterDB.getUser(editingUserId);
+        MasterDB.saveUser({ ...currentUser, username, password, employeeId, permissions });
       }
       
-      localStorage.setItem('kuk_users_db', JSON.stringify(usersDB));
       renderUsers();
       closeModal();
     }
 
-    function deleteUser(index) {
-      const u = usersDB[index];
-      if (confirm(`Yakin ingin menghapus pengguna "${u.username}"?`)) {
-        usersDB.splice(index, 1);
-        localStorage.setItem('kuk_users_db', JSON.stringify(usersDB));
+    function deleteUser(id) {
+      if (confirm('Yakin ingin menghapus pengguna ini?')) {
+        MasterDB.deleteUser(id);
         renderUsers();
-        showToast('Pengguna berhasil dihapus.', 'success');
       }
     }
 
-    initDB();
+    // Init
+    window.addEventListener('DOMContentLoaded', () => {
+      renderUsers();
+    });
   </script>
-  <script src="shared/shell.js" data-base="."></script>
 </body>
 </html>
