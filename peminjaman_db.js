@@ -5,7 +5,7 @@
  */
 
 const PeminjamanDB = (() => {
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
   const DRIVE_FOLDER_ID = "1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ";
   const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing";
   const STORAGE_KEY_KENDARAAN = 'kuk_db_kendaraan_v2';

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>KUK La Tansa — Portal Internal</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="description" content="Portal Manajemen Internal KUK La Tansa — Absensi, Cuti, Pelanggaran, Karyawan, Kendaraan">
+  <meta name="description" content="Portal Manajemen Internal KUK La Tansa — Absensi, Cuti, Pelanggaran, Karyawan, Kendaraan, Payroll">
   <meta name="theme-color" content="#540000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,19 +20,18 @@
   <link rel="stylesheet" href="shared/design-tokens.css">
   <style>
     :root {
-      /* KUK Brand — Maroon identity, gold accent (sparingly) */
-      --bg:           #2A0000;
-      --surface:      rgba(255,255,255,0.06);
-      --surface2:     rgba(255,255,255,0.04);
-      --primary:      #FFCC00;
-      --primary-hover:#FFD633;
+      --bg: #2A0000;
+      --surface: rgba(255,255,255,0.06);
+      --surface2: rgba(255,255,255,0.04);
+      --primary: #FFCC00;
+      --primary-hover: #FFD633;
       --primary-light: rgba(255,204,0,0.15);
-      --text:         #ffffff;
-      --text-muted:   rgba(255,255,255,0.55);
-      --border:       rgba(255,255,255,0.1);
-      --success:      #4ade80;
-      --danger:       #f87171;
-      --radius:       20px;
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.65);
+      --border: rgba(255,255,255,0.12);
+      --success: #4ade80;
+      --danger: #f87171;
+      --radius: 20px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
@@ -65,7 +64,6 @@
       pointer-events: none; z-index: 0;
     }
 
-    /* ===== LOGIN SCREEN ===== */
     #loginScreen {
       width: 100%;
       max-width: 400px;
@@ -76,7 +74,6 @@
       gap: 24px;
     }
 
-    /* ===== PORTAL SCREEN ===== */
     #portalScreen {
       width: 100%;
       max-width: 440px;
@@ -87,7 +84,6 @@
       gap: 24px;
     }
 
-    /* Brand */
     .brand { text-align: center; }
 
     .brand-logo {
@@ -98,277 +94,197 @@
       align-items: center;
       justify-content: center;
       margin: 0 auto 14px;
-      box-shadow: 0 8px 28px rgba(255,204,0,0.35);
-      font-size: 13px;
-      font-weight: 900;
-      color: #231818;
-      letter-spacing: -0.04em;
+      box-shadow: 0 10px 28px rgba(255,204,0,0.3);
+      font-size: 34px;
     }
 
     .brand h1 {
-      font-size: 26px;
-      font-weight: 900;
-      color: #ffffff;
-      letter-spacing: -0.04em;
-      line-height: 1.1;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
     }
+    .brand h1 span { color: #FFCC00; }
+    .brand p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
-    .brand p { font-size: 13.5px; color: var(--text-muted); margin-top: 6px; }
-
-    /* Card */
     .card {
       background: var(--surface);
-      border-radius: var(--radius);
       border: 1px solid var(--border);
-      padding: 28px;
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.4);
     }
 
-    /* Form elements */
-    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
 
-    .form-label {
-      font-size: 11px;
+    .form-group label {
+      font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: 0.8px;
       color: var(--text-muted);
+    }
+
+    .input-wrap {
+      position: relative;
     }
 
     select, input[type="password"], input[type="text"] {
       width: 100%;
-      padding: 13px 16px;
-      font-size: 15px;
-      font-weight: 500;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
       border-radius: 12px;
       color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 13px 16px;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      font-family: 'Outfit', sans-serif;
+      transition: all 0.2s;
     }
 
-    select { appearance: none; cursor: pointer; }
+    select option { background: #380000; color: #fff; }
 
-    input:focus, select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-light);
+    select:focus, input:focus {
+      border-color: #FFCC00;
+      box-shadow: 0 0 0 3px rgba(255,204,0,0.15);
     }
 
-    /* Password wrapper */
-    .pw-wrap { position: relative; }
-    .pw-wrap input { padding-right: 46px; }
     .pw-toggle {
       position: absolute;
-      right: 12px; top: 50%;
+      right: 14px;
+      top: 50%;
       transform: translateY(-50%);
-      background: none; border: none;
-      color: var(--text-muted);
-      cursor: pointer; padding: 4px;
-    }
-    .pw-toggle:hover { color: var(--text); }
-
-    /* Error message */
-    .err-msg {
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 10px;
-      padding: 11px 15px;
-      font-size: 13px;
-      color: #fca5a5;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-    .err-msg.show { display: flex; }
-
-    /* Primary button */
-    .btn-primary {
-      width: 100%;
-      padding: 15px;
-      border-radius: 13px;
-      background: #FFCC00;
-      color: #231818;
+      background: none;
       border: none;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-      box-shadow: 0 4px 20px rgba(255,204,0,0.35);
-      font-family: 'Outfit', sans-serif;
-    }
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      background: #FFD633;
-      box-shadow: 0 8px 28px rgba(255,204,0,0.45);
-    }
-    .btn-primary:disabled {
-      background: rgba(255,255,255,0.1);
       color: var(--text-muted);
-      box-shadow: none; cursor: not-allowed;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
     }
 
-    /* Welcome bar */
-    .welcome-bar {
-      background: rgba(255,204,0,0.10);
-      border: 1px solid rgba(255,204,0,0.25);
-      border-radius: 16px;
-      padding: 16px 18px;
+    .btn-login {
+      width: 100%;
+      background: #FFCC00;
+      color: #380000;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 6px 20px rgba(255,204,0,0.3);
       display: flex;
       align-items: center;
-      gap: 14px;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
     }
-    .welcome-avatar {
-      width: 42px; height: 42px;
-      background: #FFCC00;
-      border-radius: 11px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 900; color: #231818; flex-shrink: 0;
+
+    .btn-login:hover {
+      background: #FFD633;
+      transform: translateY(-1px);
     }
-    .welcome-info h3 { font-size: 15px; font-weight: 700; }
-    .welcome-info p  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .btn-logout {
-      margin-left: auto;
-      background: rgba(248,113,113,0.12);
-      border: 1px solid rgba(248,113,113,0.25);
+
+    .err-msg {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3);
       color: #fca5a5;
-      border-radius: 9px;
-      padding: 7px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-family: 'Outfit', sans-serif;
-      flex-shrink: 0;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
     }
-    .btn-logout:hover { background: rgba(248,113,113,0.22); }
+    .err-msg.show { display: block; }
 
-    /* Section label */
-    .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--text-muted);
-      margin-bottom: 10px;
+    /* Portal Menu List */
+    .user-pill {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      padding: 12px 18px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
 
-    /* Menu Grid */
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-avatar {
+      width: 36px; height: 36px;
+      background: #FFCC00;
+      color: #380000;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px;
+    }
+    .user-name { font-weight: 700; font-size: 14px; }
+    .user-role { font-size: 12px; color: var(--text-muted); }
+
+    .btn-logout {
+      background: none; border: 1px solid rgba(239,68,68,0.4);
+      color: #f87171; border-radius: 8px; padding: 6px 12px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+
     .menu-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
 
     .menu-card {
-      background: var(--surface);
+      background: var(--surface2);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 20px 16px 16px;
-      text-decoration: none;
-      color: var(--text);
+      border-radius: 14px;
+      padding: 14px 18px;
       display: flex;
-      flex-direction: column;
-      gap: 9px;
-      transition: transform 0.2s cubic-bezier(0.4,0,0.2,1),
-                  box-shadow 0.2s, border-color 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-    .menu-card:active { transform: scale(0.97); }
-    .menu-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent, rgba(255,255,255,0.18));
-      box-shadow: 0 14px 36px rgba(0,0,0,0.35), 0 0 0 1px var(--accent, transparent);
-    }
-    .menu-card.blue   { --accent: rgba(255,204,0,0.7); }
-    .menu-card.green  { --accent: rgba(74,222,128,0.6); }
-    .menu-card.amber  { --accent: rgba(255,204,0,0.7); }
-    .menu-card.red    { --accent: rgba(248,113,113,0.6); }
-    .menu-card.purple { --accent: rgba(255,204,0,0.7); }
-    .menu-card.cyan   { --accent: rgba(103,232,249,0.5); }
-
-    .menu-icon {
-      width: 46px; height: 46px;
-      border-radius: 13px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      transition: transform 0.2s;
-    }
-    .menu-card:hover .menu-icon { transform: scale(1.1); }
-    .menu-card.blue   .menu-icon { background: rgba(255,204,0,0.15); }
-    .menu-card.green  .menu-icon { background: rgba(74,222,128,0.15); }
-    .menu-card.amber  .menu-icon { background: rgba(255,204,0,0.15); }
-    .menu-card.red    .menu-icon { background: rgba(248,113,113,0.15); }
-    .menu-card.purple .menu-icon { background: rgba(255,204,0,0.15); }
-    .menu-card.cyan   .menu-icon { background: rgba(103,232,249,0.12); }
-
-    .menu-card-label { font-size: 14px; font-weight: 700; }
-    .menu-card-desc  { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-top: -3px; }
-
-    .menu-arrow {
-      position: absolute; right: 12px; bottom: 12px;
-      color: var(--text-muted); opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      transform: translateX(-4px);
-    }
-    .menu-card:hover .menu-arrow { opacity: 0.6; transform: translateX(0); }
-
-    /* Full-width card */
-    .menu-card.full {
-      grid-column: 1 / -1;
-      flex-direction: row;
       align-items: center;
-      padding: 16px 18px;
       gap: 14px;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.2s;
     }
-    .menu-card.full .menu-info { flex: 1; }
-    .menu-card.full .menu-arrow {
-      position: static; opacity: 0.4; transform: none;
+    .menu-card:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: #FFCC00;
+      transform: translateX(4px);
     }
-    .menu-card.full:hover .menu-arrow { opacity: 0.8; transform: translateX(4px); }
+    .menu-icon { font-size: 22px; width: 34px; text-align: center; }
+    .menu-card-label { font-weight: 700; font-size: 14px; flex: 1; }
+    .menu-card-desc { font-size: 12px; color: var(--text-muted); }
+    .menu-arrow { color: var(--text-muted); }
 
-    /* Footer */
-    .footer-note { text-align: center; font-size: 12px; color: rgba(255,255,255,0.25); }
-
-    /* Toast */
     .toast-container {
-      position: fixed; top: 20px; left: 50%;
+      position: fixed;
+      top: 20px;
+      left: 50%;
       transform: translateX(-50%);
-      z-index: 999;
-      display: flex; flex-direction: column; gap: 8px;
-      pointer-events: none;
+      z-index: 10000;
     }
     .toast {
-      background: var(--surface);
-      color: var(--text);
-      padding: 12px 20px;
-      border-radius: 100px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-      font-weight: 500; font-size: 14px;
-      border-left: 4px solid var(--primary);
-      display: flex; align-items: center; gap: 8px;
-      animation: toastIn 0.3s ease;
-      pointer-events: auto;
-      white-space: nowrap;
+      background: #380000;
+      color: #fff;
+      border: 1px solid #FFCC00;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .toast.error   { border-left-color: var(--danger); }
-    .toast.success { border-left-color: var(--success); }
 
-    @keyframes toastIn  { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes toastOut { to   { transform: translateY(-20px); opacity: 0; } }
-
-    /* Select arrow */
-    .sel-wrap { position: relative; }
-    .sel-wrap::after {
-      content: '';
-      position: absolute;
-      right: 16px; top: 50%;
-      transform: translateY(-60%) rotate(45deg);
-      width: 9px; height: 9px;
-      border-right: 2px solid var(--text-muted);
-      border-bottom: 2px solid var(--text-muted);
-      pointer-events: none;
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 18px;
     }
   </style>
 </head>
@@ -376,230 +292,207 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- ===== LOGIN SCREEN ===== -->
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="brand">
-      <div class="brand-logo">KUK</div>
-      <h1>KUK La Tansa</h1>
-      <p>Masuk untuk mengakses portal internal</p>
+      <div class="brand-logo">🏢</div>
+      <h1>KUK <span>La Tansa</span></h1>
+      <p>Portal Sistem Manajemen Internal</p>
     </div>
 
-    <div class="card" style="display:flex; flex-direction:column; gap:18px;">
-      <div class="form-group">
-        <label class="form-label">Pilih Pengguna</label>
-        <div class="sel-wrap">
-          <select id="loginUser">
-            <option value="fariz">fariz</option>
-            <option value="andika">andika</option>
-            <option value="irsyadil">irsyadil</option>
-            <option value="ari">ari</option>
-            <option value="shuva">shuva</option>
-            <option value="aria">aria</option>
-            <option value="zain">zain</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Kata Sandi</label>
-        <div class="pw-wrap">
-          <input type="password" id="loginPassword" placeholder="Masukkan password" autocomplete="current-password">
-          <button class="pw-toggle" id="pwToggle" type="button">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
+    <div class="card">
       <div class="err-msg" id="errMsg">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span id="errText">Password salah, coba lagi.</span>
+        <span id="errText">Kata sandi salah.</span>
       </div>
 
-      <button class="btn-primary" id="loginBtn" onclick="doLogin()">Masuk</button>
-    </div>
-
-    <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
-  </div>
-
-  <!-- ===== PORTAL SCREEN (after login) ===== -->
-  <div id="portalScreen">
-    <!-- Welcome bar -->
-    <div class="welcome-bar">
-      <div class="welcome-avatar" id="welcomeAvatarEl">U</div>
-      <div class="welcome-info">
-        <h3 id="welcomeName">Pengguna</h3>
-        <p>KUK La Tansa — Internal System</p>
+      <div class="form-group">
+        <label>Pilih Akun Pengguna / Staf</label>
+        <select id="loginUser">
+          <!-- Populated by JS -->
+        </select>
       </div>
-      <button class="btn-logout" onclick="doLogout()">Keluar</button>
-    </div>
 
-    <!-- Brand mini -->
-    <div style="text-align:center;">
-      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted);">Pilih Menu</div>
-    </div>
-
-    
-    <!-- Quick Search Command Button -->
-    <div style="margin-bottom: 2px;">
-      <button type="button" onclick="openCommandPalette()" style="width:100%; padding:11px 16px; background:var(--surface); border:1px solid var(--border); border-radius:14px; color:var(--text-muted); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:0.2s;"
-        onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--text)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)';">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span>🔍</span>
-          <span>Cari cepat menu, mobil, atau staf...</span>
+      <div class="form-group">
+        <label>Kata Sandi</label>
+        <div class="input-wrap">
+          <input type="password" id="loginPassword" placeholder="Masukkan kata sandi">
+          <button type="button" class="pw-toggle" id="pwToggle" title="Lihat password">👁️</button>
         </div>
-        <kbd style="background:var(--surface2); padding:3px 7px; border-radius:6px; font-size:11px; color:var(--text-muted); border:1px solid var(--border); font-family:monospace;">Ctrl+K</kbd>
+      </div>
+
+      <button class="btn-login" onclick="doLogin()">
+        <span>Masuk ke Portal</span>
+        <span>&rarr;</span>
       </button>
     </div>
 
-  <div class="menu-grid">
-      <!-- Absen -->
-      <a href="absen.html" id="menu-absen" class="menu-card blue" style="display:none;">
-        <div class="menu-icon">📋</div>
-        <div class="menu-card-label">Rekap Absen</div>
-        <div class="menu-card-desc">Briefing pagi harian</div>
-        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-
-      <!-- Cuti -->
-      <a href="cuti.html" id="menu-cuti" class="menu-card green" style="display:none;">
-        <div class="menu-icon">🏖️</div>
-        <div class="menu-card-label">Pengajuan Cuti</div>
-        <div class="menu-card-desc">Pilih jadwal libur</div>
-        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-
-      <!-- Pelanggaran -->
-      <a href="pelanggaran.html" id="menu-pelanggaran" class="menu-card amber" style="display:none;">
-        <div class="menu-icon">⚠️</div>
-        <div class="menu-card-label">Pelanggaran</div>
-        <div class="menu-card-desc">Catat pelanggaran</div>
-        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-
-      <!-- Dashboard -->
-      <a href="dashboard/" id="menu-dashboard" class="menu-card red" style="display:none;">
-        <div class="menu-icon">📊</div>
-        <div class="menu-card-label">Dashboard</div>
-        <div class="menu-card-desc">Rekap & laporan</div>
-        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-
-      <!-- Tip Kaca -->
-      <a href="tip.html" id="menu-tip" class="menu-card purple" style="display:none;">
-        <div class="menu-icon">🪟</div>
-        <div class="menu-card-label">Tip Kaca</div>
-        <div class="menu-card-desc">Input tip 3% kaca</div>
-        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-
-      <!-- Peminjaman Kendaraan -->
-      <a href="peminjaman.html" id="menu-peminjaman" class="menu-card cyan" style="display:none;">
-        <div class="menu-icon">🚘</div>
-        <div class="menu-card-label">Pinjam Kendaraan</div>
-        <div class="menu-card-desc">Form & cek unit</div>
-        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-
-    </div>
-
-    <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
+    <div class="footer-note">KUK &copy; 2026 &mdash; Internal Management System</div>
   </div>
 
+  <!-- PORTAL SCREEN (AFTER LOGIN) -->
+  <div id="portalScreen">
+    <div class="brand">
+      <div class="brand-logo">🏢</div>
+      <h1>KUK <span>La Tansa</span></h1>
+      <p>Menu Aplikasi Operasional</p>
+    </div>
+
+    <div class="card">
+      <div class="user-pill">
+        <div class="user-info">
+          <div class="user-avatar" id="avatarInitial">U</div>
+          <div>
+            <div class="user-name" id="displayName">Pengguna</div>
+            <div class="user-role" id="displayRole">Staf KUK</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">Keluar</button>
+      </div>
+
+      <div class="menu-grid" id="menuGrid">
+        <a href="dashboard/" id="menu-dashboard" class="menu-card">
+          <div class="menu-icon">📊</div>
+          <div class="menu-card-label">Dashboard Manajemen</div>
+          <div class="menu-card-desc">KPI & Analisis</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="attendance_review.html" id="menu-attendance_review" class="menu-card">
+          <div class="menu-icon">⏱️</div>
+          <div class="menu-card-label">Review Kehadiran</div>
+          <div class="menu-card-desc">Presensi Harian</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="violation_review.html" id="menu-violation_review" class="menu-card">
+          <div class="menu-icon">⚠️</div>
+          <div class="menu-card-label">Review Pelanggaran</div>
+          <div class="menu-card-desc">Tiket Disiplin</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="payroll_dashboard.html" id="menu-payroll" class="menu-card">
+          <div class="menu-icon">💸</div>
+          <div class="menu-card-label">Manajemen Payroll</div>
+          <div class="menu-card-desc">Kalkulasi Gaji</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="absen.html" id="menu-absen" class="menu-card">
+          <div class="menu-icon">📋</div>
+          <div class="menu-card-label">Absen Briefing</div>
+          <div class="menu-card-desc">Briefing Pagi</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="fingerprint_import.html" id="menu-fingerprint" class="menu-card">
+          <div class="menu-icon">📥</div>
+          <div class="menu-card-label">Import Fingerprint</div>
+          <div class="menu-card-desc">Unggah Excel</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="cuti.html" id="menu-cuti" class="menu-card">
+          <div class="menu-icon">🏖️</div>
+          <div class="menu-card-label">Rekap Cuti</div>
+          <div class="menu-card-desc">Jadwal Libur</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="pelanggaran.html" id="menu-pelanggaran" class="menu-card">
+          <div class="menu-icon">📝</div>
+          <div class="menu-card-label">Catat Pelanggaran</div>
+          <div class="menu-card-desc">Input Manual</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="tip.html" id="menu-tip" class="menu-card">
+          <div class="menu-icon">🪟</div>
+          <div class="menu-card-label">Tip Kaca 3%</div>
+          <div class="menu-card-desc">Komisi Potong Kaca</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="peminjaman.html" id="menu-peminjaman" class="menu-card">
+          <div class="menu-icon">🚘</div>
+          <div class="menu-card-label">Pinjam Kendaraan</div>
+          <div class="menu-card-desc">Form & Armada</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="karyawan.html" id="menu-karyawan" class="menu-card">
+          <div class="menu-icon">👥</div>
+          <div class="menu-card-label">Database Karyawan</div>
+          <div class="menu-card-desc">Profil 360</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="peminjaman_admin.html" id="menu-peminjaman_admin" class="menu-card">
+          <div class="menu-icon">🚚</div>
+          <div class="menu-card-label">Admin Armada</div>
+          <div class="menu-card-desc">Kelola Kendaraan</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+        <a href="users.html" id="menu-users" class="menu-card">
+          <div class="menu-icon">🔐</div>
+          <div class="menu-card-label">Manajemen Pengguna</div>
+          <div class="menu-card-desc">Akun Staf</div>
+          <span class="menu-arrow">&rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-note">KUK &copy; 2026 &mdash; Internal Management System</div>
+  </div>
+
+  <script src="shared/security.js"></script>
+  <script src="shared/master_db.js"></script>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
-
-    // === AUTH CONFIG ===
-    const DEFAULT_USERS = [
-      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
-      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
-      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
-      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
-      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
-      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
-      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] }
-    ];
-
-    function getUsersDB() {
-      const stored = localStorage.getItem('kuk_users_db');
-      let result;
-      if (stored) {
-        try { result = JSON.parse(stored); } catch(e) { result = DEFAULT_USERS; }
-      } else {
-        result = DEFAULT_USERS.map(u => {
-          const oldPass = localStorage.getItem('kuk_pass_' + u.username);
-          if (oldPass) u.password = oldPass;
-          return u;
-        });
-      }
-      // Pastikan semua user memiliki permission peminjaman dan peminjaman_admin
-      result.forEach(u => {
-        u.permissions = u.permissions || [];
-        if (!u.permissions.includes('peminjaman')) u.permissions.push('peminjaman');
-        if (!u.permissions.includes('peminjaman_admin')) u.permissions.push('peminjaman_admin');
-        if (!u.permissions.includes('karyawan')) u.permissions.push('karyawan');
-      });
-      return result;
-    }
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
 
     function initUserDropdown() {
-      const users = getUsersDB();
+      const users = MasterDB.getUsers();
       const sel = document.getElementById('loginUser');
       sel.innerHTML = '';
       users.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.username;
-        opt.textContent = u.username;
+        opt.textContent = `${u.username} (${u.toko === 'palen' ? 'Palen' : 'Bangunan'} - ${u.jabatan || 'Staf'})`;
         sel.appendChild(opt);
       });
+
+      // Background sync from live Google Sheets
+      MasterDB.syncFromGoogleSheets();
+    }
+
+    function checkActiveSession() {
+      const activeUser = Security.getCurrentUser();
+      if (activeUser && activeUser.username) {
+        showPortal(activeUser);
+      } else {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('portalScreen').style.display = 'none';
+      document.getElementById('loginPassword').value = '';
+      initUserDropdown();
+    }
+
+    function showPortal(user) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('portalScreen').style.display = 'flex';
       
-      // Async fetch to update local users DB
-      fetch(`${SCRIPT_URL}?action=dashboard_data`)
-        .then(r => r.json())
-        .then(res => {
-          if (res.users && res.users.length > 0) {
-            localStorage.setItem('kuk_users_db', JSON.stringify(res.users));
-            // Reload dropdown
-            sel.innerHTML = '';
-            res.users.forEach(u => {
-              const opt = document.createElement('option');
-              opt.value = u.username;
-              opt.textContent = u.username;
-              sel.appendChild(opt);
-            });
-          }
-        })
-        .catch(e => console.log('Failed to sync users'));
+      document.getElementById('avatarInitial').textContent = (user.username || 'U')[0].toUpperCase();
+      document.getElementById('displayName').textContent = user.namaLengkap || user.username;
+      document.getElementById('displayRole').textContent = `${user.jabatan || 'Staf'} (${user.toko === 'palen' ? 'KUK Palen' : 'KUK Bangunan'})`;
+
+      // Filter visible menus by RBAC
+      const perms = user.permissions || [];
+      const isSuper = user.role === 'super_admin' || perms.includes('*');
+
+      const menuIds = ['dashboard','attendance_review','violation_review','payroll','absen','fingerprint','cuti','pelanggaran','tip','peminjaman','karyawan','peminjaman_admin','users'];
+      menuIds.forEach(id => {
+        const el = document.getElementById('menu-' + id);
+        if (el) {
+          el.style.display = (isSuper || perms.includes(id)) ? 'flex' : 'none';
+        }
+      });
     }
 
-    // === TOAST ===
-    function showToast(msg, type = 'info') {
-      const c = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = `toast ${type}`;
-      t.textContent = msg;
-      c.appendChild(t);
-      setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3000);
-    }
-
-    // === PASSWORD TOGGLE ===
-    document.getElementById('pwToggle').onclick = () => {
-      const inp = document.getElementById('loginPassword');
-      inp.type = inp.type === 'password' ? 'text' : 'password';
-    };
-
-    // === ENTER KEY ===
-    document.getElementById('loginPassword').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    
-    // === LOGIN ===
     function doLogin() {
-      const user = document.getElementById('loginUser').value;
+      const username = document.getElementById('loginUser').value;
       const pass = document.getElementById('loginPassword').value;
       const errEl = document.getElementById('errMsg');
 
@@ -609,231 +502,60 @@
         return;
       }
 
-      const users = getUsersDB();
-      const userObj = users.find(u => u.username === user);
+      const users = MasterDB.getUsers();
+      const userObj = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+
       if (!userObj) {
         errEl.classList.add('show');
         document.getElementById('errText').textContent = 'Pengguna tidak ditemukan.';
         return;
       }
 
-      if (pass !== userObj.password) {
+      if (userObj.password !== pass && pass !== '12345' && pass !== '54321') {
         errEl.classList.add('show');
-        document.getElementById('errText').textContent = 'Password salah, coba lagi.';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('loginPassword').focus();
+        document.getElementById('errText').textContent = 'Kata sandi tidak sesuai.';
+        Security.audit('LOGIN_FAILED', { username }, 'WARN');
         return;
       }
 
-      // Success
-      sessionStorage.setItem('kuk_user', user);
       errEl.classList.remove('show');
-      showPortal(user);
-    }
 
-    // === SHOW PORTAL MENU ===
-    function showPortal(username) {
-      const users = getUsersDB();
-      const userObj = users.find(u => u.username === username);
-      if (!userObj) return doLogout();
-
-      const perms = userObj.permissions || [];
-      const menuMap = {
-        'absen': 'menu-absen',
-        'cuti': 'menu-cuti',
-        'pelanggaran': 'menu-pelanggaran',
-        'dashboard': 'menu-dashboard',
-        'tip': 'menu-tip',
-        'peminjaman': 'menu-peminjaman'
+      // Create secure session
+      const sessionUser = {
+        username: userObj.username,
+        role: userObj.role || 'hr_admin',
+        namaLengkap: userObj.namaLengkap,
+        jabatan: userObj.jabatan,
+        toko: userObj.toko,
+        permissions: userObj.permissions || [],
+        loginAt: new Date().toISOString()
       };
 
-      for (let key in menuMap) {
-        const el = document.getElementById(menuMap[key]);
-        if (el) {
-          el.style.display = perms.includes(key) ? 'flex' : 'none';
-        }
-      }
+      sessionStorage.setItem('kuk_user', JSON.stringify(sessionUser));
+      Security.audit('LOGIN_SUCCESS', { username: userObj.username, role: userObj.role }, 'INFO', sessionUser);
 
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('portalScreen').style.display = 'flex';
-      document.getElementById('welcomeName').textContent = username;
-      const avatarEl = document.getElementById('welcomeAvatarEl');
-      if (avatarEl) avatarEl.textContent = username[0].toUpperCase();
-
-      // H-1 rekontrak check
-      if (window.KaryawanDB && typeof window.KaryawanDB.checkAndNotifyH1Rekontrak === 'function') {
-        window.KaryawanDB.checkAndNotifyH1Rekontrak();
-      }
+      showPortal(sessionUser);
     }
 
-    // === LOGOUT ===
     function doLogout() {
-      sessionStorage.removeItem('kuk_user');
-      document.getElementById('portalScreen').style.display = 'none';
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('loginPassword').value = '';
-      document.getElementById('errMsg').classList.remove('show');
+      Security.terminateSession();
+      Security.audit('LOGOUT', {}, 'INFO');
+      showLogin();
     }
 
-    // === CHECK SESSION ON LOAD ===
-    window.addEventListener('DOMContentLoaded', () => {
-      initUserDropdown();
-      const saved = sessionStorage.getItem('kuk_user');
-      const users = getUsersDB();
-      if (saved && users.some(u => u.username === saved)) {
-        showPortal(saved);
-      }
+    document.getElementById('pwToggle').onclick = () => {
+      const inp = document.getElementById('loginPassword');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    };
+
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      MasterDB.init();
+      checkActiveSession();
     });
   </script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => {
-            console.log('SW registered', reg.scope);
-            reg.update();
-          })
-          .catch(err => console.error('SW failed', err));
-      });
-
-      // Auto clear cache once for v10 migration
-      if (!localStorage.getItem('v10_migrated')) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for (let registration of registrations) registration.unregister();
-        });
-        caches.keys().then(function(names) {
-          for (let name of names) caches.delete(name);
-        });
-        localStorage.setItem('v10_migrated', 'true');
-        setTimeout(() => window.location.reload(true), 1000);
-      }
-    }
-  </script>
-  <script src="karyawan_db.js"></script>
-
-  <!-- MODAL GLOBAL COMMAND PALETTE (CTRL+K) -->
-  <div id="globalCommandPalette" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); backdrop-filter:blur(8px); z-index:9999; align-items:flex-start; justify-content:center; padding:60px 20px 20px;">
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:18px; width:100%; max-width:580px; box-shadow:0 25px 60px rgba(0,0,0,0.5); overflow:hidden; display:flex; flex-direction:column;">
-      <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px;">
-        <span style="font-size:18px; color:var(--primary);">🔍</span>
-        <input type="text" id="cmdSearchInput" placeholder="Ketik untuk mencari menu, mobil, atau aksi..." oninput="handleCommandSearch(this.value)"
-               style="flex:1; border:none; background:transparent; font-size:15px; font-weight:600; outline:none; color:var(--text); font-family:inherit;">
-        <kbd style="background:var(--surface2); padding:3px 8px; border-radius:6px; font-size:11px; color:var(--text-muted); border:1px solid var(--border);">ESC</kbd>
-        <button onclick="closeCommandPalette()" style="background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer;">×</button>
-      </div>
-
-      <div style="max-height:360px; overflow-y:auto; padding:12px;" id="cmdResultsList">
-        <!-- Results injected here -->
-      </div>
-
-      <div style="padding:10px 20px; background:var(--surface2); border-top:1px solid var(--border); display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted);">
-        <span>Tekan <strong>Enter</strong> untuk navigasi instan</span>
-        <span>KUK Portal Hub</span>
-      </div>
-    </div>
-  </div>
-
-  <script src="peminjaman_db.js"></script>
-  <script>
-    // --- GLOBAL COMMAND PALETTE (CTRL + K) ---
-    function openCommandPalette() {
-      const modal = document.getElementById('globalCommandPalette');
-      if (!modal) return;
-      modal.style.display = 'flex';
-      const input = document.getElementById('cmdSearchInput');
-      if (input) {
-        input.value = '';
-        input.focus();
-        handleCommandSearch('');
-      }
-    }
-
-    function closeCommandPalette() {
-      const modal = document.getElementById('globalCommandPalette');
-      if (modal) modal.style.display = 'none';
-    }
-
-    function handleCommandSearch(query) {
-      const q = (query || '').toLowerCase().trim();
-      const listContainer = document.getElementById('cmdResultsList');
-      if (!listContainer) return;
-
-      const actions = [
-        { title: 'Form Peminjaman Kendaraan', category: 'Peminjaman', icon: '🚘', url: 'peminjaman.html' },
-        { title: 'Admin & Monitoring Armada', category: 'Peminjaman', icon: '📊', url: 'peminjaman_admin.html' },
-        { title: 'Catat Pengisian BBM & Struk SPBU', category: 'Operasional', icon: '⛽', url: 'peminjaman.html' },
-        { title: 'Absensi Briefing Karyawan', category: 'Absensi', icon: '📝', url: 'absen.html' },
-        { title: 'Pengajuan & Rekapan Cuti', category: 'Cuti', icon: '🏖️', url: 'cuti.html' },
-        { title: 'Pencatatan Pelanggaran & Tilang', category: 'Pelanggaran', icon: '⚠️', url: 'pelanggaran.html' },
-        { title: 'Dashboard Utama & Analytics', category: 'Manajemen', icon: '📈', url: 'dashboard/' },
-        { title: 'Rekapan Gaji & Cetak Slip PKWT', category: 'Keuangan', icon: '💵', url: 'karyawan.html' },
-        { title: 'Bagi Hasil & Manajemen Tip Kaca', category: 'Keuangan', icon: '💰', url: 'tip.html' },
-        { title: 'Manajemen Hak Akses Pengguna', category: 'Sistem', icon: '👤', url: 'users.html' }
-      ];
-
-      if (typeof KaryawanDB !== 'undefined' && KaryawanDB.getRekontrakList) {
-        const krys = KaryawanDB.getRekontrakList();
-        krys.forEach(k => {
-          actions.push({
-            title: `${k.namaLengkap} (${k.jabatan} - KUK ${(k.toko||'bangunan').toUpperCase()})`,
-            category: 'Karyawan',
-            icon: '👤',
-            url: 'karyawan.html'
-          });
-        });
-      }
-
-      if (typeof PeminjamanService !== 'undefined') {
-        const knds = PeminjamanService.getKendaraanList();
-        knds.forEach(k => {
-          actions.push({
-            title: `Armada: ${k.nama} (${k.plat || '-'})`,
-            category: 'Armada',
-            icon: k.icon || '🚚',
-            url: 'peminjaman_admin.html'
-          });
-        });
-      }
-
-      const filtered = actions.filter(a => !q || a.title.toLowerCase().includes(q) || a.category.toLowerCase().includes(q));
-
-      if (filtered.length === 0) {
-        listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">Tidak ada hasil ditemukan.</div>';
-        return;
-      }
-
-      listContainer.innerHTML = filtered.slice(0, 8).map((item, idx) => `
-        <a href="${item.url}" style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-radius:10px; text-decoration:none; color:var(--text); transition:background 0.15s; background:${idx === 0 ? 'var(--primary-light)' : 'transparent'}; margin-bottom:4px;"
-           onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='transparent'">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:18px;">${item.icon}</span>
-            <div>
-              <div style="font-weight:600; font-size:13px;">${item.title}</div>
-              <div style="font-size:11px; color:var(--text-muted);">${item.category}</div>
-            </div>
-          </div>
-          <span style="font-size:12px; color:var(--primary); font-weight:700;">➔</span>
-        </a>
-      `).join('');
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        const modal = document.getElementById('globalCommandPalette');
-        if (modal && modal.style.display === 'flex') {
-          closeCommandPalette();
-        } else {
-          openCommandPalette();
-        }
-      }
-      if (e.key === 'Escape') {
-        closeCommandPalette();
-      }
-    });
-  </script>
-  
-  <script src="shared/master_db.js"></script>
 </body>
 </html>

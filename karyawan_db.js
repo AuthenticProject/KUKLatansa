@@ -5,7 +5,7 @@
  */
 
 const KaryawanDB = (() => {
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
   const STORAGE_KEY_REKRUTMEN = 'kuk_db_rekrutmen_v1';
   const STORAGE_KEY_REKONTRAK = 'kuk_db_rekontrak_v1';
   const STORAGE_KEY_GAJI_HISTORI = 'kuk_db_gaji_v1';

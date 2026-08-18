@@ -24,13 +24,20 @@
 
   /* ── Default users (fallback when localStorage not yet populated) ─── */
   const DEFAULT_USERS = [
-    { username: 'fariz',    password: '12345', role: 'super_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','users', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
-    { username: 'andika',   password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
-    { username: 'irsyadil', password: '12345', role: 'super_admin', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','users', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
-    { username: 'ari',      password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
-    { username: 'shuva',    password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
-    { username: 'aria',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] },
-    { username: 'zain',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'] }
+    // KUK Bangunan Staff
+    { username: 'fariz',    password: '12345', role: 'super_admin', permissions: ['*'] },
+    { username: 'andika',   password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','users','fingerprint','attendance_review','violation_review','payroll'] },
+    { username: 'irsyadil', password: '150904', role: 'super_admin', permissions: ['*'] },
+    { username: 'ari',      password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+    { username: 'shuva',    password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+    { username: 'aria',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+    { username: 'zain',     password: '12345', role: 'hr_admin',    permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+    // KUK Palen Staff
+    { username: 'Raju',     password: '54321', role: 'manager',     permissions: ['dashboard','absen','pelanggaran','karyawan'] },
+    { username: 'Agheea',   password: '54321', role: 'hr_admin',    permissions: ['dashboard','absen','pelanggaran'] },
+    { username: 'Basith',   password: '54321', role: 'hr_admin',    permissions: ['dashboard','absen','pelanggaran'] },
+    { username: 'Anshory',  password: '54321', role: 'hr_admin',    permissions: ['dashboard','absen','pelanggaran'] },
+    { username: 'Lintang',  password: '54321', role: 'hr_admin',    permissions: ['dashboard','absen','pelanggaran'] }
   ];
 
   const ROLE_LABELS = {
@@ -112,9 +119,22 @@
   };
 
   /* ── Auth helpers ─────────────────────────────────────────────────── */
-  function getUsername() { return sessionStorage.getItem(KEY_USER); }
+  function getUsername() {
+    const raw = sessionStorage.getItem(KEY_USER);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed !== null && parsed.username) {
+        return parsed.username;
+      }
+    } catch(e) {}
+    return raw;
+  }
 
   function getUsersDB() {
+    if (typeof MasterDB !== 'undefined' && MasterDB.getUsers) {
+      return MasterDB.getUsers();
+    }
     try {
       const s = localStorage.getItem(KEY_USERS_DB);
       if (s) { const db = JSON.parse(s); if (Array.isArray(db) && db.length) return db; }
@@ -123,7 +143,12 @@
   }
 
   function getUserRecord(username) {
-    return getUsersDB().find(u => u.username === username) || null;
+    if (!username) return null;
+    if (typeof MasterDB !== 'undefined' && MasterDB.getUser) {
+      const u = MasterDB.getUser(username);
+      if (u) return u;
+    }
+    return getUsersDB().find(u => u.username.toLowerCase() === username.toLowerCase()) || null;
   }
 
   function checkAuth() {
