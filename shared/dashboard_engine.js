@@ -547,12 +547,111 @@ const DashboardEngine = (() => {
     return subs[idx];
   }
 
+  /**
+   * Helper: 7-day attendance trend formatted for Dashboard UI
+   */
+  function getAttendanceTrend7Days(filters = {}) {
+    const unit = filters.unit || 'ALL';
+    const rawTrends = getAttendanceTrends(7, unit);
+    return rawTrends.map(t => {
+      const working = t.present + t.late;
+      const rate = t.total > 0 ? Math.round((working / t.total) * 100) : 0;
+      return {
+        date: t.date,
+        label: t.label,
+        rate: rate,
+        present: t.present,
+        late: t.late,
+        absent: t.absent,
+        total: t.total
+      };
+    });
+  }
+
+  /**
+   * Helper: Violation summary breakdown & leaderboard
+   */
+  function getViolationSummary(filters = {}) {
+    const rawTrends = getViolationTrends(filters.unit || 'ALL');
+    const breakdown = { late: 0, absent: 0, incomplete: 0, other: 0 };
+    
+    rawTrends.forEach(r => {
+      if (r.key === 'LATE_ARRIVAL') breakdown.late = r.count;
+      else if (r.key === 'UNAUTHORIZED_ABSENCE') breakdown.absent = r.count;
+      else if (r.key === 'MISSING_PUNCH') breakdown.incomplete = r.count;
+      else breakdown.other += r.count;
+    });
+
+    let leaderboard = [];
+    if (typeof ViolationEngine !== 'undefined' && ViolationEngine.getViolations) {
+      const vList = ViolationEngine.getViolations().filter(v => v.status !== 'REJECTED');
+      const empMap = {};
+      vList.forEach(v => {
+        if (!empMap[v.employeeId]) {
+          empMap[v.employeeId] = { name: v.employeeName, points: 0, violationsCount: 0 };
+        }
+        empMap[v.employeeId].points += (v.points || 1);
+        empMap[v.employeeId].violationsCount++;
+      });
+      leaderboard = Object.values(empMap).sort((a, b) => b.points - a.points);
+    }
+
+    return {
+      breakdown,
+      leaderboard
+    };
+  }
+
+  /**
+   * Helper: Get pending leave applications
+   */
+  function getPendingLeavesDirect(filters = {}) {
+    const subs = getSubmissions();
+    let pending = subs.filter(s => s.module === 'CUTI' && (!s.status || s.status === 'PENDING' || s.status === 'MENUNGGU'));
+    if (filters.unit && filters.unit !== 'ALL' && filters.unit !== 'semua') {
+      const u = filters.unit.toLowerCase().replace('kuk ', '');
+      pending = pending.filter(s => s.unit && s.unit.toLowerCase().includes(u));
+    }
+    return pending;
+  }
+
+  /**
+   * Helper: Get pending violations to review
+   */
+  function getPendingViolationsDirect(filters = {}) {
+    if (typeof ViolationEngine === 'undefined' || !ViolationEngine.getViolations) return [];
+    let list = ViolationEngine.getViolations().filter(v => v.status === 'AUTO GENERATED' || v.status === 'REVIEW');
+    if (filters.unit && filters.unit !== 'ALL' && filters.unit !== 'semua') {
+      const u = filters.unit.toLowerCase().replace('kuk ', '');
+      list = list.filter(v => v.unit && v.unit.toLowerCase().includes(u));
+    }
+    return list;
+  }
+
+  /**
+   * Helper: Resolve leave directly
+   */
+  function resolveLeaveDirect(submissionId, status, note = '') {
+    const activeUser = typeof Security !== 'undefined' && Security.getCurrentUser ? Security.getCurrentUser() : null;
+    const reviewerName = activeUser ? activeUser.username : 'Admin';
+    if (status === 'APPROVED') {
+      return approveLeave(submissionId, reviewerName, note);
+    } else {
+      return rejectLeave(submissionId, reviewerName, note || 'Ditolak Manajemen');
+    }
+  }
+
   return {
     getMetrics,
     getActionItems,
     getUnitComparison,
     getAttendanceTrends,
+    getAttendanceTrend7Days,
     getViolationTrends,
+    getViolationSummary,
+    getPendingLeavesDirect,
+    getPendingViolationsDirect,
+    resolveLeaveDirect,
     getRecentActivities,
     approveLeave,
     rejectLeave,

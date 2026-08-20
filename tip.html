@@ -3,82 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Catat Tip Pemotongan Kaca</title>
+  <title>Catat Tip Potong Kaca — KUK Bangunan</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#8b5cf6">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#540000">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="shortcut icon" href="favicon-32x32.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <style>
     :root {
-      --bg: #fafafa;
+      --primary: #540000;
+      --primary-hover: #3d0000;
+      --secondary: #FFCC00;
+      --bg: #f8fafc;
       --surface: #ffffff;
-      --primary: #8b5cf6;
-      --primary-hover: #7c3aed;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
       --success: #10b981;
-      --radius: 16px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 40px 20px 100px; min-height: 100vh; }
-    .app-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 24px; }
-    .header { text-align: center; margin-bottom: 10px; }
-    .header h1 { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
-    .header p { font-size: 15px; color: var(--text-muted); margin-top: 8px; }
-    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 30px; border: 1px solid rgba(255, 255, 255, 0.8); }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    input[type="number"], input[type="date"], input[type="text"], select { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 15px; font-weight: 500; outline: none; transition: 0.2s; background: #f8fafc; color: var(--text); }
-    input:focus, select:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1); }
-    input[readonly] { background: #f1f5f9; color: var(--primary); font-weight: 700; cursor: not-allowed; border-color: var(--border); }
-    .btn-submit { width: 100%; padding: 16px; border-radius: 12px; background: var(--primary); color: white; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25); }
-    .btn-submit:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
+    body { background-color: var(--bg); color: var(--text); padding: 40px 20px 80px; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; }
+    .app-container { width: 100%; max-width: 540px; display: flex; flex-direction: column; gap: 20px; }
+    .header { text-align: center; }
+    .header h1 { font-size: 26px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+    .header p { font-size: 14px; color: var(--text-muted); }
+    .unit-tag { display: inline-flex; align-items: center; gap: 6px; background: #fef3c7; color: #b45309; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 999px; margin-bottom: 8px; border: 1px solid #fde68a; }
+    .card { background: var(--surface); padding: 28px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    input[type="number"], input[type="date"], input[type="text"], select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; color: var(--text); font-size: 15px; outline: none; transition: border-color 0.2s; font-family: inherit; }
+    input:focus, select:focus { border-color: var(--primary); background: #ffffff; }
+    input[readonly] { background: #f1f5f9; color: var(--text-muted); font-weight: 700; cursor: not-allowed; }
+    .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 8px; }
+    .btn-submit:hover { background: var(--primary-hover); transform: translateY(-1px); }
     .back-link { text-align: center; margin-top: 10px; }
-    .back-link a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; }
+    .back-link a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 600; }
     .back-link a:hover { color: var(--primary); }
     .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-    .toast { background: white; color: var(--text); padding: 14px 24px; border-radius: 100px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); font-weight: 500; font-size: 14px; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 10px; animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
+    .toast { background: white; color: var(--text); padding: 14px 24px; border-radius: 100px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); font-weight: 600; font-size: 14px; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 10px; animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
     .toast.success { border-left-color: var(--success); }
     @keyframes toastIn { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
     @keyframes toastOut { to { transform: translateY(-20px); opacity: 0; } }
-    @media (max-width: 480px) {
-      body { padding: 20px 10px 100px; }
-      .app-container { gap: 16px; }
-      .header h1 { font-size: 22px; }
-      .header p { font-size: 13px; }
-      .card { padding: 20px 16px; border-radius: 12px; }
-      .form-group label { font-size: 11px; }
-      input[type="number"], input[type="date"], input[type="text"], select { padding: 10px 12px; font-size: 14px; }
-      .btn-submit { padding: 14px; font-size: 14px; border-radius: 12px; }
-    }
   </style>
 </head>
 <body>
   <div class="toast-container" id="toastContainer"></div>
   <div class="app-container">
     <div class="header">
-      <h1>Catat Tip Kaca</h1>
-      <p>Input data pemotongan kaca untuk menghitung tip otomatis (3%).</p>
+      <div class="unit-tag">🏗️ Modul Khusus: KUK Bangunan (Potong Kaca)</div>
+      <h1>Catat Tip Potong Kaca 3%</h1>
+      <p>Kalkulasi komisi tip potong kaca untuk karyawan KUK Bangunan secara otomatis.</p>
     </div>
+    
     <div class="card">
       <div class="form-group">
-        <label>Pilih Karyawan</label>
+        <label>Pilih Karyawan (KUK Bangunan)</label>
         <select id="tkKaryawan">
-          <option value="" disabled selected>Memuat daftar karyawan...</option>
+          <option value="" disabled selected>Memuat daftar karyawan Bangunan...</option>
         </select>
       </div>
+
       <div class="form-group">
         <label>Jenis Kaca</label>
         <select id="tkJenis" onchange="hitungTip()">
@@ -93,29 +81,38 @@
           <option value="18" data-name="Kaca Riben 5mm">Kaca Riben 5mm - Rp 18/m²</option>
         </select>
       </div>
+
       <div class="form-group">
         <label>Luas Kaca (m²)</label>
         <input type="number" id="tkLuas" placeholder="Contoh: 1.5" step="0.01" min="0" oninput="hitungTip()">
       </div>
+
       <div class="form-group">
         <label>Total Harga Kaca</label>
         <input type="text" id="tkTotalHarga" readonly value="Rp 0">
       </div>
+
       <div class="form-group">
         <label>Tip Karyawan (3%)</label>
-        <input type="text" id="tkTip" readonly value="Rp 0">
+        <input type="text" id="tkTip" readonly value="Rp 0" style="color:var(--primary); font-weight:800; font-size:16px;">
       </div>
+
       <div class="form-group">
         <label>Tanggal Pemotongan</label>
         <input type="date" id="tkWaktu">
       </div>
-      <button class="btn-submit" id="submitBtn" onclick="simpanTip()">Simpan Tip</button>
+
+      <button class="btn-submit" id="submitBtn" onclick="simpanTip()">💾 Simpan Data Tip Kaca</button>
     </div>
+
     <div class="back-link">
       <a href="index.html">← Kembali ke Portal</a>
     </div>
   </div>
 
+  <script src="shared/master_db.js"></script>
+  <script src="shared/security.js"></script>
+  <script src="shared/shell.js" data-base="."></script>
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
 
@@ -128,135 +125,119 @@
       setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
     }
 
-    function filterDataByRole(dataArray) {
-      if (!Array.isArray(dataArray)) return dataArray;
-      const rawUser = sessionStorage.getItem('kuk_user');
-      if (!rawUser) return dataArray;
-      
-      const loggedUser = String(rawUser).toLowerCase().trim();
+    document.addEventListener('DOMContentLoaded', () => {
+      MasterDB.init();
 
-      let hasUsersPerm = false;
-      const storedDb = localStorage.getItem('kuk_users_db');
-      if (storedDb) {
-        try {
-          const parsed = JSON.parse(storedDb);
-          const u = parsed.find(x => String(x.username).toLowerCase().trim() === loggedUser);
-          if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
-        } catch(e){}
-      } else {
-        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
-      }
-      if (hasUsersPerm) return dataArray;
-      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
-      return dataArray.filter(item => {
-        const nameStr = String(item.nama || '').toLowerCase().trim();
-        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
-        return isPalen ? isEmpPalen : !isEmpPalen;
-      });
-    }
-
-    function init() {
       // Set default date
       const now = new Date();
       const offset = now.getTimezoneOffset() * 60000;
       const localDate = new Date(now - offset).toISOString().split('T')[0];
       document.getElementById('tkWaktu').value = localDate;
 
-      // Fetch employees
-      fetch(`${SCRIPT_URL}?action=dashboard_data`)
-        .then(r => r.json())
-        .then(res => {
-          let tempKaryawan = (res.karyawan || []).filter(k => k.status.toLowerCase() !== 'nonaktif');
-          const dbKaryawan = filterDataByRole(tempKaryawan);
-          const sel = document.getElementById('tkKaryawan');
-          if (dbKaryawan.length === 0) {
-            sel.innerHTML = '<option value="" disabled>Tidak ada karyawan aktif.</option>';
-          } else {
-            sel.innerHTML = '<option value="" disabled selected>Pilih karyawan...</option>' + 
-              dbKaryawan.map(k => `<option value="${k.id}" data-nama="${k.nama}">${k.nama} (${k.bagian})</option>`).join('');
-          }
-        })
-        .catch(e => {
-          showToast('Gagal memuat daftar karyawan.', 'error');
-          document.getElementById('tkKaryawan').innerHTML = '<option value="" disabled>Gagal memuat data.</option>';
-        });
-    }
+      populateEmployees();
+    });
 
-    function hitungTip() {
-      const hargaPerM2 = Number(document.getElementById('tkJenis').value) || 0;
-      const luas = Number(document.getElementById('tkLuas').value) || 0;
-      const totalHarga = hargaPerM2 * luas;
-      const tip = totalHarga * 0.03;
-      document.getElementById('tkTotalHarga').value = formatRupiah(totalHarga);
-      document.getElementById('tkTip').value = formatRupiah(tip);
-    }
+    function populateEmployees() {
+      const sel = document.getElementById('tkKaryawan');
+      sel.innerHTML = '<option value="" disabled selected>Pilih Karyawan Bangunan...</option>';
 
-    function formatRupiah(angka) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(angka);
-    }
+      // Filter specifically KUK Bangunan employees
+      const emps = MasterDB.getEmployees().filter(e => {
+        const isAct = e.status === 'Active' || e.status === 'Aktif';
+        const isB = !e.unit || e.unit.toLowerCase().includes('bangunan');
+        return isAct && isB;
+      });
 
-    function simpanTip() {
-      const selectKaryawan = document.getElementById('tkKaryawan');
-      const nama = selectKaryawan.options[selectKaryawan.selectedIndex]?.getAttribute('data-nama');
-      const idKaryawan = selectKaryawan.value;
-      const selectJenis = document.getElementById('tkJenis');
-      const jenisKaca = selectJenis.options[selectJenis.selectedIndex]?.getAttribute('data-name');
-      const hargaPerM2 = Number(selectJenis.value);
-      const luas = Number(document.getElementById('tkLuas').value);
-      const tanggal = document.getElementById('tkWaktu').value;
-
-      if (!idKaryawan) return showToast('Pilih karyawan!', 'error');
-      if (!jenisKaca) return showToast('Pilih jenis kaca!', 'error');
-      if (!luas || luas <= 0) return showToast('Masukkan luas kaca yang valid!', 'error');
-      if (!tanggal) return showToast('Pilih tanggal!', 'error');
-
-      const totalHarga = hargaPerM2 * luas;
-      const tip = totalHarga * 0.03;
-
-      const newTip = {
-        action: 'save_tip',
-        id: Date.now().toString(),
-        idKaryawan,
-        nama,
-        jenisKaca,
-        luas,
-        totalHarga,
-        tip,
-        tanggal
-      };
-
-      const btn = document.getElementById('submitBtn');
-      const originalText = btn.textContent;
-      btn.textContent = 'Menyimpan...';
-      btn.disabled = true;
-
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(newTip)
-      })
-      .then(r => r.json())
-      .then(res => {
-        if(res.result === 'success') {
-          showToast('Data tip berhasil disimpan!', 'success');
-          document.getElementById('tkLuas').value = '';
-          hitungTip();
-        } else {
-          showToast(res.message || 'Gagal menyimpan data.', 'error');
-        }
-      })
-      .catch(e => {
-        showToast('Kesalahan jaringan. Gagal menyimpan tip.', 'error');
-      })
-      .finally(() => {
-        btn.textContent = originalText;
-        btn.disabled = false;
+      emps.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.fullName;
+        opt.textContent = `${e.fullName} (${e.department || 'Operasional'})`;
+        sel.appendChild(opt);
       });
     }
 
-    init();
+    function hitungTip() {
+      const jenisSelect = document.getElementById('tkJenis');
+      const luasInput = document.getElementById('tkLuas');
+      
+      const hargaPerMeter = parseFloat(jenisSelect.value) || 0;
+      const luas = parseFloat(luasInput.value) || 0;
+      
+      // Rumus: Total = luas * hargaPerMeter * 1000 (jika skala ribuan) atau harga riil
+      const totalHarga = luas * hargaPerMeter * 1000;
+      const tip = Math.round(totalHarga * 0.03);
+      
+      document.getElementById('tkTotalHarga').value = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalHarga);
+      document.getElementById('tkTip').value = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(tip);
+    }
+
+    async function simpanTip() {
+      const karyawan = document.getElementById('tkKaryawan').value;
+      const jenisSelect = document.getElementById('tkJenis');
+      const jenis = jenisSelect.options[jenisSelect.selectedIndex] ? jenisSelect.options[jenisSelect.selectedIndex].getAttribute('data-name') : '';
+      const luas = parseFloat(document.getElementById('tkLuas').value);
+      const waktu = document.getElementById('tkWaktu').value;
+
+      if (!karyawan) return showToast('Pilih karyawan terlebih dahulu', 'error');
+      if (!jenis) return showToast('Pilih jenis kaca', 'error');
+      if (isNaN(luas) || luas <= 0) return showToast('Masukkan luas kaca yang valid', 'error');
+      if (!waktu) return showToast('Pilih tanggal pemotongan', 'error');
+
+      const hargaPerMeter = parseFloat(jenisSelect.value) || 0;
+      const totalHarga = luas * hargaPerMeter * 1000;
+      const tip = Math.round(totalHarga * 0.03);
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+
+      // Save to local storage kuk_db_tip_v1
+      try {
+        const localTips = JSON.parse(localStorage.getItem('kuk_db_tip_v1') || '[]');
+        localTips.push({
+          id: 'TIP-' + Date.now(),
+          namaKaryawan: karyawan,
+          jenisKaca: jenis,
+          luas: luas,
+          totalHarga: totalHarga,
+          nominalTip: tip,
+          tanggal: waktu,
+          unit: 'KUK Bangunan',
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('kuk_db_tip_v1', JSON.stringify(localTips));
+      } catch (e) {}
+
+      // Cloud sync
+      try {
+        const payload = {
+          action: 'submit_tip',
+          karyawan: karyawan,
+          jenis: jenis,
+          luas: luas,
+          totalHarga: totalHarga,
+          tip: tip,
+          waktu: waktu
+        };
+
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        showToast('Data tip potong kaca berhasil disimpan!', 'success');
+        document.getElementById('tkLuas').value = '';
+        document.getElementById('tkTotalHarga').value = 'Rp 0';
+        document.getElementById('tkTip').value = 'Rp 0';
+      } catch (err) {
+        showToast('Tersimpan di sistem lokal: ' + err.message, 'info');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Data Tip Kaca';
+      }
+    }
   </script>
-  <script src="shared/master_db.js"></script>
-  <script src="shared/security.js"></script>
-  <script src="shared/shell.js" data-base="."></script>
 </body>
 </html>

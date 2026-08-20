@@ -362,13 +362,13 @@
         const imported = new Date(r.importedAt).toLocaleDateString('id-ID');
         const nameDisplay = r.employeeId ? r.employeeName : `<span class="badge bg-red">TIDAK DIKETAHUI</span>`;
         
-        tr.innerHTML = \`
-          <td style="color:var(--kuk-text-muted); font-size:12px;">\${imported}</td>
-          <td style="font-weight:600;">\${r.pin}</td>
-          <td>\${nameDisplay}</td>
-          <td style="font-weight:600;">\${r.date}</td>
-          <td style="color:var(--kuk-primary); font-weight:700;">\${r.time}</td>
-        \`;
+        tr.innerHTML = `
+          <td style="color:var(--kuk-text-muted); font-size:12px;">${imported}</td>
+          <td style="font-weight:600;">${r.pin}</td>
+          <td>${nameDisplay}</td>
+          <td style="font-weight:600;">${r.date}</td>
+          <td style="color:var(--kuk-primary); font-weight:700;">${r.time}</td>
+        `;
         tbody.appendChild(tr);
       });
     }

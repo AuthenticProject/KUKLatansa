@@ -208,11 +208,18 @@
     return '';
   }
 
-  /* ── Visible nav items (filtered by permissions) ──────────────────── */
+  /* ── Visible nav items (filtered by permissions & unit features) ─── */
   function getVisibleNav() {
     const username = getUsername();
     const user = getUserRecord(username);
     return NAV_DEFS.filter(item => {
+      // Tip Kaca (Potong Kaca 3%) is strictly for KUK Bangunan
+      if (item.id === 'tip') {
+        const currentUnit = getUnit();
+        if (currentUnit === 'palen') return false;
+        if (user && user.toko === 'palen' && user.role !== 'super_admin') return false;
+      }
+
       if (typeof Security !== 'undefined' && Security.can) {
         return Security.can(user, item.perm);
       }

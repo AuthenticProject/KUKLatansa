@@ -3,138 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Manajemen Payroll - KUK HR Portal</title>
+  <title>Manajemen Payroll & Gaji — KUK La Tansa</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#540000">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <style>
     body {
-      background-color: var(--kuk-bg);
-      color: var(--kuk-text);
-      min-height: 100vh;
+      background-color: var(--kuk-bg, #f8fafc);
+      color: var(--kuk-text, #0f172a);
       padding: 30px 20px 80px;
+      min-height: 100vh;
+      font-family: var(--kuk-font, 'Outfit', sans-serif);
+    }
+    .container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    
+    .panel {
+      background: var(--kuk-surface, #fff);
+      border-radius: var(--kuk-radius, 16px);
+      border: 1px solid var(--kuk-border, #e2e8f0);
+      padding: 24px;
+      box-shadow: var(--kuk-shadow, 0 4px 16px rgba(0,0,0,0.06));
     }
     
-    .container {
-      width: 100%;
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .panel {
-      background: var(--kuk-surface);
-      border: 1px solid var(--kuk-border);
-      border-radius: var(--kuk-radius);
-      padding: 24px;
-      box-shadow: var(--kuk-shadow);
-    }
-
     .header-actions {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid var(--kuk-border);
-      padding-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 16px;
       margin-bottom: 20px;
     }
 
-    .form-group {
+    .unit-pill-group {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
+      gap: 8px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
     }
-
-    .form-group label {
+    .unit-pill-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: none;
       font-size: 13px;
       font-weight: 600;
-      color: var(--kuk-text-muted);
-      text-transform: uppercase;
+      cursor: pointer;
+      background: transparent;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+    .unit-pill-btn.active {
+      background: var(--kuk-primary, #540000);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(84,0,0,0.2);
     }
 
-    .form-group input {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--kuk-border);
-      font-family: inherit;
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid var(--kuk-primary);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .stat-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--kuk-text-muted, #64748b);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--kuk-text, #0f172a);
+      margin-top: 4px;
     }
 
     .btn {
       padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 14px;
+      border-radius: 10px;
       font-weight: 600;
-      cursor: pointer;
+      font-size: 13px;
       border: none;
-      transition: 0.2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
     }
+    .btn-primary { background: var(--kuk-primary, #540000); color: white; }
+    .btn-primary:hover { background: #730000; transform: translateY(-1px); }
+    .btn-secondary { background: #f1f5f9; color: var(--kuk-text, #0f172a); border: 1px solid #cbd5e1; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-action { background: #0ea5e9; color: white; }
 
-    .btn-primary { background: var(--kuk-primary); color: white; }
-    .btn-primary:hover { background: #3b0000; }
-    
-    .btn-secondary { background: transparent; border: 1px solid var(--kuk-border); color: var(--kuk-text); }
-    .btn-secondary:hover { background: #f1f5f9; }
+    /* Badges */
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .b-cal { background: #e2e8f0; color: #475569; }
+    .b-rev { background: #fef3c7; color: #b45309; }
+    .b-app { background: #dcfce7; color: #15803d; }
+    .b-loc { background: #e0e7ff; color: #4338ca; }
 
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 12px; border-bottom: 2px solid var(--kuk-border); color: var(--kuk-text-muted); font-size: 13px; text-transform: uppercase; }
-    td { padding: 12px; border-bottom: 1px solid var(--kuk-border); font-size: 14px; vertical-align: middle; }
-    
-    .badge {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      text-align: center;
-      min-width: 90px;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: left; padding: 12px 14px; border-bottom: 2px solid var(--kuk-border, #e2e8f0); color: var(--kuk-text-muted, #64748b); font-size: 12px; text-transform: uppercase; background: #f8fafc; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--kuk-border, #e2e8f0); font-size: 13.5px; }
 
-    .b-cal { background: #fef3c7; color: #d97706; }
-    .b-rev { background: #dbeafe; color: #2563eb; }
-    .b-app { background: #e0e7ff; color: #4f46e5; }
-    .b-loc { background: #d1fae5; color: #059669; }
-
-    /* Modal */
+    /* Modals */
     .modal-overlay {
-      position: fixed; top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.5);
-      display: none; align-items: center; justify-content: center;
-      z-index: 1000;
+      position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px;
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: var(--kuk-surface);
-      border-radius: var(--kuk-radius);
-      padding: 24px;
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-height: 90vh;
-      overflow-y: auto;
+      background: white; border-radius: 18px; width: 100%; max-width: 780px; padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
     }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--kuk-text-muted, #64748b); margin-bottom: 6px; text-transform: uppercase; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; outline: none; background: #f8fafc; font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--kuk-primary, #540000); background: #fff; }
 
-    .math-breakdown {
-      font-family: monospace;
-      font-size: 13px;
-      background: #f8fafc;
-      padding: 12px;
-      border-radius: 8px;
-    }
-
-    .math-row {
-      display: flex; justify-content: space-between; margin-bottom: 4px;
-    }
-    .math-row.total {
-      border-top: 1px dashed #cbd5e1; padding-top: 4px; font-weight: bold; color: var(--kuk-primary); font-size: 14px; margin-top: 4px;
-    }
-
+    .math-breakdown { font-family: monospace; font-size: 13px; background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .math-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .math-row.total { border-top: 1px dashed #cbd5e1; padding-top: 6px; font-weight: 800; color: var(--kuk-primary); font-size: 14px; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -143,21 +148,51 @@
     <div class="panel">
       <div class="header-actions">
         <div>
-          <h2 style="color:var(--kuk-primary); font-size:20px;">💸 Manajemen Payroll</h2>
-          <p style="color:var(--kuk-text-muted); font-size:14px;">Generate, Review, and Lock Payroll Periods.</p>
+          <h2 style="color:var(--kuk-primary); font-size:22px; font-weight:800;">💸 Manajemen Payroll & Kalkulasi Gaji</h2>
+          <p style="color:var(--kuk-text-muted); font-size:13px;">Generate otomatis dari presensi fingerprint, pisahkan per unit toko, dan kunci permanen.</p>
         </div>
-        <button class="btn btn-primary" onclick="openGenModal()">+ Buat Periode Baru</button>
+        
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <!-- Unit Filter Pills -->
+          <div class="unit-pill-group">
+            <button class="unit-pill-btn active" id="unitPillAll" onclick="setPayrollUnitFilter('ALL')">🏢 Semua</button>
+            <button class="unit-pill-btn" id="unitPillBangunan" onclick="setPayrollUnitFilter('KUK Bangunan')">🏗️ Bangunan</button>
+            <button class="unit-pill-btn" id="unitPillPalen" onclick="setPayrollUnitFilter('KUK Palen')">🏠 Palen</button>
+          </div>
+          <button class="btn btn-primary" onclick="openGenModal()">➕ Buat Periode Payroll</button>
+        </div>
+      </div>
+
+      <!-- Stats Summary by Unit -->
+      <div class="stats-row">
+        <div class="stat-card" style="border-left-color: var(--kuk-primary);">
+          <div class="stat-title">Total Payroll Berjalan</div>
+          <div class="stat-val" id="statTotalPayroll">Rp 0</div>
+          <span style="font-size:11px; color:var(--kuk-text-muted);" id="statTotalSlips">0 Slip Karyawan</span>
+        </div>
+        <div class="stat-card" style="border-left-color: #f59e0b;">
+          <div class="stat-title">Subtotal KUK Bangunan</div>
+          <div class="stat-val" id="statBangunanPayroll" style="color:#b45309;">Rp 0</div>
+          <span style="font-size:11px; color:var(--kuk-text-muted);" id="statBangunanSlips">9 Karyawan (Termasuk Tip Kaca)</span>
+        </div>
+        <div class="stat-card" style="border-left-color: #0ea5e9;">
+          <div class="stat-title">Subtotal KUK Palen</div>
+          <div class="stat-val" id="statPalenPayroll" style="color:#0284c7;">Rp 0</div>
+          <span style="font-size:11px; color:var(--kuk-text-muted);" id="statPalenSlips">2 Karyawan (Nukul & Miftah)</span>
+        </div>
       </div>
 
       <div style="overflow-x:auto;">
         <table id="payrollTable">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>ID Run</th>
               <th>Nama Periode</th>
               <th>Rentang Tanggal</th>
+              <th>Unit Target</th>
               <th>Status</th>
-              <th>Aksi</th>
+              <th>Total Nominal</th>
+              <th style="text-align:right;">Aksi</th>
             </tr>
           </thead>
           <tbody id="payrollBody">
@@ -168,54 +203,81 @@
     </div>
   </div>
 
-  <!-- Gen Modal -->
+  <!-- Generate Payroll Modal -->
   <div class="modal-overlay" id="genModal">
-    <div class="modal" style="max-width:400px;">
-      <h3 style="color:var(--kuk-primary);">Generate Payroll Baru</h3>
+    <div class="modal" style="max-width:440px;">
+      <h3 style="color:var(--kuk-primary); font-size:18px; font-weight:800; margin-bottom:16px;">➕ Generate Payroll Baru</h3>
       
       <div class="form-group">
         <label>Nama Periode</label>
         <input type="text" id="gName" placeholder="Contoh: Periode Agustus 2026">
       </div>
+
       <div class="form-group">
-        <label>Tanggal Mulai</label>
-        <input type="date" id="gStart">
-      </div>
-      <div class="form-group">
-        <label>Tanggal Akhir</label>
-        <input type="date" id="gEnd">
+        <label>Target Unit Bisnis</label>
+        <select id="gUnit">
+          <option value="ALL">🏢 Semua Unit (Bangunan & Palen)</option>
+          <option value="KUK Bangunan">🏗️ Khusus KUK Bangunan</option>
+          <option value="KUK Palen">🏠 Khusus KUK Palen</option>
+        </select>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="form-group">
+          <label>Tanggal Mulai</label>
+          <input type="date" id="gStart">
+        </div>
+        <div class="form-group">
+          <label>Tanggal Akhir</label>
+          <input type="date" id="gEnd">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
         <button class="btn btn-secondary" onclick="document.getElementById('genModal').classList.remove('active')">Batal</button>
-        <button class="btn btn-primary" onclick="runGenerate()">Generate & Kalkulasi</button>
+        <button class="btn btn-primary" onclick="runGenerate()">Kalkulasi Otomatis</button>
       </div>
     </div>
   </div>
 
-  <!-- Detail Modal -->
+  <!-- Detail Slips Modal -->
   <div class="modal-overlay" id="detailModal">
     <div class="modal">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 id="dTitle" style="color:var(--kuk-primary);">Detail Periode</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 id="dTitle" style="color:var(--kuk-primary); font-size:18px; font-weight:800;">Detail Periode</h3>
+          <p id="dMeta" style="font-size:12px; color:var(--kuk-text-muted);"></p>
+        </div>
         <span id="dBadge" class="badge">STATUS</span>
       </div>
 
-      <div style="display:flex; gap:10px; margin-bottom:10px;" id="actionToolbar">
-        <!-- Rendered by JS based on state -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; gap:8px;" id="actionToolbar">
+          <!-- Action Buttons -->
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; font-weight:700; color:var(--kuk-text-muted);">FILTER SLIP:</span>
+          <select id="slipFilterUnit" style="padding:6px 10px; font-size:12.5px; border-radius:6px; border:1px solid #cbd5e1;" onchange="renderSlips()">
+            <option value="ALL">Semua Unit</option>
+            <option value="KUK Bangunan">🏗️ KUK Bangunan</option>
+            <option value="KUK Palen">🏠 KUK Palen</option>
+          </select>
+        </div>
       </div>
       
-      <div style="overflow-x:auto; border: 1px solid var(--kuk-border); border-radius:8px;">
+      <div style="overflow-x:auto; border: 1px solid var(--kuk-border); border-radius:10px; margin-bottom:16px;">
         <table id="slipsTable">
           <thead>
-            <tr style="background:#f8fafc;">
+            <tr>
               <th>Karyawan</th>
-              <th>Unit</th>
+              <th>Unit & Dept</th>
               <th>Hadir</th>
               <th>Telat</th>
               <th>Mangkir</th>
+              <th>Tip Kaca</th>
               <th>Take Home Pay</th>
-              <th>Aksi</th>
+              <th style="text-align:right;">Aksi</th>
             </tr>
           </thead>
           <tbody id="slipsBody">
@@ -224,11 +286,13 @@
       </div>
 
       <div style="display:none; margin-top:16px;" id="breakdownSection">
-        <h4 style="margin-bottom:8px;">Detail Kalkulasi: <span id="bEmpName"></span></h4>
+        <h4 style="margin-bottom:8px; font-size:14px;">Detail Rincian Gaji: <strong id="bEmpName" style="color:var(--kuk-primary);"></strong></h4>
         <div class="math-breakdown" id="bMath"></div>
       </div>
 
-      <button class="btn btn-secondary" style="margin-top:10px;" onclick="closeDetail()">Tutup Jendela</button>
+      <div style="text-align:right; margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeDetail()">Tutup Jendela</button>
+      </div>
     </div>
   </div>
 
@@ -237,33 +301,62 @@
   <script src="shared/payroll_engine.js"></script>
   <script>
     let currentPeriod = null;
+    let selectedUnitFilter = 'ALL';
 
     function formatRp(val) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val);
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      MasterDB.init();
+
+      // Listen to shell global unit change
+      window.addEventListener('kukUnitChange', e => {
+        const u = e.detail && e.detail.unit ? e.detail.unit : 'ALL';
+        if (u === 'bangunan') setPayrollUnitFilter('KUK Bangunan');
+        else if (u === 'palen') setPayrollUnitFilter('KUK Palen');
+        else setPayrollUnitFilter('ALL');
+      });
+
       renderTable();
     });
 
+    function setPayrollUnitFilter(unit) {
+      selectedUnitFilter = unit;
+      document.getElementById('unitPillAll').classList.toggle('active', unit === 'ALL');
+      document.getElementById('unitPillBangunan').classList.toggle('active', unit === 'KUK Bangunan');
+      document.getElementById('unitPillPalen').classList.toggle('active', unit === 'KUK Palen');
+      renderTable();
+    }
+
     function openGenModal() {
-      document.getElementById('gName').value = '';
-      document.getElementById('gStart').value = '';
-      document.getElementById('gEnd').value = '';
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+      
+      document.getElementById('gName').value = `Periode ${monthNames[m]} ${y}`;
+      document.getElementById('gStart').value = `${y}-${String(m+1).padStart(2,'0')}-01`;
+      
+      const lastDay = new Date(y, m + 1, 0).getDate();
+      document.getElementById('gEnd').value = `${y}-${String(m+1).padStart(2,'0')}-${lastDay}`;
+      document.getElementById('gUnit').value = selectedUnitFilter;
       document.getElementById('genModal').classList.add('active');
     }
 
     function runGenerate() {
-      const name = document.getElementById('gName').value;
+      const name = document.getElementById('gName').value.trim();
       const start = document.getElementById('gStart').value;
       const end = document.getElementById('gEnd').value;
+      const unit = document.getElementById('gUnit').value;
 
-      if(!name || !start || !end) return alert("Lengkapi semua field.");
+      if (!name || !start || !end) return alert("Harap lengkapi semua data formulir.");
 
       try {
-        PayrollEngine.generatePayroll(name, start, end);
+        PayrollEngine.generatePayroll(name, start, end, unit);
         document.getElementById('genModal').classList.remove('active');
         renderTable();
+        alert('✅ Payroll berhasil dikalkulasi otomatis dari data kehadiran presensi!');
       } catch (e) {
         alert("Error: " + e.message);
       }
@@ -273,24 +366,79 @@
       const tbody = document.getElementById('payrollBody');
       tbody.innerHTML = '';
 
-      const data = PayrollEngine.getPayrolls();
-      data.sort((a,b) => new Date(b.generatedAt) - new Date(a.generatedAt));
+      let data = PayrollEngine.getPayrolls();
+      data.sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt));
+
+      if (data.length > 0) {
+        const latest = data[0];
+        let totalAll = 0;
+        let totalB = 0;
+        let totalP = 0;
+        let countB = 0;
+        let countP = 0;
+
+        (latest.slips || []).forEach(s => {
+          if (s.unit && s.unit.toLowerCase().includes('palen')) {
+            totalP += (s.takeHomePay || 0);
+            countP++;
+          } else {
+            totalB += (s.takeHomePay || 0);
+            countB++;
+          }
+        });
+        totalAll = totalB + totalP;
+
+        document.getElementById('statTotalPayroll').textContent = formatRp(totalAll);
+        document.getElementById('statTotalSlips').textContent = `${(latest.slips || []).length} Slip Total`;
+        document.getElementById('statBangunanPayroll').textContent = formatRp(totalB);
+        document.getElementById('statBangunanSlips').textContent = `${countB} Karyawan Bangunan`;
+        document.getElementById('statPalenPayroll').textContent = formatRp(totalP);
+        document.getElementById('statPalenSlips').textContent = `${countP} Karyawan Palen`;
+      }
+
+      // Filter runs if specific targetUnit
+      if (selectedUnitFilter !== 'ALL') {
+        const u = selectedUnitFilter.toLowerCase().replace('kuk ', '');
+        data = data.filter(r => !r.targetUnit || r.targetUnit === 'ALL' || r.targetUnit.toLowerCase().includes(u));
+      }
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--kuk-text-muted);">Belum ada periode payroll yang dibuat. Klik "+ Buat Periode Payroll" di atas.</td></tr>';
+        return;
+      }
 
       data.forEach(r => {
         const tr = document.createElement('tr');
         
         let bClass = 'b-cal';
-        if(r.status === 'REVIEW') bClass = 'b-rev';
-        if(r.status === 'APPROVED') bClass = 'b-app';
-        if(r.status === 'LOCKED') bClass = 'b-loc';
+        if (r.status === 'REVIEW') bClass = 'b-rev';
+        if (r.status === 'APPROVED') bClass = 'b-app';
+        if (r.status === 'LOCKED') bClass = 'b-loc';
 
-        tr.innerHTML = \`
-          <td style="font-family:monospace;">\${r.id}</td>
-          <td style="font-weight:600;">\${r.periodName}</td>
-          <td>\${r.startDate} s/d \${r.endDate}</td>
-          <td><span class="badge \${bClass}">\${r.status}</span></td>
-          <td><button class="btn btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openDetail('\${r.id}')">Lihat Slips</button></td>
-        \`;
+        let totalRun = 0;
+        if (r.totals && r.totals.all) {
+          totalRun = r.totals.all;
+        } else if (r.slips) {
+          totalRun = r.slips.reduce((acc, s) => acc + (s.takeHomePay || 0), 0);
+        }
+
+        const unitBadge = r.targetUnit === 'KUK Palen' 
+          ? '<span class="badge" style="background:#e0f2fe; color:#0369a1;">🏠 KUK Palen</span>'
+          : (r.targetUnit === 'KUK Bangunan' 
+            ? '<span class="badge" style="background:#fef3c7; color:#b45309;">🏗️ KUK Bangunan</span>'
+            : '<span class="badge" style="background:#f1f5f9; color:#475569;">🏢 Semua Unit</span>');
+
+        tr.innerHTML = `
+          <td style="font-family:monospace; font-size:12px;">${r.id}</td>
+          <td style="font-weight:700; color:var(--kuk-text);">${r.periodName}</td>
+          <td style="font-size:12.5px; color:var(--kuk-text-muted);">${r.startDate} s/d ${r.endDate}</td>
+          <td>${unitBadge}</td>
+          <td><span class="badge ${bClass}">${r.status}</span></td>
+          <td style="font-weight:700; color:var(--kuk-primary);">${formatRp(totalRun)}</td>
+          <td style="text-align:right;">
+            <button class="btn btn-secondary btn-sm" onclick="openDetail('${r.id}')">📄 Rincian Slip</button>
+          </td>
+        `;
         tbody.appendChild(tr);
       });
     }
@@ -298,16 +446,19 @@
     function openDetail(id) {
       const runs = PayrollEngine.getPayrolls();
       currentPeriod = runs.find(x => x.id === id);
-      if(!currentPeriod) return;
+      if (!currentPeriod) return;
 
       document.getElementById('dTitle').textContent = currentPeriod.periodName;
+      document.getElementById('dMeta').textContent = `Periode: ${currentPeriod.startDate} s/d ${currentPeriod.endDate} • Target: ${currentPeriod.targetUnit || 'Semua Unit'}`;
       document.getElementById('dBadge').textContent = currentPeriod.status;
       
       let bClass = 'b-cal';
-      if(currentPeriod.status === 'REVIEW') bClass = 'b-rev';
-      if(currentPeriod.status === 'APPROVED') bClass = 'b-app';
-      if(currentPeriod.status === 'LOCKED') bClass = 'b-loc';
-      document.getElementById('dBadge').className = \`badge \${bClass}\`;
+      if (currentPeriod.status === 'REVIEW') bClass = 'b-rev';
+      if (currentPeriod.status === 'APPROVED') bClass = 'b-app';
+      if (currentPeriod.status === 'LOCKED') bClass = 'b-loc';
+      document.getElementById('dBadge').className = `badge ${bClass}`;
+
+      document.getElementById('slipFilterUnit').value = selectedUnitFilter;
 
       renderToolbar();
       renderSlips();
@@ -322,30 +473,30 @@
       const s = currentPeriod.status;
 
       if (s === 'CALCULATED') {
-        bar.innerHTML = \`
-          <button class="btn btn-secondary" onclick="recalc()">Regenerate Ulang Data</button>
-          <button class="btn btn-primary" onclick="transit('REVIEW')">Ajukan Review</button>
-        \`;
+        bar.innerHTML = `
+          <button class="btn btn-secondary btn-sm" onclick="recalc()">🔄 Rekalkulasi Ulang</button>
+          <button class="btn btn-primary btn-sm" onclick="transit('REVIEW')">📤 Ajukan Review</button>
+        `;
       } else if (s === 'REVIEW') {
-        bar.innerHTML = \`
-          <button class="btn btn-secondary" onclick="transit('CALCULATED')">Tolak (Kembali ke Draft)</button>
-          <button class="btn btn-action" style="background:#0ea5e9; color:white;" onclick="transit('APPROVED')">Approve Payroll</button>
-        \`;
+        bar.innerHTML = `
+          <button class="btn btn-secondary btn-sm" onclick="transit('CALCULATED')">↩️ Kembalikan ke Draft</button>
+          <button class="btn btn-action btn-sm" onclick="transit('APPROVED')">✅ Setujui Payroll</button>
+        `;
       } else if (s === 'APPROVED') {
-        bar.innerHTML = \`
-          <button class="btn" style="background:#059669; color:white;" onclick="transit('LOCKED')">🔒 Kunci Permanen (LOCKED)</button>
-        \`;
+        bar.innerHTML = `
+          <button class="btn btn-sm" style="background:#059669; color:white;" onclick="transit('LOCKED')">🔒 Kunci Permanen (LOCKED)</button>
+        `;
       } else if (s === 'LOCKED') {
-        bar.innerHTML = \`
-          <span style="color:#059669; font-weight:bold; font-size:14px;">🔒 Payroll periode ini sudah terkunci dan permanen.</span>
-        \`;
+        bar.innerHTML = `
+          <span style="color:#059669; font-weight:bold; font-size:13px;">🔒 Payroll terkunci permanen.</span>
+        `;
       }
     }
 
     function recalc() {
       try {
-        const run = PayrollEngine.generatePayroll(currentPeriod.periodName, currentPeriod.startDate, currentPeriod.endDate);
-        alert("Payroll berhasil direkalkulasi ulang mengambil data absensi terbaru.");
+        const run = PayrollEngine.generatePayroll(currentPeriod.periodName, currentPeriod.startDate, currentPeriod.endDate, currentPeriod.targetUnit);
+        alert("Payroll berhasil direkalkulasi mengambil data absensi & tip kaca terbaru.");
         openDetail(run.id);
         renderTable();
       } catch (e) {
@@ -354,8 +505,8 @@
     }
 
     function transit(newState) {
-      if(newState === 'LOCKED') {
-        if(!confirm("Yakin mengunci payroll? Setelah dikunci, data tidak bisa berubah meskipun absensi diubah HR!")) return;
+      if (newState === 'LOCKED') {
+        if (!confirm("Yakin ingin mengunci payroll secara permanen? Setelah dikunci, data slip tidak dapat diubah lagi!")) return;
       }
       try {
         const run = PayrollEngine.transitionState(currentPeriod.id, newState);
@@ -370,33 +521,69 @@
       const tbody = document.getElementById('slipsBody');
       tbody.innerHTML = '';
       
-      currentPeriod.slips.forEach(s => {
+      const filterUnit = document.getElementById('slipFilterUnit').value;
+      let slips = currentPeriod.slips || [];
+
+      if (filterUnit !== 'ALL') {
+        const u = filterUnit.toLowerCase().replace('kuk ', '');
+        slips = slips.filter(s => s.unit && s.unit.toLowerCase().includes(u));
+      }
+
+      if (slips.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:16px; color:var(--kuk-text-muted);">Tidak ada slip untuk unit ini.</td></tr>';
+        return;
+      }
+
+      slips.forEach(s => {
         const tr = document.createElement('tr');
-        tr.innerHTML = \`
-          <td style="font-weight:bold; font-size:13px;">\${s.employeeName}</td>
-          <td style="font-size:12px;">\${s.unit}</td>
-          <td style="color:#059669; font-weight:bold;">\${s.attendanceCounts.PRESENT}</td>
-          <td style="color:#d97706; font-weight:bold;">\${s.attendanceCounts.LATE}</td>
-          <td style="color:#dc2626; font-weight:bold;">\${s.attendanceCounts.ABSENT}</td>
-          <td style="font-weight:bold; color:var(--kuk-primary);">\${formatRp(s.takeHomePay)}</td>
-          <td><button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="showBreakdown('\${s.employeeId}')">Lihat Rincian</button></td>
-        \`;
+        const isPalen = s.unit && s.unit.toLowerCase().includes('palen');
+        const unitBadge = isPalen 
+          ? '<span class="badge" style="background:#e0f2fe; color:#0369a1;">🏠 Palen</span>'
+          : '<span class="badge" style="background:#fef3c7; color:#b45309;">🏗️ Bangunan</span>';
+
+        const tipKacaStr = s.tipKaca > 0 
+          ? `<strong style="color:#059669;">+${formatRp(s.tipKaca)}</strong>` 
+          : '<span style="color:#94a3b8;">-</span>';
+
+        tr.innerHTML = `
+          <td>
+            <strong>${s.employeeName}</strong>
+            <span style="font-size:11px; color:var(--kuk-text-muted); display:block;">${s.position || 'Staf'}</span>
+          </td>
+          <td>${unitBadge}</td>
+          <td style="color:#059669; font-weight:bold;">${s.attendanceCounts.PRESENT || 0}</td>
+          <td style="color:#d97706; font-weight:bold;">${s.attendanceCounts.LATE || 0}</td>
+          <td style="color:#dc2626; font-weight:bold;">${s.attendanceCounts.ABSENT || 0}</td>
+          <td>${tipKacaStr}</td>
+          <td style="font-weight:800; color:var(--kuk-primary);">${formatRp(s.takeHomePay)}</td>
+          <td style="text-align:right;">
+            <button class="btn btn-secondary btn-sm" onclick="showBreakdown('${s.employeeId}')">🔍 Rincian</button>
+          </td>
+        `;
         tbody.appendChild(tr);
       });
     }
 
     function showBreakdown(empId) {
       const slip = currentPeriod.slips.find(s => s.employeeId === empId);
-      document.getElementById('bEmpName').textContent = slip.employeeName;
+      if (!slip) return;
+
+      document.getElementById('bEmpName').textContent = `${slip.employeeName} (${slip.unit})`;
       
       const bMath = document.getElementById('bMath');
-      bMath.innerHTML = \`
-        <div class="math-row"><span>Gaji Pokok (Mock)</span> <span>\${formatRp(slip.baseSalary)}</span></div>
-        <div class="math-row" style="color:#d97706;"><span>Potongan Telat (\${slip.attendanceCounts.LATE}x)</span> <span>- \${formatRp(slip.breakdown.lateDeduction)}</span></div>
-        <div class="math-row" style="color:#dc2626;"><span>Potongan Mangkir (\${slip.attendanceCounts.ABSENT}x)</span> <span>- \${formatRp(slip.breakdown.absentDeduction)}</span></div>
-        <div class="math-row" style="color:#ea580c;"><span>Potongan Tidak Lengkap (\${slip.attendanceCounts.INCOMPLETE}x)</span> <span>- \${formatRp(slip.breakdown.incompleteDeduction)}</span></div>
-        <div class="math-row total"><span>TOTAL TAKE HOME PAY</span> <span>\${formatRp(slip.takeHomePay)}</span></div>
-      \`;
+      const isBangunan = slip.unit && slip.unit.toLowerCase().includes('bangunan');
+      const tipRow = isBangunan 
+        ? `<div class="math-row" style="color:#059669;"><span>+ Komisi Tip Kaca (3%)</span> <span>+ ${formatRp(slip.tipKaca || 0)}</span></div>`
+        : '';
+
+      bMath.innerHTML = `
+        <div class="math-row"><span>Gaji Pokok</span> <span>${formatRp(slip.baseSalary)}</span></div>
+        ${tipRow}
+        <div class="math-row" style="color:#d97706;"><span>- Potongan Telat (${slip.attendanceCounts.LATE || 0}x @Rp 15.000)</span> <span>- ${formatRp(slip.breakdown.lateDeduction || 0)}</span></div>
+        <div class="math-row" style="color:#dc2626;"><span>- Potongan Mangkir (${slip.attendanceCounts.ABSENT || 0}x @Rp 50.000)</span> <span>- ${formatRp(slip.breakdown.absentDeduction || 0)}</span></div>
+        <div class="math-row" style="color:#ea580c;"><span>- Potongan Tidak Lengkap (${slip.attendanceCounts.INCOMPLETE || 0}x @Rp 20.000)</span> <span>- ${formatRp(slip.breakdown.incompleteDeduction || 0)}</span></div>
+        <div class="math-row total"><span>TOTAL TAKE HOME PAY</span> <span>${formatRp(slip.takeHomePay)}</span></div>
+      `;
       document.getElementById('breakdownSection').style.display = 'block';
     }
 
@@ -404,7 +591,6 @@
       document.getElementById('detailModal').classList.remove('active');
       currentPeriod = null;
     }
-
   </script>
   <script src="shared/security.js"></script>
   <script src="shared/shell.js" data-base="."></script>

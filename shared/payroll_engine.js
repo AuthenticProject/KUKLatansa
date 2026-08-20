@@ -51,9 +51,9 @@ const PayrollEngine = (() => {
   }
 
   /**
-   * Generates or Regenerates a Payroll Run for a specific period.
+   * Generates or Regenerates a Payroll Run for a specific period with unit separation.
    */
-  function generatePayroll(periodName, startStr, endStr) {
+  function generatePayroll(periodName, startStr, endStr, targetUnit = 'ALL') {
     checkPayrollAccess();
 
     if (typeof AttendanceEngine === 'undefined') {
@@ -76,16 +76,46 @@ const PayrollEngine = (() => {
     const empData = {};
     const employees = typeof MasterDB !== 'undefined' && MasterDB.getEmployees ? MasterDB.getEmployees() : [];
 
-    // Initialize all active employees
-    employees.forEach(emp => {
-      if (emp.status === 'Active' || emp.status === 'Aktif') {
-        empData[emp.id] = {
-          employeeName: emp.fullName,
-          unit: emp.unit,
-          baseSalary: RULES.default_base_salary, // Mock injection
-          counts: { PRESENT: 0, LATE: 0, ABSENT: 0, INCOMPLETE: 0, LEAVE: 0, SICK: 0, PERMISSION: 0, EXCUSED: 0, OFF: 0 }
-        };
+    // Filter employees by target unit if specified
+    const activeEmps = employees.filter(emp => {
+      const isActive = emp.status === 'Active' || emp.status === 'Aktif';
+      if (!isActive) return false;
+      if (targetUnit && targetUnit !== 'ALL' && targetUnit !== 'semua') {
+        const u = targetUnit.toLowerCase().replace('kuk ', '');
+        return emp.unit && emp.unit.toLowerCase().includes(u);
       }
+      return true;
+    });
+
+    // Check tip kaca for Bangunan employees
+    let glassTips = [];
+    try {
+      glassTips = JSON.parse(localStorage.getItem('kuk_db_tip_v1') || '[]');
+    } catch (e) {}
+
+    // Initialize employees
+    activeEmps.forEach(emp => {
+      // Calculate tip kaca for Bangunan employees within the period
+      let tipKacaNominal = 0;
+      if (emp.unit && emp.unit.toLowerCase().includes('bangunan')) {
+        const empTips = glassTips.filter(t => {
+          const tName = t.namaKaryawan || t.karyawan || '';
+          const tDate = t.tanggal || t.tgl || '';
+          return (tName.toLowerCase() === emp.fullName.toLowerCase() || tName === emp.id) &&
+                 (tDate >= startStr && tDate <= endStr);
+        });
+        tipKacaNominal = empTips.reduce((acc, t) => acc + (parseFloat(t.nominalTip || t.tip || 0) || 0), 0);
+      }
+
+      empData[emp.id] = {
+        employeeName: emp.fullName,
+        unit: emp.unit,
+        department: emp.department || 'Operasional',
+        position: emp.position || 'Staf',
+        baseSalary: RULES.default_base_salary,
+        tipKaca: tipKacaNominal,
+        counts: { PRESENT: 0, LATE: 0, ABSENT: 0, INCOMPLETE: 0, LEAVE: 0, SICK: 0, PERMISSION: 0, EXCUSED: 0, OFF: 0 }
+      };
     });
 
     // Aggregate attendance
@@ -99,6 +129,9 @@ const PayrollEngine = (() => {
     });
 
     // Calculate Slips
+    let totalBangunan = 0;
+    let totalPalen = 0;
+
     const slips = Object.keys(empData).map(empId => {
       const data = empData[empId];
       
@@ -107,13 +140,22 @@ const PayrollEngine = (() => {
       const incompleteDeduction = data.counts.INCOMPLETE * RULES.incomplete_deduction_rate;
       const totalDeductions = lateDeduction + absentDeduction + incompleteDeduction;
 
-      const takeHomePay = data.baseSalary - totalDeductions;
+      const takeHomePay = (data.baseSalary + data.tipKaca) - totalDeductions;
+
+      if (data.unit && data.unit.toLowerCase().includes('palen')) {
+        totalPalen += takeHomePay;
+      } else {
+        totalBangunan += takeHomePay;
+      }
 
       return {
         employeeId: empId,
         employeeName: data.employeeName,
         unit: data.unit,
+        department: data.department,
+        position: data.position,
         baseSalary: data.baseSalary,
+        tipKaca: data.tipKaca,
         attendanceCounts: data.counts,
         breakdown: {
           lateDeduction,
@@ -129,10 +171,16 @@ const PayrollEngine = (() => {
     const run = {
       id: 'PAY-' + Date.now(),
       periodName,
+      targetUnit,
       startDate: startStr,
       endDate: endStr,
       generatedAt: new Date().toISOString(),
       status: 'CALCULATED',
+      totals: {
+        all: totalBangunan + totalPalen,
+        bangunan: totalBangunan,
+        palen: totalPalen
+      },
       slips: slips,
       integritySeal: null
     };

@@ -13,8 +13,11 @@ const ViolationEngine = (() => {
     shift_start: '08:00'
   };
 
-  function getViolations() {
-    return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+  function getViolations(unit = 'ALL') {
+    const list = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    if (!unit || unit === 'ALL' || unit === 'semua') return list;
+    const u = unit.toLowerCase().replace('kuk ', '');
+    return list.filter(t => t.unit && t.unit.toLowerCase().includes(u));
   }
 
   function saveViolations(data) {
@@ -26,16 +29,16 @@ const ViolationEngine = (() => {
   }
 
   /**
-   * Scans a specific date and auto-generates violations.
+   * Scans a specific date and auto-generates violations with unit separation.
    * Prevents duplicates by checking existing ticket date+empId+rule.
    */
-  function runDailyScan(dateStr) {
+  function runDailyScan(dateStr, unit = 'ALL') {
     if (typeof AttendanceEngine === 'undefined') {
       throw new Error("AttendanceEngine not loaded");
     }
 
-    const attendanceList = AttendanceEngine.getDailyAttendance(dateStr);
-    const existing = getViolations();
+    const attendanceList = AttendanceEngine.getDailyAttendance(dateStr, unit);
+    const existing = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
     let newGenerated = 0;
 
     attendanceList.forEach(att => {
@@ -69,6 +72,7 @@ const ViolationEngine = (() => {
             source: 'SYSTEM',
             employeeId: att.employeeId,
             employeeName: att.employeeName,
+            unit: att.unit || (att.employeeName && ['Nukul', 'Miftah'].includes(att.employeeName) ? 'KUK Palen' : 'KUK Bangunan'),
             date: dateStr,
             ruleBroken: ruleBroken,
             calculatedValue: calculatedValue,
@@ -125,3 +129,11 @@ const ViolationEngine = (() => {
     transitionTicket
   };
 })();
+
+if (typeof window !== 'undefined') {
+  window.ViolationEngine = ViolationEngine;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ViolationEngine;
+}
+

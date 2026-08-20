@@ -120,10 +120,14 @@ const AttendanceEngine = (() => {
   }
 
   /**
-   * Get attendance for all active employees for a given date
+   * Get attendance for active employees for a given date, optionally filtered by unit
    */
-  function getDailyAttendance(dateStr) {
-    const employees = typeof MasterDB !== 'undefined' ? MasterDB.getEmployees().filter(e => e.status === 'Active') : [];
+  function getDailyAttendance(dateStr, unit = 'ALL') {
+    let employees = typeof MasterDB !== 'undefined' ? MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif') : [];
+    if (unit && unit !== 'ALL' && unit !== 'semua') {
+      const u = unit.toLowerCase().replace('kuk ', '');
+      employees = employees.filter(e => e.unit && e.unit.toLowerCase().includes(u));
+    }
     const forms = getForms();
     const fingerprints = getRawFingerprints();
 
@@ -133,6 +137,8 @@ const AttendanceEngine = (() => {
         employeeId: emp.id,
         employeeName: emp.fullName,
         unit: emp.unit,
+        department: emp.department,
+        position: emp.position,
         ...calc
       };
     });

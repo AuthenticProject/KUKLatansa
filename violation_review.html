@@ -147,9 +147,20 @@
         </div>
       </div>
 
-      <div style="display:flex; gap:10px; margin-bottom: 20px;">
-        <button class="btn btn-secondary" onclick="renderTickets('PENDING')">Perlu Review</button>
-        <button class="btn btn-secondary" onclick="renderTickets('ALL')">Semua Histori</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 20px;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" id="btnFilterPending" onclick="setFilterState('PENDING')">Perlu Review</button>
+          <button class="btn btn-secondary" id="btnFilterAll" onclick="setFilterState('ALL')">Semua Histori</button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; font-weight:700; color:var(--kuk-text-muted);">UNIT:</span>
+          <select id="vioFilterUnit" style="padding:6px 12px; font-size:13px; border-radius:8px; border:1px solid #cbd5e1;" onchange="renderTickets()">
+            <option value="ALL">🏢 Semua Unit</option>
+            <option value="KUK Bangunan">🏗️ KUK Bangunan</option>
+            <option value="KUK Palen">🏠 KUK Palen</option>
+          </select>
+        </div>
       </div>
 
       <div class="ticket-grid" id="ticketGrid">
@@ -168,6 +179,7 @@
       
       <div style="background:#f9fafb; padding:12px; border-radius:8px; font-size:14px;">
         <div><strong>Karyawan:</strong> <span id="mEmp"></span></div>
+        <div><strong>Unit:</strong> <span id="mUnit"></span></div>
         <div><strong>Tanggal:</strong> <span id="mDate"></span></div>
         <div><strong>Rule Broken:</strong> <span id="mRule"></span></div>
         <div style="margin-top:8px;" class="ticket-val" id="mVal"></div>
@@ -200,39 +212,69 @@
   <script src="shared/violation_engine.js"></script>
   <script>
     let currentTicketId = null;
+    let currentTabState = 'PENDING';
 
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('scanDate').valueAsDate = new Date();
+
+      window.addEventListener('kukUnitChange', e => {
+        const u = e.detail && e.detail.unit ? e.detail.unit : 'ALL';
+        const sel = document.getElementById('vioFilterUnit');
+        if (sel) {
+          if (u === 'bangunan') sel.value = 'KUK Bangunan';
+          else if (u === 'palen') sel.value = 'KUK Palen';
+          else sel.value = 'ALL';
+        }
+        renderTickets();
+      });
+
+      const storedUnit = localStorage.getItem('kuk_selected_unit') || 'semua';
+      const sel = document.getElementById('vioFilterUnit');
+      if (sel) {
+        if (storedUnit === 'bangunan') sel.value = 'KUK Bangunan';
+        else if (storedUnit === 'palen') sel.value = 'KUK Palen';
+        else sel.value = 'ALL';
+      }
+
       renderTickets('PENDING');
     });
 
+    function setFilterState(state) {
+      currentTabState = state;
+      document.getElementById('btnFilterPending').className = state === 'PENDING' ? 'btn btn-primary' : 'btn btn-secondary';
+      document.getElementById('btnFilterAll').className = state === 'ALL' ? 'btn btn-primary' : 'btn btn-secondary';
+      renderTickets();
+    }
+
     function runScan() {
       const date = document.getElementById('scanDate').value;
+      const unit = document.getElementById('vioFilterUnit').value;
       if(!date) return alert("Pilih tanggal scan");
 
       try {
-        const count = ViolationEngine.runDailyScan(date);
-        alert(\`Scan selesai. Ditemukan \${count} pelanggaran baru untuk tanggal \${date}.\`);
-        renderTickets('PENDING');
+        const count = ViolationEngine.runDailyScan(date, unit);
+        alert(`Scan selesai. Ditemukan ${count} pelanggaran baru untuk tanggal ${date}.`);
+        renderTickets();
       } catch (e) {
         alert("Error: " + e.message);
       }
     }
 
-    function renderTickets(filter) {
+    function renderTickets() {
       const grid = document.getElementById('ticketGrid');
       grid.innerHTML = '';
 
-      let tickets = ViolationEngine.getViolations();
+      const unit = document.getElementById('vioFilterUnit').value;
+      let tickets = ViolationEngine.getViolations(unit);
       // sort latest first
       tickets.sort((a,b) => new Date(b.generatedTime) - new Date(a.generatedTime));
 
-      if (filter === 'PENDING') {
+      if (currentTabState === 'PENDING') {
         tickets = tickets.filter(t => t.status === 'AUTO GENERATED' || t.status === 'REVIEW' || t.status === 'VERIFIED' || t.status === 'ACTION');
       }
 
       if(tickets.length === 0) {
-        grid.innerHTML = '<p style="color:var(--kuk-text-muted);">Tidak ada tiket pelanggaran.</p>';
+        grid.innerHTML = '<p style="color:var(--kuk-text-muted);">Tidak ada tiket pelanggaran untuk unit ini.</p>';
         return;
       }
 
@@ -248,12 +290,15 @@
         if(t.status === 'CLOSED') bClass = 'b-closed';
         if(t.status === 'REJECTED') bClass = 'b-rejected';
 
-        div.innerHTML = \`
-          <span class="badge \${bClass}">\${t.status}</span>
-          <div class="ticket-title">\${t.employeeName}</div>
-          <div class="ticket-meta">\${t.date} &bull; \${t.ruleBroken}</div>
-          <div class="ticket-val">\${t.calculatedValue}</div>
-        \`;
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span class="badge ${bClass}">${t.status}</span>
+            <span style="font-size:11px; font-weight:700; color:var(--kuk-primary);">${t.unit || 'KUK'}</span>
+          </div>
+          <div class="ticket-title">${t.employeeName}</div>
+          <div class="ticket-meta">${t.date} &bull; ${t.ruleBroken}</div>
+          <div class="ticket-val">${t.calculatedValue}</div>
+        `;
         grid.appendChild(div);
       });
     }
@@ -267,6 +312,7 @@
       document.getElementById('mId').textContent = t.id;
       document.getElementById('mBadge').textContent = t.status;
       document.getElementById('mEmp').textContent = t.employeeName;
+      document.getElementById('mUnit').textContent = t.unit || 'KUK';
       document.getElementById('mDate').textContent = t.date;
       document.getElementById('mRule').textContent = t.ruleBroken;
       document.getElementById('mVal').textContent = t.calculatedValue;
@@ -275,12 +321,12 @@
       histDiv.innerHTML = '';
       t.history.forEach(h => {
         const dt = new Date(h.timestamp).toLocaleString('id-ID');
-        histDiv.innerHTML += \`
+        histDiv.innerHTML += `
           <div>
-            <strong style="color:var(--kuk-primary);">[\${h.state}]</strong> \${dt}<br>
-            <span style="color:#64748b;">Oleh: \${h.actor} - \${h.note}</span>
+            <strong style="color:var(--kuk-primary);">[${h.state}]</strong> ${dt}<br>
+            <span style="color:#64748b;">Oleh: ${h.actor} - ${h.note}</span>
           </div>
-        \`;
+        `;
       });
 
       document.getElementById('mNote').value = '';

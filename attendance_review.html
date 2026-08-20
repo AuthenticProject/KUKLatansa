@@ -208,6 +208,28 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('filterDate').valueAsDate = new Date();
+
+      // Sync with shell unit
+      window.addEventListener('kukUnitChange', e => {
+        const u = e.detail && e.detail.unit ? e.detail.unit : 'ALL';
+        const sel = document.getElementById('filterUnit');
+        if (sel) {
+          if (u === 'bangunan') sel.value = 'KUK Bangunan';
+          else if (u === 'palen') sel.value = 'KUK Palen';
+          else sel.value = 'ALL';
+        }
+        loadData();
+      });
+
+      // Check current stored unit
+      const storedUnit = localStorage.getItem('kuk_selected_unit') || 'semua';
+      const sel = document.getElementById('filterUnit');
+      if (sel) {
+        if (storedUnit === 'bangunan') sel.value = 'KUK Bangunan';
+        else if (storedUnit === 'palen') sel.value = 'KUK Palen';
+        else sel.value = 'ALL';
+      }
+
       loadData();
     });
 
@@ -237,18 +259,18 @@
           noteStr = row.note;
         }
 
-        tr.innerHTML = \`
-          <td style="font-weight:600;">\${row.employeeName}</td>
-          <td style="font-size:13px;">\${row.unit}</td>
-          <td>\${inTimeStr}</td>
-          <td>\${outTimeStr}</td>
+        tr.innerHTML = `
+          <td style="font-weight:600;">${row.employeeName}</td>
+          <td style="font-size:13px;">${row.unit}</td>
+          <td>${inTimeStr}</td>
+          <td>${outTimeStr}</td>
           <td>
-            <div class="badge \${statusClass}" onclick="openModal('\${row.employeeId}', '\${row.employeeName}', '\${row.status}')">
-              \${row.status}
+            <div class="badge ${statusClass}" onclick="openModal('${row.employeeId}', '${row.employeeName}', '${row.status}')">
+              ${row.status}
             </div>
           </td>
-          <td style="font-size:12px; color:var(--kuk-text-muted);">\${noteStr}</td>
-        \`;
+          <td style="font-size:12px; color:var(--kuk-text-muted);">${noteStr}</td>
+        `;
         tbody.appendChild(tr);
       });
     }

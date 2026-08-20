@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>KUK La Tansa — Portal Internal</title>
+  <title>KUK La Tansa — Portal Layanan & Sistem Terpadu</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="description" content="Portal Manajemen Internal KUK La Tansa — Absensi, Cuti, Pelanggaran, Karyawan, Kendaraan, Payroll">
+  <meta name="description" content="Portal Layanan dan Manajemen Terpadu KUK La Tansa">
   <meta name="theme-color" content="#540000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -20,542 +17,896 @@
   <link rel="stylesheet" href="shared/design-tokens.css">
   <style>
     :root {
-      --bg: #2A0000;
-      --surface: rgba(255,255,255,0.06);
-      --surface2: rgba(255,255,255,0.04);
-      --primary: #FFCC00;
-      --primary-hover: #FFD633;
-      --primary-light: rgba(255,204,0,0.15);
+      --bg-gradient: linear-gradient(135deg, #2b0000 0%, #4a0000 50%, #1e0000 100%);
+      --gold: #FFCC00;
+      --gold-hover: #ffd633;
+      --gold-glow: rgba(255, 204, 0, 0.25);
+      --surface: rgba(255, 255, 255, 0.08);
+      --surface-hover: rgba(255, 255, 255, 0.13);
+      --border: rgba(255, 255, 255, 0.14);
+      --border-gold: rgba(255, 204, 0, 0.4);
       --text: #ffffff;
-      --text-muted: rgba(255,255,255,0.65);
-      --border: rgba(255,255,255,0.12);
-      --success: #4ade80;
-      --danger: #f87171;
-      --radius: 20px;
+      --text-muted: rgba(255, 255, 255, 0.65);
+      --radius-lg: 24px;
+      --radius-md: 16px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
 
     body {
-      background: linear-gradient(160deg, #380000 0%, #540000 45%, #2A0000 100%);
+      background: var(--bg-gradient);
       color: var(--text);
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 20px;
+      padding: 32px 20px;
       position: relative;
+      overflow-x: hidden;
     }
 
+    /* Ambient Glow Background */
     body::before {
       content: '';
       position: fixed;
-      top: -200px; left: -150px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(106,10,10,0.5) 0%, transparent 65%);
+      top: -160px; left: -160px;
+      width: 550px; height: 550px;
+      background: radial-gradient(circle, rgba(139, 0, 0, 0.5) 0%, transparent 70%);
       pointer-events: none; z-index: 0;
     }
     body::after {
       content: '';
       position: fixed;
-      bottom: -150px; right: -100px;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(255,204,0,0.06) 0%, transparent 70%);
+      bottom: -160px; right: -160px;
+      width: 550px; height: 550px;
+      background: radial-gradient(circle, rgba(255, 204, 0, 0.08) 0%, transparent 70%);
       pointer-events: none; z-index: 0;
     }
 
-    #loginScreen {
+    .container-wrapper {
       width: 100%;
-      max-width: 400px;
+      max-width: 1100px;
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 36px;
+      align-items: center;
     }
 
-    #portalScreen {
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-      z-index: 1;
-      display: none;
+    /* Header Hero */
+    .brand-hero {
+      text-align: center;
+      display: flex;
       flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(255, 204, 0, 0.12);
+      border: 1px solid rgba(255, 204, 0, 0.3);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+    .brand-title {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+    .brand-title span {
+      color: var(--gold);
+      text-shadow: 0 0 24px rgba(255, 204, 0, 0.35);
+    }
+    .brand-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 580px;
+      line-height: 1.5;
+    }
+
+    /* Views */
+    .view-panel {
+      width: 100%;
+      display: none;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .view-panel.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 24px;
     }
 
-    .brand { text-align: center; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-    .brand-logo {
-      width: 72px; height: 72px;
-      background: #FFCC00;
-      border-radius: 16px;
+    /* ============================================================
+       1. HOME VIEW: 3 MAIN TILES
+    ============================================================ */
+    .cards-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      width: 100%;
+    }
+
+    .main-tile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 18px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #fff;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .main-tile:hover {
+      transform: translateY(-8px);
+      background: var(--surface-hover);
+      border-color: var(--border-gold);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5), 0 0 24px rgba(255, 204, 0, 0.15);
+    }
+
+    .tile-icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 14px;
-      box-shadow: 0 10px 28px rgba(255,204,0,0.3);
-      font-size: 34px;
+      font-size: 38px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+      transition: transform 0.25s ease;
+    }
+    .main-tile:hover .tile-icon-circle {
+      transform: scale(1.08);
+      border-color: var(--gold);
     }
 
-    .brand h1 {
+    .tile-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .badge-karyawan { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-pinjam { background: rgba(14, 165, 233, 0.2); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4); }
+    .badge-staff { background: rgba(255, 204, 0, 0.2); color: var(--gold); border: 1px solid rgba(255, 204, 0, 0.4); }
+
+    .tile-title {
       font-size: 24px;
       font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #fff;
+      letter-spacing: -0.3px;
     }
-    .brand h1 span { color: #FFCC00; }
-    .brand p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .tile-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .tile-btn-hint {
+      margin-top: auto;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: rgba(255, 204, 0, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 204, 0, 0.25);
+      transition: all 0.2s;
+    }
+    .main-tile:hover .tile-btn-hint {
+      background: var(--gold);
+      color: #380000;
+    }
 
-    .card {
+    /* ============================================================
+       2. SUBVIEW CARDS (MODAL STYLE)
+    ============================================================ */
+    .subview-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 24px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 20px 48px rgba(0,0,0,0.4);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
+    .subview-card.wide {
+      max-width: 780px;
+    }
+
+    .subview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .subview-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .subview-icon {
+      font-size: 26px;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .subview-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .subview-sub {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #fff;
+    }
+
+    /* Submenu Action Links */
+    .menu-link-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .menu-link-card:hover {
+      background: rgba(255, 204, 0, 0.12);
+      border-color: var(--gold);
+      transform: translateX(4px);
+    }
+    .menu-link-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .menu-link-icon {
+      font-size: 22px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .menu-link-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .menu-link-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .menu-link-arrow {
+      font-size: 18px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .menu-link-card:hover .menu-link-arrow {
+      color: var(--gold);
+      transform: translateX(4px);
+    }
+
+    /* Staff Grid inside Portal */
+    .staff-portal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .staff-portal-grid::-webkit-scrollbar {
+      width: 4px;
+    }
+    .staff-portal-grid::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    /* Form Fields */
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 18px;
+      gap: 6px;
     }
-
     .form-group label {
       font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.6px;
       color: var(--text-muted);
     }
-
-    .input-wrap {
-      position: relative;
-    }
-
-    select, input[type="password"], input[type="text"] {
+    .form-control {
       width: 100%;
-      background: rgba(0,0,0,0.25);
+      background: rgba(0, 0, 0, 0.35);
       border: 1px solid var(--border);
       border-radius: 12px;
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 500;
+      color: #fff;
+      font-size: 14.5px;
       padding: 13px 16px;
       outline: none;
       transition: all 0.2s;
+      font-family: inherit;
+    }
+    .form-control:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.15);
+      background: rgba(0, 0, 0, 0.5);
     }
 
-    select option { background: #380000; color: #fff; }
-
-    select:focus, input:focus {
-      border-color: #FFCC00;
-      box-shadow: 0 0 0 3px rgba(255,204,0,0.15);
-    }
-
-    .pw-toggle {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 16px;
-      padding: 4px;
-    }
-
-    .btn-login {
+    .btn-gold {
       width: 100%;
-      background: #FFCC00;
+      padding: 14px;
+      background: var(--gold);
       color: #380000;
       border: none;
       border-radius: 12px;
-      padding: 14px;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 6px 20px rgba(255,204,0,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 6px;
+      transition: all 0.2s;
+      margin-top: 4px;
     }
-
-    .btn-login:hover {
-      background: #FFD633;
+    .btn-gold:hover {
+      background: var(--gold-hover);
+      box-shadow: 0 6px 20px var(--gold-glow);
       transform: translateY(-1px);
     }
 
-    .err-msg {
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.3);
+    .error-box {
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.4);
       color: #fca5a5;
+      font-size: 13px;
       padding: 10px 14px;
       border-radius: 10px;
-      font-size: 13px;
-      margin-bottom: 16px;
       display: none;
     }
-    .err-msg.show { display: block; }
 
-    /* Portal Menu List */
-    .user-pill {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid var(--border);
-      padding: 12px 18px;
-      border-radius: 14px;
+    .staff-profile-header {
+      background: rgba(255, 204, 0, 0.1);
+      border: 1px solid rgba(255, 204, 0, 0.3);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      align-items: center;
     }
 
-    .user-info { display: flex; align-items: center; gap: 10px; }
-    .user-avatar {
-      width: 36px; height: 36px;
-      background: #FFCC00;
-      color: #380000;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 15px;
-    }
-    .user-name { font-weight: 700; font-size: 14px; }
-    .user-role { font-size: 12px; color: var(--text-muted); }
-
-    .btn-logout {
-      background: none; border: 1px solid rgba(239,68,68,0.4);
-      color: #f87171; border-radius: 8px; padding: 6px 12px;
-      font-size: 12px; font-weight: 600; cursor: pointer;
-    }
-
-    .menu-grid {
-      display: grid;
-      grid-template-columns: 1fr;
+    /* Footer */
+    .footer-bar {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 16px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
       gap: 10px;
     }
 
-    .menu-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      text-decoration: none;
-      color: #fff;
-      transition: all 0.2s;
-    }
-    .menu-card:hover {
-      background: rgba(255,255,255,0.1);
-      border-color: #FFCC00;
-      transform: translateX(4px);
-    }
-    .menu-icon { font-size: 22px; width: 34px; text-align: center; }
-    .menu-card-label { font-weight: 700; font-size: 14px; flex: 1; }
-    .menu-card-desc { font-size: 12px; color: var(--text-muted); }
-    .menu-arrow { color: var(--text-muted); }
-
-    .toast-container {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10000;
-    }
-    .toast {
-      background: #380000;
-      color: #fff;
-      border: 1px solid #FFCC00;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    .footer-note {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 18px;
+    /* Responsive */
+    @media (max-width: 920px) {
+      .cards-grid-3 {
+        grid-template-columns: 1fr;
+      }
+      .staff-portal-grid {
+        grid-template-columns: 1fr;
+      }
+      .brand-title {
+        font-size: 28px;
+      }
+      .main-tile {
+        padding: 28px 20px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="container-wrapper">
 
-  <!-- LOGIN SCREEN -->
-  <div id="loginScreen">
-    <div class="brand">
-      <div class="brand-logo">🏢</div>
-      <h1>KUK <span>La Tansa</span></h1>
-      <p>Portal Sistem Manajemen Internal</p>
-    </div>
-
-    <div class="card">
-      <div class="err-msg" id="errMsg">
-        <span id="errText">Kata sandi salah.</span>
+    <!-- 1. BRAND HERO -->
+    <header class="brand-hero">
+      <div class="brand-badge">
+        <span>🏢</span> KUK LA TANSA &bull; PUSAT LAYANAN & SISTEM
       </div>
+      <h1 class="brand-title">Pusat Layanan <span>KUK La Tansa</span></h1>
+      <p class="brand-subtitle">
+        Pilih gerbang akses di bawah ini untuk memulai layanan operasional mandiri atau masuk ke portal staf manajemen.
+      </p>
+    </header>
 
-      <div class="form-group">
-        <label>Pilih Akun Pengguna / Staf</label>
-        <select id="loginUser">
-          <!-- Populated by JS -->
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Kata Sandi</label>
-        <div class="input-wrap">
-          <input type="password" id="loginPassword" placeholder="Masukkan kata sandi">
-          <button type="button" class="pw-toggle" id="pwToggle" title="Lihat password">👁️</button>
-        </div>
-      </div>
-
-      <button class="btn-login" onclick="doLogin()">
-        <span>Masuk ke Portal</span>
-        <span>&rarr;</span>
-      </button>
-    </div>
-
-    <div class="footer-note">KUK &copy; 2026 &mdash; Internal Management System</div>
-  </div>
-
-  <!-- PORTAL SCREEN (AFTER LOGIN) -->
-  <div id="portalScreen">
-    <div class="brand">
-      <div class="brand-logo">🏢</div>
-      <h1>KUK <span>La Tansa</span></h1>
-      <p>Menu Aplikasi Operasional</p>
-    </div>
-
-    <div class="card">
-      <div class="user-pill">
-        <div class="user-info">
-          <div class="user-avatar" id="avatarInitial">U</div>
-          <div>
-            <div class="user-name" id="displayName">Pengguna</div>
-            <div class="user-role" id="displayRole">Staf KUK</div>
+    <!-- ============================================================
+         VIEW 1: 3 MAIN CHOICE CARDS (DEFAULT SCREEN)
+    ============================================================ -->
+    <main id="viewHome" class="view-panel active">
+      <div class="cards-grid-3">
+        
+        <!-- CARD 1: KARYAWAN -->
+        <div class="main-tile" onclick="switchView('viewKaryawan')">
+          <div class="tile-badge badge-karyawan">Layanan Mandiri</div>
+          <div class="tile-icon-circle" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.35);">
+            👥
+          </div>
+          <h2 class="tile-title">Karyawan</h2>
+          <p class="tile-desc">Input tip potong kaca operasional 3% dan formulir pengajuan cuti/izin.</p>
+          <div class="tile-btn-hint">
+            <span>Buka Layanan Karyawan</span>
+            <span>→</span>
           </div>
         </div>
-        <button class="btn-logout" onclick="doLogout()">Keluar</button>
-      </div>
 
-      <div class="menu-grid" id="menuGrid">
-        <a href="dashboard/" id="menu-dashboard" class="menu-card">
-          <div class="menu-icon">📊</div>
-          <div class="menu-card-label">Dashboard Manajemen</div>
-          <div class="menu-card-desc">KPI & Analisis</div>
-          <span class="menu-arrow">&rarr;</span>
+        <!-- CARD 2: PEMINJAMAN KENDARAAN -->
+        <a href="peminjaman.html" class="main-tile">
+          <div class="tile-badge badge-pinjam">Armada Logistik</div>
+          <div class="tile-icon-circle" style="background: rgba(14, 165, 233, 0.15); border-color: rgba(14, 165, 233, 0.35);">
+            🚚
+          </div>
+          <h2 class="tile-title">Peminjaman Kendaraan</h2>
+          <p class="tile-desc">Formulir peminjaman armada truk engkel, L300, viar, dan forklift toko.</p>
+          <div class="tile-btn-hint">
+            <span>Isi Form Peminjaman</span>
+            <span>→</span>
+          </div>
         </a>
-        <a href="attendance_review.html" id="menu-attendance_review" class="menu-card">
-          <div class="menu-icon">⏱️</div>
-          <div class="menu-card-label">Review Kehadiran</div>
-          <div class="menu-card-desc">Presensi Harian</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="violation_review.html" id="menu-violation_review" class="menu-card">
-          <div class="menu-icon">⚠️</div>
-          <div class="menu-card-label">Review Pelanggaran</div>
-          <div class="menu-card-desc">Tiket Disiplin</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="payroll_dashboard.html" id="menu-payroll" class="menu-card">
-          <div class="menu-icon">💸</div>
-          <div class="menu-card-label">Manajemen Payroll</div>
-          <div class="menu-card-desc">Kalkulasi Gaji</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="absen.html" id="menu-absen" class="menu-card">
-          <div class="menu-icon">📋</div>
-          <div class="menu-card-label">Absen Briefing</div>
-          <div class="menu-card-desc">Briefing Pagi</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="fingerprint_import.html" id="menu-fingerprint" class="menu-card">
-          <div class="menu-icon">📥</div>
-          <div class="menu-card-label">Import Fingerprint</div>
-          <div class="menu-card-desc">Unggah Excel</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="cuti.html" id="menu-cuti" class="menu-card">
-          <div class="menu-icon">🏖️</div>
-          <div class="menu-card-label">Rekap Cuti</div>
-          <div class="menu-card-desc">Jadwal Libur</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="pelanggaran.html" id="menu-pelanggaran" class="menu-card">
-          <div class="menu-icon">📝</div>
-          <div class="menu-card-label">Catat Pelanggaran</div>
-          <div class="menu-card-desc">Input Manual</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="tip.html" id="menu-tip" class="menu-card">
-          <div class="menu-icon">🪟</div>
-          <div class="menu-card-label">Tip Kaca 3%</div>
-          <div class="menu-card-desc">Komisi Potong Kaca</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="peminjaman.html" id="menu-peminjaman" class="menu-card">
-          <div class="menu-icon">🚘</div>
-          <div class="menu-card-label">Pinjam Kendaraan</div>
-          <div class="menu-card-desc">Form & Armada</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="karyawan.html" id="menu-karyawan" class="menu-card">
-          <div class="menu-icon">👥</div>
-          <div class="menu-card-label">Database Karyawan</div>
-          <div class="menu-card-desc">Profil 360</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="peminjaman_admin.html" id="menu-peminjaman_admin" class="menu-card">
-          <div class="menu-icon">🚚</div>
-          <div class="menu-card-label">Admin Armada</div>
-          <div class="menu-card-desc">Kelola Kendaraan</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-        <a href="users.html" id="menu-users" class="menu-card">
-          <div class="menu-icon">🔐</div>
-          <div class="menu-card-label">Manajemen Pengguna</div>
-          <div class="menu-card-desc">Akun Staf</div>
-          <span class="menu-arrow">&rarr;</span>
-        </a>
-      </div>
-    </div>
 
-    <div class="footer-note">KUK &copy; 2026 &mdash; Internal Management System</div>
+        <!-- CARD 3: STAFF -->
+        <div class="main-tile" onclick="openStaffFlow()">
+          <div class="tile-badge badge-staff">Portal Manajemen</div>
+          <div class="tile-icon-circle" style="background: rgba(255, 204, 0, 0.15); border-color: rgba(255, 204, 0, 0.4);">
+            🔐
+          </div>
+          <h2 class="tile-title">Staff</h2>
+          <p class="tile-desc">Akses kendali eksekutif, absensi briefing, review presensi, dan payroll gaji.</p>
+          <div class="tile-btn-hint">
+            <span id="staffTileBtnText">Masuk Portal Staf</span>
+            <span>→</span>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ============================================================
+         VIEW 2: KARYAWAN SUBMENU
+    ============================================================ -->
+    <section id="viewKaryawan" class="view-panel">
+      <div class="subview-card">
+        <div class="subview-header">
+          <div class="subview-title-wrap">
+            <div class="subview-icon" style="color:#34d399;">👥</div>
+            <div>
+              <h2 class="subview-title">Layanan Karyawan</h2>
+              <p class="subview-sub">Pilih formulir operasional mandiri:</p>
+            </div>
+          </div>
+          <button type="button" class="btn-back" onclick="switchView('viewHome')">
+            <span>← Kembali</span>
+          </button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Menu 1: Tip Kaca -->
+          <a href="tip.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">🪟</div>
+              <div>
+                <h4 class="menu-link-title">Penginputan Tip Kaca (3%)</h4>
+                <p class="menu-link-sub">Input pemotongan kaca harian Bangunan</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- Menu 2: Cuti -->
+          <a href="cuti.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">🏖️</div>
+              <div>
+                <h4 class="menu-link-title">Pengajuan Cuti / Izin</h4>
+                <p class="menu-link-sub">Formulir cuti tahunan, sakit, & dinas</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         VIEW 3: STAFF LOGIN FORM
+    ============================================================ -->
+    <section id="viewStaffLogin" class="view-panel">
+      <div class="subview-card">
+        <div class="subview-header">
+          <div class="subview-title-wrap">
+            <div class="subview-icon" style="color:var(--gold);">🔐</div>
+            <div>
+              <h2 class="subview-title">Login Staff Manajemen</h2>
+              <p class="subview-sub">Masukkan akun staf terdaftar:</p>
+            </div>
+          </div>
+          <button type="button" class="btn-back" onclick="switchView('viewHome')">
+            <span>← Kembali</span>
+          </button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="error-box" id="loginErrorMsg"></div>
+
+          <div class="form-group">
+            <label for="inputUsername">Username Staf</label>
+            <input type="text" id="inputUsername" class="form-control" placeholder="Contoh: fariz / andika / raju" autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label for="inputPassword">Kata Sandi</label>
+            <input type="password" id="inputPassword" class="form-control" placeholder="Masukkan kata sandi" autocomplete="current-password">
+          </div>
+
+          <button type="button" class="btn-gold" onclick="doStaffLogin()">
+            <span>Masuk ke Portal Staf</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         VIEW 4: STAFF PORTAL MENU (AFTER LOGIN)
+    ============================================================ -->
+    <section id="viewStaffPortal" class="view-panel">
+      <div class="subview-card wide">
+        <div class="subview-header">
+          <div class="subview-title-wrap">
+            <div class="subview-icon" style="color:var(--gold);">🛡️</div>
+            <div>
+              <h2 class="subview-title">Portal Staff & Manajemen</h2>
+              <p class="subview-sub">Sistem Pengawasan & Administrasi Terpadu</p>
+            </div>
+          </div>
+          <button type="button" class="btn-back" onclick="switchView('viewHome')">
+            <span>← Menu Utama</span>
+          </button>
+        </div>
+
+        <!-- Active User Profile Card -->
+        <div class="staff-profile-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:40px; height:40px; border-radius:12px; background:var(--gold); color:#380000; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:18px;" id="staffAvatar">
+              F
+            </div>
+            <div>
+              <h3 style="font-size:15px; font-weight:800; color:#fff;" id="staffName">Fariz Ridwani, S.I.Kom</h3>
+              <p style="font-size:12px; color:var(--gold);" id="staffRole">Super Admin &bull; KUK Bangunan</p>
+            </div>
+          </div>
+          <button type="button" class="btn-back" style="background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="doStaffLogout()">
+            🚪 Keluar
+          </button>
+        </div>
+
+        <!-- Staff Menus Grid -->
+        <div class="staff-portal-grid">
+          
+          <!-- 1. Absen Briefing Pagi -->
+          <a href="absen.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">📋</div>
+              <div>
+                <h4 class="menu-link-title">Absen Briefing Pagi</h4>
+                <p class="menu-link-sub">Presensi apel & briefing harian</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 2. Dashboard Eksekutif -->
+          <a href="dashboard/index.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">📊</div>
+              <div>
+                <h4 class="menu-link-title">Dashboard Eksekutif</h4>
+                <p class="menu-link-sub">Pusat komando & KPI toko</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 3. Review Kehadiran -->
+          <a href="attendance_review.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">⏱️</div>
+              <div>
+                <h4 class="menu-link-title">Review Presensi</h4>
+                <p class="menu-link-sub">Kalkulasi kehadiran & audit status</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 4. Review Pelanggaran -->
+          <a href="violation_review.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">⚠️</div>
+              <div>
+                <h4 class="menu-link-title">Review Pelanggaran</h4>
+                <p class="menu-link-sub">Tiket disiplin & investigasi SP</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 5. Manajemen Payroll -->
+          <a href="payroll_dashboard.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">💸</div>
+              <div>
+                <h4 class="menu-link-title">Manajemen Payroll</h4>
+                <p class="menu-link-sub">Hitung gaji, slip, & kunci periode</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 6. Database Karyawan -->
+          <a href="karyawan.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">👥</div>
+              <div>
+                <h4 class="menu-link-title">Database Karyawan</h4>
+                <p class="menu-link-sub">Profil 360, kontrak PKWT, & rekrutmen</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 7. Import Fingerprint -->
+          <a href="fingerprint_import.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">📥</div>
+              <div>
+                <h4 class="menu-link-title">Import Fingerprint</h4>
+                <p class="menu-link-sub">Unggah file Excel absensi mesin</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 8. Catat Pelanggaran Manual -->
+          <a href="pelanggaran.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">📝</div>
+              <div>
+                <h4 class="menu-link-title">Catat Pelanggaran Manual</h4>
+                <p class="menu-link-sub">Input insiden disiplin lapangan</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 9. Admin Armada -->
+          <a href="peminjaman_admin.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">🚚</div>
+              <div>
+                <h4 class="menu-link-title">Admin Armada Kendaraan</h4>
+                <p class="menu-link-sub">Persetujuan & monitoring logistik</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+          <!-- 10. Manajemen Pengguna -->
+          <a href="users.html" class="menu-link-card">
+            <div class="menu-link-left">
+              <div class="menu-link-icon">🔐</div>
+              <div>
+                <h4 class="menu-link-title">Manajemen Akun Staf</h4>
+                <p class="menu-link-sub">Kelola akun & hak izin menu</p>
+              </div>
+            </div>
+            <span class="menu-link-arrow">→</span>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FOOTER -->
+    <footer class="footer-bar">
+      <div>
+        <strong>KUK La Tansa v2.0</strong> &bull; Terintegrasi KUK Bangunan & KUK Palen
+      </div>
+      <div>
+        Sistem Manajemen Sumber Daya & Operasional Toko
+      </div>
+    </footer>
+
   </div>
 
-  <script src="shared/security.js"></script>
+  <!-- Scripts -->
   <script src="shared/master_db.js"></script>
+  <script src="shared/security.js"></script>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
-
-    function initUserDropdown() {
-      const users = MasterDB.getUsers();
-      const sel = document.getElementById('loginUser');
-      sel.innerHTML = '';
-      users.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.username;
-        opt.textContent = `${u.username} (${u.toko === 'palen' ? 'Palen' : 'Bangunan'} - ${u.jabatan || 'Staf'})`;
-        sel.appendChild(opt);
-      });
-
-      // Background sync from live Google Sheets
-      MasterDB.syncFromGoogleSheets();
-    }
-
-    function checkActiveSession() {
-      const activeUser = Security.getCurrentUser();
-      if (activeUser && activeUser.username) {
-        showPortal(activeUser);
-      } else {
-        showLogin();
-      }
-    }
-
-    function showLogin() {
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('portalScreen').style.display = 'none';
-      document.getElementById('loginPassword').value = '';
-      initUserDropdown();
-    }
-
-    function showPortal(user) {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('portalScreen').style.display = 'flex';
-      
-      document.getElementById('avatarInitial').textContent = (user.username || 'U')[0].toUpperCase();
-      document.getElementById('displayName').textContent = user.namaLengkap || user.username;
-      document.getElementById('displayRole').textContent = `${user.jabatan || 'Staf'} (${user.toko === 'palen' ? 'KUK Palen' : 'KUK Bangunan'})`;
-
-      // Filter visible menus by RBAC
-      const perms = user.permissions || [];
-      const isSuper = user.role === 'super_admin' || perms.includes('*');
-
-      const menuIds = ['dashboard','attendance_review','violation_review','payroll','absen','fingerprint','cuti','pelanggaran','tip','peminjaman','karyawan','peminjaman_admin','users'];
-      menuIds.forEach(id => {
-        const el = document.getElementById('menu-' + id);
-        if (el) {
-          el.style.display = (isSuper || perms.includes(id)) ? 'flex' : 'none';
-        }
-      });
-    }
-
-    function doLogin() {
-      const username = document.getElementById('loginUser').value;
-      const pass = document.getElementById('loginPassword').value;
-      const errEl = document.getElementById('errMsg');
-
-      if (!pass) {
-        errEl.classList.add('show');
-        document.getElementById('errText').textContent = 'Harap masukkan kata sandi.';
-        return;
-      }
-
-      const users = MasterDB.getUsers();
-      const userObj = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-
-      if (!userObj) {
-        errEl.classList.add('show');
-        document.getElementById('errText').textContent = 'Pengguna tidak ditemukan.';
-        return;
-      }
-
-      if (userObj.password !== pass && pass !== '12345' && pass !== '54321') {
-        errEl.classList.add('show');
-        document.getElementById('errText').textContent = 'Kata sandi tidak sesuai.';
-        Security.audit('LOGIN_FAILED', { username }, 'WARN');
-        return;
-      }
-
-      errEl.classList.remove('show');
-
-      // Create secure session
-      const sessionUser = {
-        username: userObj.username,
-        role: userObj.role || 'hr_admin',
-        namaLengkap: userObj.namaLengkap,
-        jabatan: userObj.jabatan,
-        toko: userObj.toko,
-        permissions: userObj.permissions || [],
-        loginAt: new Date().toISOString()
-      };
-
-      sessionStorage.setItem('kuk_user', JSON.stringify(sessionUser));
-      Security.audit('LOGIN_SUCCESS', { username: userObj.username, role: userObj.role }, 'INFO', sessionUser);
-
-      showPortal(sessionUser);
-    }
-
-    function doLogout() {
-      Security.terminateSession();
-      Security.audit('LOGOUT', {}, 'INFO');
-      showLogin();
-    }
-
-    document.getElementById('pwToggle').onclick = () => {
-      const inp = document.getElementById('loginPassword');
-      inp.type = inp.type === 'password' ? 'text' : 'password';
-    };
-
-    document.getElementById('loginPassword').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-
     document.addEventListener('DOMContentLoaded', () => {
       MasterDB.init();
-      checkActiveSession();
+      updateStaffTileStatus();
+
+      // Enter key for login
+      document.getElementById('inputPassword').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doStaffLogin();
+      });
+      document.getElementById('inputUsername').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doStaffLogin();
+      });
     });
+
+    function switchView(viewId) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(viewId);
+      if (target) target.classList.add('active');
+    }
+
+    function openStaffFlow() {
+      const activeUser = typeof Security !== 'undefined' && Security.getCurrentUser ? Security.getCurrentUser() : null;
+      if (activeUser && activeUser.username) {
+        populateStaffProfile(activeUser);
+        switchView('viewStaffPortal');
+      } else {
+        document.getElementById('loginErrorMsg').style.display = 'none';
+        document.getElementById('inputPassword').value = '';
+        switchView('viewStaffLogin');
+        setTimeout(() => document.getElementById('inputUsername').focus(), 150);
+      }
+    }
+
+    function updateStaffTileStatus() {
+      const activeUser = typeof Security !== 'undefined' && Security.getCurrentUser ? Security.getCurrentUser() : null;
+      const hint = document.getElementById('staffTileBtnText');
+      if (activeUser && activeUser.username) {
+        if (hint) hint.textContent = `Buka Portal (${activeUser.namaLengkap || activeUser.username})`;
+      } else {
+        if (hint) hint.textContent = 'Masuk Portal Staf';
+      }
+    }
+
+    function populateStaffProfile(user) {
+      document.getElementById('staffName').textContent = user.namaLengkap || user.username;
+      document.getElementById('staffAvatar').textContent = (user.username || 'S')[0].toUpperCase();
+      const tokoLabel = user.toko === 'palen' ? 'KUK Palen' : 'KUK Bangunan';
+      const roleLabel = user.role === 'super_admin' ? 'Super Admin' : (user.jabatan || 'Staf');
+      document.getElementById('staffRole').textContent = `${roleLabel} • ${tokoLabel}`;
+    }
+
+    function doStaffLogin() {
+      const usernameInput = document.getElementById('inputUsername').value.trim().toLowerCase();
+      const passwordInput = document.getElementById('inputPassword').value.trim();
+      const errorDiv = document.getElementById('loginErrorMsg');
+
+      errorDiv.style.display = 'none';
+
+      if (!usernameInput || !passwordInput) {
+        errorDiv.textContent = 'Harap isi Username dan Kata Sandi.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      const users = MasterDB.getUsers();
+      const matched = users.find(u => u.username.toLowerCase() === usernameInput);
+
+      if (!matched || matched.password !== passwordInput) {
+        errorDiv.textContent = 'Username atau Kata Sandi salah.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      // Login Successful
+      if (typeof Security !== 'undefined' && Security.login) {
+        Security.login(matched.username, matched.password);
+      } else {
+        sessionStorage.setItem('kuk_user', matched.username);
+        localStorage.setItem('kuk_user', matched.username);
+        localStorage.setItem('kuk_user_record', JSON.stringify(matched));
+      }
+
+      if (matched.toko === 'palen') {
+        localStorage.setItem('kuk_selected_unit', 'palen');
+      } else {
+        localStorage.setItem('kuk_selected_unit', 'bangunan');
+      }
+
+      populateStaffProfile(matched);
+      updateStaffTileStatus();
+      switchView('viewStaffPortal');
+    }
+
+    function doStaffLogout() {
+      if (typeof Security !== 'undefined' && Security.logout) {
+        Security.logout();
+      } else {
+        sessionStorage.removeItem('kuk_user');
+        localStorage.removeItem('kuk_user');
+        localStorage.removeItem('kuk_user_record');
+      }
+      document.getElementById('inputPassword').value = '';
+      updateStaffTileStatus();
+      switchView('viewHome');
+    }
   </script>
 </body>
 </html>

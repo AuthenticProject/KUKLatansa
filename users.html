@@ -3,119 +3,396 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Manajemen Pengguna - KUK HR</title>
+  <title>Manajemen Akun Staf & Pengguna — KUK La Tansa</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#540000">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="shortcut icon" href="favicon-32x32.png">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <style>
-    /* Styling according to new Maroon/Gold Phase 1 tokens */
     body { 
-      background-color: var(--kuk-bg); 
-      color: var(--kuk-text); 
-      padding: 40px 20px 100px; 
+      background-color: var(--kuk-bg, #f8fafc); 
+      color: var(--kuk-text, #0f172a); 
+      padding: 30px 20px 100px; 
       min-height: 100vh; 
-      font-family: var(--kuk-font);
+      font-family: var(--kuk-font, 'Outfit', sans-serif);
     }
-    .app-container { width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
-    .header { text-align: center; margin-bottom: 10px; }
-    .header h1 { font-size: 28px; font-weight: 700; color: var(--kuk-primary); letter-spacing: -0.5px; }
-    .header p { font-size: 15px; color: var(--kuk-text-muted); margin-top: 8px; }
+    .app-container { 
+      width: 100%; 
+      max-width: 960px; 
+      margin: 0 auto; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 24px; 
+    }
+    .header { text-align: center; margin-bottom: 8px; }
+    .header h1 { font-size: 28px; font-weight: 800; color: var(--kuk-primary, #540000); letter-spacing: -0.5px; }
+    .header p { font-size: 14px; color: var(--kuk-text-muted, #64748b); margin-top: 4px; }
     
-    .card { background: var(--kuk-surface); border-radius: var(--kuk-radius); box-shadow: var(--kuk-shadow); padding: 24px; border: 1px solid var(--kuk-border); }
+    .card { 
+      background: var(--kuk-surface, #ffffff); 
+      border-radius: var(--kuk-radius, 16px); 
+      box-shadow: var(--kuk-shadow, 0 4px 16px rgba(0,0,0,0.06)); 
+      padding: 24px 28px; 
+      border: 1px solid var(--kuk-border, #e2e8f0); 
+    }
+
+    .info-banner {
+      background: linear-gradient(135deg, rgba(84,0,0,0.05) 0%, rgba(255,204,0,0.1) 100%);
+      border: 1px solid rgba(84,0,0,0.12);
+      border-left: 4px solid var(--kuk-primary, #540000);
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #334155;
+      margin-bottom: 20px;
+    }
     
-    .btn { padding: 10px 16px; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-primary { background: var(--kuk-primary); color: white; }
-    .btn-primary:hover { background: #6b0000; transform: translateY(-1px); }
-    .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--kuk-danger); }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+    .btn { 
+      padding: 10px 18px; 
+      border-radius: 10px; 
+      border: none; 
+      font-size: 13.5px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .btn-primary { 
+      background: var(--kuk-primary, #540000); 
+      color: white; 
+    }
+    .btn-primary:hover { 
+      background: #730000; 
+      transform: translateY(-1px); 
+      box-shadow: 0 4px 12px rgba(84,0,0,0.25);
+    }
+    .btn-outline { 
+      background: transparent; 
+      border: 1px solid var(--kuk-border, #cbd5e1); 
+      color: var(--kuk-text, #0f172a); 
+    }
+    .btn-outline:hover { 
+      background: #f1f5f9; 
+    }
+    .btn-danger { 
+      background: rgba(239, 68, 68, 0.1); 
+      color: var(--kuk-danger, #ef4444); 
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-danger:hover { 
+      background: rgba(239, 68, 68, 0.2); 
+    }
     
-    .user-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #fdfdfd; border: 1px solid var(--kuk-border); border-radius: 12px; }
-    .user-info h3 { font-size: 16px; margin-bottom: 4px; color: var(--kuk-primary); }
-    .user-info p { font-size: 13px; color: var(--kuk-text-muted); }
+    .user-list { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 12px; 
+      margin-top: 18px; 
+    }
+    .user-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 18px 20px; 
+      background: #ffffff; 
+      border: 1px solid var(--kuk-border, #e2e8f0); 
+      border-radius: 14px; 
+      transition: all 0.2s;
+    }
+    .user-item:hover {
+      border-color: var(--kuk-primary, #540000);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .user-main {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-avatar-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--kuk-primary, #540000) 0%, #8b0000 100%);
+      color: #FFCC00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(84,0,0,0.2);
+    }
+    .user-info h3 { 
+      font-size: 15px; 
+      font-weight: 700;
+      color: var(--kuk-text, #0f172a); 
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-badge-role {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .role-super_admin { background: #fef3c7; color: #b45309; }
+    .role-hr_admin { background: #dbeafe; color: #1e40af; }
+    .role-manager { background: #e0e7ff; color: #4338ca; }
+    .role-finance { background: #dcfce7; color: #15803d; }
+    .role-staff { background: #f1f5f9; color: #475569; }
+
+    .user-info p { 
+      font-size: 13px; 
+      color: var(--kuk-text-muted, #64748b); 
+      margin-top: 4px;
+    }
+    .user-perms-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .perm-tag {
+      font-size: 10.5px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
     
     .actions { display: flex; gap: 8px; }
     
     /* Modal */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+    .modal-overlay { 
+      position: fixed; 
+      top: 0; left: 0; right: 0; bottom: 0; 
+      background: rgba(15, 23, 42, 0.65); 
+      backdrop-filter: blur(4px);
+      display: none; 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 10000; 
+      padding: 20px; 
+    }
     .modal-overlay.show { display: flex; }
-    .modal { background: var(--kuk-surface); width: 100%; max-width: 450px; border-radius: var(--kuk-radius); padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
-    .modal h2 { margin-bottom: 16px; font-size: 20px; color: var(--kuk-primary); }
-    @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal { 
+      background: #ffffff; 
+      width: 100%; 
+      max-width: 540px; 
+      border-radius: 18px; 
+      padding: 28px; 
+      box-shadow: 0 24px 48px rgba(0,0,0,0.2); 
+      animation: modalIn 0.25s ease; 
+      max-height: 90vh; 
+      overflow-y: auto; 
+    }
+    .modal h2 { 
+      margin-bottom: 20px; 
+      font-size: 20px; 
+      font-weight: 800; 
+      color: var(--kuk-primary, #540000); 
+    }
+    @keyframes modalIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--kuk-text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-group input[type="text"], .form-group input[type="password"], .form-group select { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--kuk-border); font-size: 15px; font-weight: 500; outline: none; background: #f8fafc; color: var(--kuk-text); font-family: var(--kuk-font); }
-    .form-group input:focus, .form-group select:focus { border-color: var(--kuk-primary); background: var(--kuk-surface); box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1); }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { 
+      display: block; 
+      font-size: 12px; 
+      font-weight: 700; 
+      color: var(--kuk-text-muted, #64748b); 
+      margin-bottom: 6px; 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px; 
+    }
+    .form-group input[type="text"], 
+    .form-group input[type="password"], 
+    .form-group select { 
+      width: 100%; 
+      padding: 10px 14px; 
+      border-radius: 8px; 
+      border: 1px solid var(--kuk-border, #cbd5e1); 
+      font-size: 14px; 
+      font-weight: 500; 
+      outline: none; 
+      background: #f8fafc; 
+      color: var(--kuk-text, #0f172a); 
+      font-family: inherit; 
+      transition: all 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { 
+      border-color: var(--kuk-primary, #540000); 
+      background: #ffffff; 
+      box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1); 
+    }
     
-    .perm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .perm-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+    .perm-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 8px 12px; 
+      background: #f8fafc;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .perm-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      font-size: 13px; 
+      font-weight: 500;
+      color: #334155;
+      cursor: pointer; 
+    }
+    .perm-item input {
+      accent-color: var(--kuk-primary, #540000);
+      cursor: pointer;
+    }
     
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    .modal-actions { 
+      display: flex; 
+      justify-content: flex-end; 
+      gap: 10px; 
+      margin-top: 24px; 
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
     <div class="header">
-      <h1>Manajemen Staff & Akses</h1>
-      <p>Kelola akses login untuk karyawan KUK</p>
+      <h1>🔐 Manajemen Akun Staf & Akses Sistem</h1>
+      <p>Kelola kredensial login, peran (*role*), unit bisnis, dan izin modul untuk akun manajemen KUK La Tansa.</p>
+    </div>
+
+    <div class="info-banner">
+      <strong>ℹ️ Catatan Penting:</strong> Modul ini khusus mengelola <strong>Akun Pengguna Sistem / Staf Manajemen</strong> (Sheet <code>Akun</code>). Untuk mengelola data tenaga kerja/karyawan operasional (absensi, cuti, pelanggaran, kontrak PKWT, payroll), gunakan menu <a href="karyawan.html" style="color:var(--kuk-primary,#540000); font-weight:700;">Database Karyawan</a>.
     </div>
 
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h2 style="font-size:18px; color:var(--kuk-primary);">Daftar Pengguna</h2>
-        <button class="btn btn-primary" onclick="openModal()">+ Tambah Akun</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+        <div>
+          <h2 style="font-size:18px; font-weight:800; color:var(--kuk-primary, #540000);">Daftar Akun Pengguna Staf</h2>
+          <p style="font-size:13px; color:var(--kuk-text-muted);">Total Akun Terdaftar: <strong id="userCount">0</strong></p>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <!-- Unit Filter Pills -->
+          <div style="display:flex; background:#f1f5f9; padding:3px; border-radius:8px; border:1px solid #cbd5e1;">
+            <button class="btn btn-sm" id="uFilterAll" style="padding:4px 10px; font-size:12px; background:var(--kuk-primary,#540000); color:#fff;" onclick="setUserUnitFilter('ALL')">Semua Staf</button>
+            <button class="btn btn-sm" id="uFilterBangunan" style="padding:4px 10px; font-size:12px; background:transparent; color:#64748b;" onclick="setUserUnitFilter('bangunan')">🏗️ Bangunan</button>
+            <button class="btn btn-sm" id="uFilterPalen" style="padding:4px 10px; font-size:12px; background:transparent; color:#64748b;" onclick="setUserUnitFilter('palen')">🏠 Palen</button>
+          </div>
+          <button class="btn btn-outline" onclick="syncUsersFromCloud()">🔄 Sinkron Cloud</button>
+          <button class="btn btn-primary" onclick="openModal()">➕ Tambah Akun Staf</button>
+        </div>
       </div>
+      
       <div class="user-list" id="userList">
         <!-- List users -->
       </div>
     </div>
   </div>
 
+  <!-- MODAL EDIT / CREATE USER -->
   <div class="modal-overlay" id="userModal">
     <div class="modal">
-      <h2 id="modalTitle">Tambah Akun</h2>
+      <h2 id="modalTitle">Tambah Akun Staf</h2>
       
-      <div class="form-group">
-        <label>Hubungkan ke Karyawan</label>
-        <select id="employeeSelect">
-          <!-- Populated by JS -->
-        </select>
-        <small style="color:var(--kuk-danger); font-size:11px; display:block; margin-top:4px;">*User harus terhubung dengan data Master Karyawan.</small>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Username (Login)</label>
+          <input type="text" id="usernameInput" placeholder="Contoh: fariz">
+        </div>
+        <div class="form-group">
+          <label>Kata Sandi</label>
+          <input type="password" id="passwordInput" placeholder="Minimal 4 karakter">
+        </div>
       </div>
 
       <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="usernameInput" placeholder="Masukkan username">
+        <label>Nama Lengkap & Gelar</label>
+        <input type="text" id="namaLengkapInput" placeholder="Contoh: Fariz Ridwani, S.I.Kom">
       </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Jabatan Staf</label>
+          <select id="jabatanInput">
+            <option value="Koordinator">Koordinator</option>
+            <option value="Kepala Toko">Kepala Toko</option>
+            <option value="HRD">HRD</option>
+            <option value="Bendahara 1">Bendahara 1</option>
+            <option value="Bendahara 2">Bendahara 2</option>
+            <option value="Inventaris">Inventaris</option>
+            <option value="Sekretaris">Sekretaris</option>
+            <option value="Admin">Admin</option>
+            <option value="Kasir">Kasir</option>
+            <option value="Staf">Staf</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Unit Bisnis (Toko)</label>
+          <select id="tokoInput">
+            <option value="bangunan">🏗️ KUK Bangunan</option>
+            <option value="palen">🏠 KUK Palen</option>
+          </select>
+        </div>
+      </div>
+
       <div class="form-group">
-        <label>Kata Sandi</label>
-        <input type="password" id="passwordInput" placeholder="Minimal 5 karakter">
+        <label>Role Akses Sistem</label>
+        <select id="roleInput" onchange="handleRolePresetChange()">
+          <option value="hr_admin">HR / Administrasi (hr_admin)</option>
+          <option value="super_admin">Super Administrator (Akses Penuh)</option>
+          <option value="manager">Manager / Kepala Toko</option>
+          <option value="finance">Keuangan & Payroll</option>
+          <option value="staff">Staf Standar</option>
+        </select>
       </div>
       
       <div class="form-group">
-        <label>Akses Menu (Permissions)</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="margin-bottom:0;">Hak Izin Menu (Permissions)</label>
+          <button type="button" class="btn-outline" style="font-size:11px; padding:2px 8px; border-radius:4px; cursor:pointer;" onclick="toggleSelectAllPerms()">Pilih Semua</button>
+        </div>
         <div class="perm-grid" id="permContainer">
-          <label class="perm-item"><input type="checkbox" value="absen"> Rekap Absen</label>
-          <label class="perm-item"><input type="checkbox" value="cuti"> Cuti</label>
-          <label class="perm-item"><input type="checkbox" value="pelanggaran"> Pelanggaran</label>
-          <label class="perm-item"><input type="checkbox" value="dashboard"> Dashboard</label>
-          <label class="perm-item"><input type="checkbox" value="tip"> Tip Kaca</label>
-          <label class="perm-item"><input type="checkbox" value="karyawan"> Data Karyawan</label>
-          <label class="perm-item"><input type="checkbox" value="peminjaman"> Kendaraan</label>
-          <label class="perm-item"><input type="checkbox" value="users"> User Admin</label>
+          <label class="perm-item"><input type="checkbox" value="dashboard"> 📊 Dashboard</label>
+          <label class="perm-item"><input type="checkbox" value="attendance_review"> ⏱️ Review Kehadiran</label>
+          <label class="perm-item"><input type="checkbox" value="violation_review"> ⚠️ Review Pelanggaran</label>
+          <label class="perm-item"><input type="checkbox" value="payroll"> 💸 Manajemen Payroll</label>
+          <label class="perm-item"><input type="checkbox" value="absen"> 📋 Absen Briefing</label>
+          <label class="perm-item"><input type="checkbox" value="fingerprint"> 📥 Import Fingerprint</label>
+          <label class="perm-item"><input type="checkbox" value="cuti"> 🏖️ Rekap Cuti</label>
+          <label class="perm-item"><input type="checkbox" value="pelanggaran"> 📝 Catat Pelanggaran</label>
+          <label class="perm-item"><input type="checkbox" value="tip"> 🪟 Tip Kaca 3%</label>
+          <label class="perm-item"><input type="checkbox" value="peminjaman"> 🚘 Pinjam Kendaraan</label>
+          <label class="perm-item"><input type="checkbox" value="karyawan"> 👥 Database Karyawan</label>
+          <label class="perm-item"><input type="checkbox" value="peminjaman_admin"> 🚚 Admin Armada</label>
+          <label class="perm-item"><input type="checkbox" value="users"> 🔐 Manajemen Pengguna</label>
         </div>
       </div>
       
       <div class="modal-actions">
-        <button class="btn" style="background: var(--kuk-surface); border: 1px solid var(--kuk-border);" onclick="closeModal()">Batal</button>
-        <button class="btn btn-primary" onclick="saveUser()">Simpan Akun</button>
+        <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveUser()">Simpan Akun Staf</button>
       </div>
     </div>
   </div>
@@ -125,82 +402,137 @@
   <script src="shared/shell.js" data-base="."></script>
   <script>
     let editingUserId = null;
+    let selectedUnitFilter = 'ALL';
+
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      MasterDB.init();
+
+      // Listen to shell global unit change
+      window.addEventListener('kukUnitChange', e => {
+        const u = e.detail && e.detail.unit ? e.detail.unit : 'ALL';
+        setUserUnitFilter(u === 'semua' ? 'ALL' : u);
+      });
+
+      renderUsers();
+    });
+
+    function setUserUnitFilter(unit) {
+      selectedUnitFilter = unit;
+      document.getElementById('uFilterAll').style.background = unit === 'ALL' ? 'var(--kuk-primary,#540000)' : 'transparent';
+      document.getElementById('uFilterAll').style.color = unit === 'ALL' ? '#fff' : '#64748b';
+      
+      document.getElementById('uFilterBangunan').style.background = unit === 'bangunan' ? 'var(--kuk-primary,#540000)' : 'transparent';
+      document.getElementById('uFilterBangunan').style.color = unit === 'bangunan' ? '#fff' : '#64748b';
+
+      document.getElementById('uFilterPalen').style.background = unit === 'palen' ? 'var(--kuk-primary,#540000)' : 'transparent';
+      document.getElementById('uFilterPalen').style.color = unit === 'palen' ? '#fff' : '#64748b';
+
+      renderUsers();
+    }
 
     function renderUsers() {
       const list = document.getElementById('userList');
       list.innerHTML = '';
       
-      const users = MasterDB.getUsersWithEmployee();
+      let users = MasterDB.getUsers();
+      if (selectedUnitFilter && selectedUnitFilter !== 'ALL' && selectedUnitFilter !== 'semua') {
+        users = users.filter(u => (u.toko || 'bangunan').toLowerCase() === selectedUnitFilter.toLowerCase());
+      }
+
+      document.getElementById('userCount').textContent = users.length;
       
       if (users.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--kuk-text-muted);">Belum ada pengguna.</div>';
+        list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--kuk-text-muted);">Tidak ada akun staf untuk unit ini.</div>';
         return;
       }
+
+      const roleLabels = {
+        super_admin: 'Super Admin',
+        hr_admin: 'HR Admin',
+        manager: 'Manager',
+        finance: 'Finance',
+        staff: 'Staf'
+      };
 
       users.forEach(u => {
         const div = document.createElement('div');
         div.className = 'user-item';
         
-        const permsText = u.permissions && u.permissions.length > 0 
-          ? u.permissions.join(', ') 
-          : 'Tidak ada akses khusus';
-          
-        const empName = u.employee ? u.employee.fullName : '<span style="color:var(--kuk-danger)">[Tidak Terhubung]</span>';
-        const empPos = u.employee ? u.employee.position : '';
+        const roleKey = u.role || 'staff';
+        const roleBadgeClass = 'role-' + roleKey;
+        const roleLabel = roleLabels[roleKey] || roleKey;
+        const tokoLabel = u.toko === 'palen' ? 'KUK Palen' : 'KUK Bangunan';
+        const initial = (u.username || 'U')[0].toUpperCase();
+
+        const perms = u.permissions || [];
+        const isSuper = u.role === 'super_admin' || perms.includes('*');
+        const permsTagsHTML = isSuper 
+          ? '<span class="perm-tag" style="background:#fef3c7; color:#b45309; font-weight:700;">⭐ Akses Penuh (Semua Modul)</span>'
+          : perms.map(p => `<span class="perm-tag">${p}</span>`).join('');
         
         div.innerHTML = `
-          <div class="user-info">
-            <h3>${u.username}</h3>
-            <p style="color:var(--kuk-accent); font-weight:600; margin-top:2px;">Karyawan: ${empName} ${empPos ? `(${empPos})` : ''}</p>
-            <p style="margin-top:2px;">Akses: ${permsText}</p>
+          <div class="user-main">
+            <div class="user-avatar-badge">${initial}</div>
+            <div class="user-info">
+              <h3>
+                ${u.namaLengkap || u.username}
+                <span class="user-badge-role ${roleBadgeClass}">${roleLabel}</span>
+              </h3>
+              <p>
+                <strong>@${u.username}</strong> &bull; ${u.jabatan || 'Staf'} &bull; <span style="color:var(--kuk-primary,#540000); font-weight:600;">${tokoLabel}</span>
+              </p>
+              <div class="user-perms-tags">
+                ${permsTagsHTML || '<span style="font-size:11px; color:#94a3b8;">Belum ada izin menu</span>'}
+              </div>
+            </div>
           </div>
           <div class="actions">
-            <button class="btn" style="background: var(--kuk-bg); border: 1px solid var(--kuk-border);" onclick="editUser('${u.id}')">Edit</button>
-            <button class="btn btn-danger" onclick="deleteUser('${u.id}')">Hapus</button>
+            <button class="btn btn-outline" onclick="editUser('${u.id || u.username}')">✏️ Edit</button>
+            <button class="btn btn-danger" onclick="deleteUser('${u.id || u.username}')">🗑️</button>
           </div>
         `;
         list.appendChild(div);
       });
     }
 
-    function populateEmployeeSelect() {
-      const select = document.getElementById('employeeSelect');
-      select.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
-      const emps = MasterDB.getEmployees();
-      emps.forEach(e => {
-        const opt = document.createElement('option');
-        opt.value = e.id;
-        opt.textContent = `${e.fullName} (${e.unit} - ${e.position})`;
-        select.appendChild(opt);
-      });
-    }
-
     function openModal() {
       editingUserId = null;
-      document.getElementById('modalTitle').textContent = 'Tambah Akun';
+      document.getElementById('modalTitle').textContent = 'Tambah Akun Staf Baru';
       document.getElementById('usernameInput').value = '';
+      document.getElementById('usernameInput').disabled = false;
       document.getElementById('passwordInput').value = '';
-      populateEmployeeSelect();
-      document.getElementById('employeeSelect').value = '';
+      document.getElementById('namaLengkapInput').value = '';
+      document.getElementById('jabatanInput').value = 'Staf';
+      document.getElementById('tokoInput').value = 'bangunan';
+      document.getElementById('roleInput').value = 'hr_admin';
+      
       document.querySelectorAll('#permContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
+      handleRolePresetChange();
       
       document.getElementById('userModal').classList.add('show');
     }
 
-    function editUser(id) {
-      editingUserId = id;
-      document.getElementById('modalTitle').textContent = 'Edit Akun';
-      
-      const u = MasterDB.getUser(id);
-      if(!u) return;
+    function editUser(idOrUsername) {
+      const u = MasterDB.getUser(idOrUsername);
+      if (!u) return;
 
+      editingUserId = u.id || u.username;
+      document.getElementById('modalTitle').textContent = 'Edit Akun Staf: ' + (u.namaLengkap || u.username);
       document.getElementById('usernameInput').value = u.username;
-      document.getElementById('passwordInput').value = u.password;
-      populateEmployeeSelect();
-      document.getElementById('employeeSelect').value = u.employeeId;
+      document.getElementById('usernameInput').disabled = true; // username immutable
+      document.getElementById('passwordInput').value = u.password || '';
+      document.getElementById('namaLengkapInput').value = u.namaLengkap || u.username;
+      document.getElementById('jabatanInput').value = u.jabatan || 'Staf';
+      document.getElementById('tokoInput').value = u.toko || 'bangunan';
+      document.getElementById('roleInput').value = u.role || 'hr_admin';
       
+      const perms = u.permissions || [];
+      const isSuper = u.role === 'super_admin' || perms.includes('*');
+
       document.querySelectorAll('#permContainer input[type="checkbox"]').forEach(cb => {
-        cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
+        cb.checked = isSuper || perms.includes(cb.value);
       });
       
       document.getElementById('userModal').classList.add('show');
@@ -208,54 +540,147 @@
 
     function closeModal() {
       document.getElementById('userModal').classList.remove('show');
+      editingUserId = null;
     }
 
-    function saveUser() {
-      const username = document.getElementById('usernameInput').value.trim();
-      const password = document.getElementById('passwordInput').value.trim();
-      const employeeId = document.getElementById('employeeSelect').value;
+    function handleRolePresetChange() {
+      const role = document.getElementById('roleInput').value;
+      const cbs = document.querySelectorAll('#permContainer input[type="checkbox"]');
       
-      if (!username || !password || !employeeId) {
-        alert('Username, Kata Sandi, dan Karyawan wajib diisi!');
+      if (role === 'super_admin') {
+        cbs.forEach(cb => cb.checked = true);
+      } else if (role === 'hr_admin') {
+        cbs.forEach(cb => {
+          cb.checked = ['dashboard','attendance_review','violation_review','payroll','absen','fingerprint','cuti','pelanggaran','tip','peminjaman','karyawan','peminjaman_admin'].includes(cb.value);
+        });
+      } else if (role === 'manager') {
+        cbs.forEach(cb => {
+          cb.checked = ['dashboard','absen','pelanggaran','cuti','karyawan'].includes(cb.value);
+        });
+      } else if (role === 'finance') {
+        cbs.forEach(cb => {
+          cb.checked = ['dashboard','payroll','tip','karyawan'].includes(cb.value);
+        });
+      } else {
+        cbs.forEach(cb => {
+          cb.checked = ['absen','cuti','peminjaman'].includes(cb.value);
+        });
+      }
+    }
+
+    let allSelected = false;
+    function toggleSelectAllPerms() {
+      allSelected = !allSelected;
+      document.querySelectorAll('#permContainer input[type="checkbox"]').forEach(cb => cb.checked = allSelected);
+    }
+
+    async function saveUser() {
+      const username = document.getElementById('usernameInput').value.trim().toLowerCase();
+      const password = document.getElementById('passwordInput').value.trim();
+      const namaLengkap = document.getElementById('namaLengkapInput').value.trim();
+      const jabatan = document.getElementById('jabatanInput').value;
+      const toko = document.getElementById('tokoInput').value;
+      const role = document.getElementById('roleInput').value;
+      
+      if (!username || !password) {
+        alert('Username dan Kata Sandi wajib diisi!');
         return;
       }
       
       const checkboxes = document.querySelectorAll('#permContainer input[type="checkbox"]:checked');
-      const permissions = Array.from(checkboxes).map(cb => cb.value);
+      let permissions = Array.from(checkboxes).map(cb => cb.value);
+      if (role === 'super_admin' || permissions.length === document.querySelectorAll('#permContainer input[type="checkbox"]').length) {
+        permissions = ['*'];
+      }
       
-      const allUsers = MasterDB.getUsers();
-      
+      const userPayload = {
+        username: username,
+        password: password,
+        namaLengkap: namaLengkap || username,
+        jabatan: jabatan,
+        toko: toko,
+        role: role,
+        permissions: permissions
+      };
+
       if (!editingUserId) {
         // Create new
-        if (allUsers.some(u => u.username === username)) {
-          alert('Username sudah ada!');
+        const allUsers = MasterDB.getUsers();
+        if (allUsers.some(u => u.username.toLowerCase() === username)) {
+          alert('Username "' + username + '" sudah digunakan!');
           return;
         }
-        MasterDB.saveUser({ username, password, employeeId, permissions });
+        MasterDB.saveUser(userPayload);
       } else {
         // Edit existing
-        const existing = allUsers.find(u => u.username === username);
-        if (existing && existing.id !== editingUserId) {
-          alert('Username sudah digunakan!');
-          return;
-        }
         const currentUser = MasterDB.getUser(editingUserId);
-        MasterDB.saveUser({ ...currentUser, username, password, employeeId, permissions });
+        MasterDB.saveUser({ ...currentUser, ...userPayload });
       }
+
+      // Background cloud sync to Google Apps Script
+      try {
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_user',
+            username: username,
+            password: password,
+            namaLengkap: namaLengkap || username,
+            jabatan: jabatan,
+            toko: toko,
+            permissions: permissions
+          })
+        }).catch(err => console.warn('[Cloud Sync User Warn]:', err));
+      } catch (e) {}
       
       renderUsers();
       closeModal();
+      alert('✅ Akun staf "' + username + '" berhasil disimpan!');
     }
 
-    function deleteUser(id) {
-      if (confirm('Yakin ingin menghapus pengguna ini?')) {
-        MasterDB.deleteUser(id);
-        renderUsers();
+    async function deleteUser(idOrUsername) {
+      const u = MasterDB.getUser(idOrUsername);
+      if (!u) return;
+
+      if (!confirm('Yakin ingin menghapus akun staf @' + u.username + ' (' + (u.namaLengkap || u.username) + ')?')) {
+        return;
+      }
+
+      MasterDB.deleteUser(u.id || u.username);
+
+      // Cloud delete
+      try {
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete_user',
+            username: u.username
+          })
+        }).catch(err => console.warn('[Cloud Delete User Warn]:', err));
+      } catch (e) {}
+
+      renderUsers();
+    }
+
+    async function syncUsersFromCloud() {
+      const btn = event ? event.target : null;
+      if (btn) btn.textContent = '⏳ Menyinkronkan...';
+      const res = await MasterDB.syncFromGoogleSheets();
+      if (btn) btn.textContent = '🔄 Sinkron Cloud';
+      renderUsers();
+      if (res && res.success) {
+        alert('✅ ' + res.message);
+      } else {
+        alert('ℹ️ Data lokal termutakhir telah dimuat.');
       }
     }
 
-    // Init
     window.addEventListener('DOMContentLoaded', () => {
+      MasterDB.init();
       renderUsers();
     });
   </script>
