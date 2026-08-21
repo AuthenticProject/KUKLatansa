@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -686,6 +686,16 @@
           <option value="KUK Palen">KUK Palen</option>
         </select>
 
+        <select id="filterBagian" class="filter-select" onchange="renderTable()">
+          <option value="ALL">Semua Bagian / Jabatan</option>
+          <option value="Kepala Toko">Kepala Toko</option>
+          <option value="Kepala Gudang">Kepala Gudang</option>
+          <option value="Admin">Admin</option>
+          <option value="Pengiriman">Pengiriman</option>
+          <option value="Kepala Pengiriman">Kepala Pengiriman</option>
+          <option value="Frontliner">Frontliner</option>
+        </select>
+
         <select id="filterKeluarga" class="filter-select" onchange="renderTable()">
           <option value="ALL">Semua Status Keluarga</option>
           <option value="YES">Sudah Berkeluarga (+Rp 50rb)</option>
@@ -708,7 +718,7 @@
             <tr>
               <th>No & ID</th>
               <th>Karyawan</th>
-              <th>Unit & Bagian</th>
+              <th>Unit & Bagian / Jabatan</th>
               <th>Gaji Pokok</th>
               <th>Gaji Bagian</th>
               <th>Berkeluarga (+50rb)</th>
@@ -775,29 +785,21 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="empDepartment">Bagian / Divisi *</label>
+              <label for="empDepartment">Bagian / Jabatan *</label>
               <select id="empDepartment" class="form-control" required>
-                <option value="Gudang & Stok">Gudang & Stok</option>
-                <option value="Operasional Toko">Operasional Toko</option>
-                <option value="Logistik & Pengiriman">Logistik & Pengiriman</option>
-                <option value="Penjualan & Kasir">Penjualan & Kasir</option>
-                <option value="Admin & Kasir">Admin & Kasir</option>
-                <option value="Produksi & Potong Kaca">Produksi & Potong Kaca</option>
-                <option value="Operasional Palen">Operasional Palen</option>
-                <option value="HR & Manajemen">HR & Manajemen</option>
+                <option value="Kepala Toko">Kepala Toko</option>
+                <option value="Kepala Gudang">Kepala Gudang</option>
+                <option value="Admin">Admin</option>
+                <option value="Pengiriman">Pengiriman</option>
+                <option value="Kepala Pengiriman">Kepala Pengiriman</option>
+                <option value="Frontliner">Frontliner</option>
               </select>
             </div>
           </div>
 
-          <div class="form-row-2">
-            <div class="form-group">
-              <label for="empPosition">Jabatan / Posisi</label>
-              <input type="text" id="empPosition" class="form-control" placeholder="Contoh: Staf Gudang Bangunan">
-            </div>
-            <div class="form-group">
-              <label for="empContact">No. WhatsApp / Kontak</label>
-              <input type="tel" id="empContact" class="form-control" placeholder="Contoh: 081234567890">
-            </div>
+          <div class="form-group">
+            <label for="empContact">No. WhatsApp / Kontak</label>
+            <input type="tel" id="empContact" class="form-control" placeholder="Contoh: 081234567890">
           </div>
 
           <div class="form-row-2">
@@ -879,9 +881,9 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="shared/master_db.js"></script>
-  <script src="shared/security.js"></script>
-  <script src="shared/shell.js" data-base="."></script>
+  <script src="shared/master_db.js?v=1787285625"></script>
+  <script src="shared/security.js?v=1787285625"></script>
+  <script src="shared/shell.js?v=1787285625" data-base="."></script>
 
   <script>
     let employeesData = [];
@@ -944,6 +946,7 @@
     function renderTable() {
       const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
       const unitFilter = document.getElementById('filterUnit').value;
+      const bagianFilter = document.getElementById('filterBagian').value;
       const keluargaFilter = document.getElementById('filterKeluarga').value;
       const statusFilter = document.getElementById('filterStatus').value;
 
@@ -960,6 +963,11 @@
         // Unit filter
         if (unitFilter !== 'ALL') {
           if (!emp.unit || !emp.unit.toLowerCase().includes(unitFilter.toLowerCase().replace('kuk ', ''))) return false;
+        }
+
+        // Bagian filter
+        if (bagianFilter !== 'ALL') {
+          if (!emp.department || emp.department.toLowerCase() !== bagianFilter.toLowerCase()) return false;
         }
 
         // Keluarga filter
@@ -1028,13 +1036,13 @@
                 <div class="emp-avatar">${initial}</div>
                 <div>
                   <div class="emp-name-main">${emp.nama || emp.fullName}</div>
-                  <div class="emp-name-sub">${emp.fullName && emp.fullName !== emp.nama ? emp.fullName : (emp.position || 'Staf')}</div>
+                  <div class="emp-name-sub">${emp.fullName && emp.fullName !== emp.nama ? emp.fullName : (emp.contactNumber || '-')}</div>
                 </div>
               </div>
             </td>
             <td>
               <div>${unitBadge}</div>
-              <div style="font-size: 12px; color: var(--kuk-text-muted); margin-top: 3px;">${emp.department || 'Operasional'}</div>
+              <div style="font-size: 12.5px; font-weight: 600; color: var(--kuk-primary); margin-top: 3px;">${emp.department || emp.position || 'Frontliner'}</div>
             </td>
             <td>
               <span class="salary-tag">${formatIDR(gajiPokok)}</span>
@@ -1077,12 +1085,8 @@
       if (!internalId || curGaji === 850000 || curGaji === 700000 || !curGaji) {
         if (unit.includes('Palen')) {
           document.getElementById('empGajiPokok').value = 700000;
-          document.getElementById('empDepartment').value = 'Operasional Palen';
         } else {
           document.getElementById('empGajiPokok').value = 850000;
-          if (document.getElementById('empDepartment').value === 'Operasional Palen') {
-            document.getElementById('empDepartment').value = 'Operasional Toko';
-          }
         }
         calcPreviewSalary();
       }
@@ -1099,8 +1103,7 @@
       document.getElementById('empNama').value = '';
       document.getElementById('empFullName').value = '';
       document.getElementById('empUnit').value = 'KUK Bangunan';
-      document.getElementById('empDepartment').value = 'Operasional Toko';
-      document.getElementById('empPosition').value = 'Staf Operasional Bangunan';
+      document.getElementById('empDepartment').value = 'Admin';
       document.getElementById('empContact').value = '';
       document.getElementById('empGajiPokok').value = 850000;
       document.getElementById('empGajiBagian').value = 200000;
@@ -1127,8 +1130,7 @@
       document.getElementById('empNama').value = emp.nama || '';
       document.getElementById('empFullName').value = emp.fullName || emp.nama || '';
       document.getElementById('empUnit').value = emp.unit || 'KUK Bangunan';
-      document.getElementById('empDepartment').value = emp.department || 'Operasional Toko';
-      document.getElementById('empPosition').value = emp.position || '';
+      document.getElementById('empDepartment').value = emp.department || emp.position || 'Admin';
       document.getElementById('empContact').value = emp.contactNumber || '';
       document.getElementById('empGajiPokok').value = Number(emp.gajiPokok) > 0 ? emp.gajiPokok : defaultBase;
       document.getElementById('empGajiBagian').value = emp.gajiBagian || 200000;
@@ -1163,9 +1165,9 @@
       const fullName = document.getElementById('empFullName').value.trim();
       const unit = document.getElementById('empUnit').value;
       const department = document.getElementById('empDepartment').value;
-      const position = document.getElementById('empPosition').value.trim() || department;
+      const position = department; // Bagian dan Jabatan dibuat satu
       const contactNumber = document.getElementById('empContact').value.trim();
-      const gajiPokok = parseFloat(document.getElementById('empGajiPokok').value) || 3000000;
+      const gajiPokok = parseFloat(document.getElementById('empGajiPokok').value) || 850000;
       const gajiBagian = parseFloat(document.getElementById('empGajiBagian').value) || 0;
       const sudahBerkeluarga = document.getElementById('empBerkeluarga').checked;
       const totalPelanggaran = parseInt(document.getElementById('empPelanggaran').value) || 0;

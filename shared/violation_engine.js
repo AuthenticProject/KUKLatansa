@@ -7,10 +7,12 @@ const ViolationEngine = (() => {
   const DB_KEY = 'kuk_violations_db';
 
   const RULES = {
-    late_tolerance_mins: 15,
+    shift_start: '07:00',
+    late_tolerance_mins: 5, // Toleransi sampai 07:05
+    max_break_minutes: 60,  // Istirahat maks 60 menit
+    flag_over_break: true,
     flag_missing_punch: true, // INCOMPLETE
-    flag_unauthorized_absence: true, // ABSENT
-    shift_start: '08:00'
+    flag_unauthorized_absence: true // ABSENT (Mangkir)
   };
 
   function getViolations(unit = 'ALL') {
@@ -42,25 +44,30 @@ const ViolationEngine = (() => {
     let newGenerated = 0;
 
     attendanceList.forEach(att => {
-      // Ignore manually excused or off
+      // Ignore manually excused, off, cuti, izin, sakit
       if (att.status === 'EXCUSED' || att.status === 'OFF' || att.status === 'LEAVE' || att.status === 'SICK' || att.status === 'PERMISSION') return;
 
       let ruleBroken = null;
       let calculatedValue = '';
 
+      const isFriday = new Date(dateStr).getDay() === 5;
+      const shiftStartMin = isFriday ? (8 * 60) : (7 * 60);
+
       if (att.status === 'LATE') {
         ruleBroken = 'LATE_ARRIVAL';
-        // Calculate late duration
-        const tIn = new Date(`2000-01-01T${att.inTime}`);
-        const tStart = new Date(`2000-01-01T${RULES.shift_start}`);
-        const diffMins = Math.floor((tIn - tStart) / 60000);
-        calculatedValue = `Terlambat ${diffMins} menit (Masuk: ${att.inTime})`;
+        const [h, m] = (att.inTime || (isFriday ? '08:00' : '07:00')).split(':').map(Number);
+        const inMins = h * 60 + m;
+        const diffMins = inMins - shiftStartMin;
+        calculatedValue = `Terlambat ${diffMins > 0 ? diffMins : 0} menit (Masuk: ${att.inTime || '-'}, Jadwal: ${isFriday ? '08:00' : '07:00'})`;
+      } else if (att.isBreakExcess && RULES.flag_over_break) {
+        ruleBroken = 'OVER_BREAK';
+        calculatedValue = `Kelebihan istirahat ${att.breakExcessMinutes || 0} menit (Durasi: ${att.breakDuration || 0} mnt, ${att.breakOutTime || '-'}-${att.breakInTime || '-'})`;
       } else if (att.status === 'INCOMPLETE' && RULES.flag_missing_punch) {
         ruleBroken = 'MISSING_PUNCH';
-        calculatedValue = `Hanya ada 1 scan (Jam: ${att.inTime})`;
+        calculatedValue = `Hanya ada 1 scan (Jam: ${att.inTime || '-'})`;
       } else if (att.status === 'ABSENT' && RULES.flag_unauthorized_absence) {
         ruleBroken = 'UNAUTHORIZED_ABSENCE';
-        calculatedValue = `Mangkir (Tanpa Keterangan/Form)`;
+        calculatedValue = `Mangkir / Tidak Masuk (Tanpa Cuti/Izin Resmi)`;
       }
 
       if (ruleBroken) {

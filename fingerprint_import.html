@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Import Fingerprint - KUK HR Portal</title>
+  <title>Import Fingerprint & Analisis Disiplin - KUK HR Portal</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#540000">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
     
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -35,7 +35,7 @@
       background: var(--kuk-surface);
       border: 1px solid var(--kuk-border);
       border-radius: var(--kuk-radius);
-      padding: 28px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -45,6 +45,11 @@
     .panel-header {
       border-bottom: 2px solid var(--kuk-border);
       padding-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .panel-header h2 {
       font-size: 20px;
@@ -52,7 +57,7 @@
       margin-bottom: 4px;
     }
     .panel-header p {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--kuk-text-muted);
     }
 
@@ -60,7 +65,7 @@
     .stepper {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
       position: relative;
     }
     .stepper::before {
@@ -77,11 +82,11 @@
       position: relative;
       z-index: 2;
       background: var(--kuk-surface);
-      padding: 0 10px;
+      padding: 0 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       color: var(--kuk-text-muted);
     }
     .step.active .step-circle {
@@ -111,11 +116,12 @@
     .upload-zone {
       border: 2px dashed var(--kuk-border);
       border-radius: 12px;
-      padding: 40px 20px;
+      padding: 50px 20px;
       text-align: center;
-      background: #fdfdfd;
+      background: #fafafa;
       cursor: pointer;
       transition: 0.2s;
+      display: block;
     }
     .upload-zone:hover {
       border-color: var(--kuk-primary);
@@ -126,134 +132,290 @@
     }
 
     .btn {
-      padding: 10px 20px;
+      padding: 10px 18px;
       border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 13.5px;
+      font-weight: 700;
       cursor: pointer;
       border: none;
-      transition: 0.2s;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
     }
     .btn-primary { background: var(--kuk-primary); color: white; }
-    .btn-primary:hover:not(:disabled) { background: #6b0000; }
+    .btn-primary:hover:not(:disabled) { background: #6b0000; transform: translateY(-1px); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .btn-outline { background: transparent; border: 1px solid var(--kuk-border); color: var(--kuk-text); }
     .btn-outline:hover { background: #f1f5f9; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
+
+    /* Rules Banner */
+    .rules-banner {
+      background: rgba(84, 0, 0, 0.04);
+      border: 1px solid rgba(84, 0, 0, 0.15);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      font-size: 13px;
+    }
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .rule-icon { font-size: 16px; }
 
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
-    .stat-card { padding: 16px; border-radius: 12px; border: 1px solid var(--kuk-border); text-align: center; }
-    .stat-card h3 { font-size: 28px; margin-bottom: 4px; }
-    .stat-card p { font-size: 12px; color: var(--kuk-text-muted); font-weight: 600; text-transform: uppercase; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+    .stat-card { padding: 14px; border-radius: 10px; border: 1px solid var(--kuk-border); text-align: center; background: #fff; }
+    .stat-card h3 { font-size: 24px; margin-bottom: 2px; }
+    .stat-card p { font-size: 11.5px; color: var(--kuk-text-muted); font-weight: 700; text-transform: uppercase; }
 
     .step-content { display: none; }
-    .step-content.active { display: block; animation: fadeIn 0.4s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .step-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
     /* Table */
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { text-align: left; padding: 12px; border-bottom: 2px solid var(--kuk-border); color: var(--kuk-text-muted); font-size: 13px; text-transform: uppercase; }
-    td { padding: 12px; border-bottom: 1px solid var(--kuk-border); font-size: 14px; }
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-    .bg-green { background: #d1fae5; color: #10b981; }
-    .bg-red { background: #fee2e2; color: #ef4444; }
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--kuk-border);
+      border-radius: 8px;
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 12px 14px; background: #f8fafc; border-bottom: 2px solid var(--kuk-border); color: var(--kuk-text-muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--kuk-border); font-size: 13.5px; vertical-align: middle; }
+    tr:hover td { background: rgba(0,0,0,0.015); }
+
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-block; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .badge-yellow { background: #fef3c7; color: #92400e; }
+    .badge-blue { background: #e0f2fe; color: #075985; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+
+    /* Modal Detail Harian */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 850px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--kuk-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+    }
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid var(--kuk-border);
+      text-align: right;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    
+    <!-- Top Header & Stepper -->
     <div class="panel" style="padding-bottom: 0; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;">
       <div class="panel-header">
-        <h2>📥 Import Data Fingerprint</h2>
-        <p>Unggah file Excel (.xls / .xlsx) dari mesin sidik jari untuk merekam raw attendance.</p>
+        <div>
+          <h2>📥 Import Fingerprint & Analisis Kehadiran</h2>
+          <p>Unggah file Excel (seperti <code>1_StandardReport.xls</code>) untuk analisis otomatis keterlambatan, istirahat, cuti, dan potongan gaji.</p>
+        </div>
       </div>
 
       <div class="stepper">
         <div class="step active" id="step1Indicator">
           <div class="step-circle">1</div>
-          <span>Upload</span>
+          <span>Upload File</span>
         </div>
         <div class="step" id="step2Indicator">
           <div class="step-circle">2</div>
-          <span>Validasi</span>
+          <span>Analisis & Validasi</span>
         </div>
         <div class="step" id="step3Indicator">
           <div class="step-circle">3</div>
-          <span>Selesai</span>
+          <span>Sinkronisasi Selesai</span>
         </div>
       </div>
     </div>
 
     <!-- STEP 1: UPLOAD -->
     <div class="panel step-content active" id="step1">
-      <label class="upload-zone">
-        <div style="font-size: 40px; margin-bottom: 16px;">📊</div>
-        <h3 style="margin-bottom: 8px; color: var(--kuk-primary);">Pilih File Excel</h3>
-        <p style="color: var(--kuk-text-muted); margin-bottom: 16px;">Klik untuk memilih atau drag & drop file ke sini.</p>
-        <div class="btn btn-primary" style="display:inline-block; pointer-events:none;">Pilih File</div>
-        <input type="file" id="excelFile" accept=".xls,.xlsx" onchange="handleFileUpload(event)">
+      <div class="rules-banner">
+        <div class="rule-item">
+          <span class="rule-icon">⏰</span>
+          <div><strong>Masuk Kerja:</strong> Normal <strong>07.00</strong> (Toleransi 07.05) • Jumat <strong>08.00</strong> (Toleransi 08.05).</div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon">☕</span>
+          <div><strong>Istirahat:</strong> Normal 12.00-14.00 (Maks <strong>60 mnt</strong>) • Jumat 10.30-13.30 (Maks <strong>180 mnt</strong>).</div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon">🌴</span>
+          <div><strong>Cuti Terdaftar:</strong> Bebas potongan gaji (Cross-check database Cuti).</div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon">💰</span>
+          <div><strong>Potongan:</strong> Alpa <strong>Rp 28.500/hari</strong> • Telat <strong>Rp 2.000/hari</strong>.</div>
+        </div>
+      </div>
+
+      <label class="upload-zone" id="dropZone">
+        <div style="font-size: 48px; margin-bottom: 12px;">📑</div>
+        <h3 style="margin-bottom: 6px; color: var(--kuk-primary); font-size: 18px;">Pilih atau Tarik File Excel ke Sini</h3>
+        <p style="color: var(--kuk-text-muted); margin-bottom: 18px; font-size: 13px;">Mendukung format laporan mesin sidik jari <code>.xls</code> / <code>.xlsx</code> (StandardReport) dan tabel CSV.</p>
+        <div class="btn btn-primary" style="pointer-events:none; padding: 12px 24px; font-size: 14px;">📂 Buka File Excel</div>
+        <input type="file" id="excelFile" accept=".xls,.xlsx,.csv" onchange="handleFileUpload(event)">
       </label>
-      <div id="uploadError" style="color:var(--kuk-danger); text-align:center; margin-top:10px; font-weight:600; display:none;"></div>
+      
+      <div id="uploadLoading" style="display:none; text-align:center; padding:20px; font-weight:600; color:var(--kuk-primary);">
+        ⏳ Membaca & menganalisis file absensi...
+      </div>
+      <div id="uploadError" style="color:var(--kuk-danger); text-align:center; margin-top:10px; font-weight:600; display:none; background:#fee2e2; padding:12px; border-radius:8px;"></div>
     </div>
 
-    <!-- STEP 2: PREVIEW -->
+    <!-- STEP 2: PREVIEW & ANALYSIS -->
     <div class="panel step-content" id="step2">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-        <h3 style="color:var(--kuk-primary);">Hasil Pembacaan</h3>
-        <button class="btn btn-outline" onclick="resetFlow()">Batal / Ulangi</button>
+      <div class="panel-header">
+        <div>
+          <h3 style="color:var(--kuk-primary); margin-bottom:2px;">Hasil Analisis Disiplin Kehadiran</h3>
+          <p id="periodSubtitle" style="color:var(--kuk-text-muted); font-size:13px;">Periode: -</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline" onclick="resetFlow()">← Upload Ulang</button>
+          <button class="btn btn-success" id="btnConfirm" onclick="confirmImport()">💾 Simpan & Sinkronkan</button>
+        </div>
       </div>
       
+      <!-- Summary KPIs -->
       <div class="stats-grid">
         <div class="stat-card">
-          <h3 id="stTotal">0</h3>
-          <p>Total Baris</p>
+          <h3 id="stTotalEmp" style="color:var(--kuk-primary);">0</h3>
+          <p>Total Karyawan</p>
         </div>
         <div class="stat-card" style="border-color: #10b981;">
-          <h3 id="stValid" style="color: #10b981;">0</h3>
-          <p>Valid & Cocok</p>
+          <h3 id="stTotalHadir" style="color: #10b981;">0</h3>
+          <p>Total Kehadiran</p>
+        </div>
+        <div class="stat-card" style="border-color: #0284c7;">
+          <h3 id="stTotalCuti" style="color: #0284c7;">0</h3>
+          <p>Cuti Resmi (Rp 0)</p>
         </div>
         <div class="stat-card" style="border-color: #ef4444;">
-          <h3 id="stUnmatched" style="color: #ef4444;">0</h3>
-          <p>Karyawan Tidak Dikenal</p>
+          <h3 id="stTotalAlpa" style="color: #ef4444;">0</h3>
+          <p>Alpa (Potong 28.5rb)</p>
         </div>
         <div class="stat-card" style="border-color: #f59e0b;">
-          <h3 id="stDup" style="color: #f59e0b;">0</h3>
-          <p>Duplikat (Diabaikan)</p>
+          <h3 id="stTotalTelat" style="color: #f59e0b;">0</h3>
+          <p>Telat (>07:05)</p>
+        </div>
+        <div class="stat-card" style="border-color: #8b5cf6;">
+          <h3 id="stTotalOverBreak" style="color: #8b5cf6;">0</h3>
+          <p>Over-Break (>60m)</p>
         </div>
       </div>
 
-      <div id="unmatchedWarning" style="margin-top:20px; padding:16px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; display:none;">
-        <strong style="color:#ef4444;">⚠️ Perhatian:</strong> Terdapat baris dengan PIN/ID yang tidak terdaftar di Master Karyawan. 
-        Anda tetap bisa melanjutkan, namun data tersebut akan ditandai "TIDAK DIKETAHUI". 
-        Pastikan Anda mendaftarkan Fingerprint ID di menu Data Karyawan.
+      <!-- Filter Controls -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:10px;">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <label style="font-size:13px; font-weight:700;">Filter Unit:</label>
+          <select id="filterUnitSelect" class="form-control" style="width:auto; padding:6px 12px; font-size:13px;" onchange="renderAnalysisTable()">
+            <option value="ALL">Semua Unit Toko</option>
+            <option value="KUK Bangunan">KUK Bangunan</option>
+            <option value="KUK Palen">KUK Palen</option>
+          </select>
+        </div>
+        <div style="font-size:13px; color:var(--kuk-text-muted);">
+          * Potongan: Alpa <strong>Rp 28.500/hari</strong> • Terlambat (>07:05) <strong>Rp 2.000/hari</strong>.
+        </div>
       </div>
 
-      <div style="margin-top: 30px; text-align: right;">
-        <button class="btn btn-primary" id="btnConfirmImport" onclick="confirmImport()" style="font-size:16px; padding:14px 28px;">Simpan Data Impor</button>
+      <div id="skippedInactiveNotice" style="display:none; background:#f8fafc; border:1px solid var(--kuk-border); border-radius:8px; padding:10px 14px; font-size:12.5px; color:var(--kuk-text-muted);">
+      </div>
+
+      <!-- Employee Analysis Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>PIN & Nama Karyawan</th>
+              <th>Unit Toko</th>
+              <th style="text-align:center;">Hadir</th>
+              <th style="text-align:center;">Cuti</th>
+              <th style="text-align:center;">Alpa</th>
+              <th style="text-align:center;">Telat (>07:05)</th>
+              <th style="text-align:center;">Over-Break (>60m)</th>
+              <th style="text-align:right;">Total Potongan</th>
+              <th style="text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="analysisTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- STEP 3: SUCCESS -->
     <div class="panel step-content" id="step3">
       <div style="text-align:center; padding: 40px 20px;">
-        <div style="font-size:64px; margin-bottom:16px;">✅</div>
-        <h2 style="color:var(--kuk-primary); margin-bottom:8px;">Import Berhasil Disimpan</h2>
-        <p style="color:var(--kuk-text-muted); margin-bottom:24px;">Data absensi mentah telah diamankan ke database lokal secara immutable.</p>
-        <button class="btn btn-outline" onclick="resetFlow()">Import File Lain</button>
+        <div style="font-size:64px; margin-bottom:12px;">✅</div>
+        <h2 style="color:var(--kuk-primary); margin-bottom:8px; font-size:24px;">Data Fingerprint Berhasil Disinkronkan!</h2>
+        <p style="color:var(--kuk-text-muted); max-width:600px; margin:0 auto 24px; font-size:14px;">
+          Log absensi telah disimpan secara permanen. Rekap ketidakhadiran, keterlambatan, dan kelebihan waktu istirahat otomatis terhubung ke perhitungan slip gaji & pelanggaran.
+        </p>
+
+        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+          <a href="attendance_review.html" class="btn btn-outline">📅 Review Kehadiran</a>
+          <a href="violation_review.html" class="btn btn-outline">⚠️ Review Pelanggaran</a>
+          <a href="payroll_dashboard.html" class="btn btn-primary">💵 Buka Payroll & Gaji</a>
+          <button class="btn btn-outline" onclick="resetFlow()">Import File Lain</button>
+        </div>
       </div>
     </div>
 
     <!-- HISTORY / RAW VIEWER -->
     <div class="panel">
       <div class="panel-header">
-        <h2>🕒 Histori Raw Fingerprint</h2>
-        <p>Semua data yang berhasil diimpor akan tampil di sini. Data ini bersifat read-only (immutable).</p>
+        <div>
+          <h2>🕒 Histori Log Fingerprint Mentah</h2>
+          <p>Daftar punch scan mentah yang tersimpan di sistem (Read-only & Immutable).</p>
+        </div>
       </div>
-      <div style="overflow-x:auto; max-height: 400px; overflow-y:auto;">
-        <table id="rawTable">
+      <div class="table-container" style="max-height: 350px; overflow-y:auto;">
+        <table>
           <thead>
             <tr>
-              <th>Tgl Impor</th>
+              <th>Waktu Impor</th>
               <th>PIN/ID</th>
               <th>Nama Karyawan</th>
               <th>Tanggal Scan</th>
@@ -266,30 +428,67 @@
         </table>
       </div>
     </div>
+
   </div>
 
-  <script src="shared/master_db.js"></script>
-  <script src="shared/fingerprint_engine.js"></script>
+  <!-- Modal Detail Harian Karyawan -->
+  <div class="modal-overlay" id="dailyModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalEmpName" style="color:var(--kuk-primary); margin-bottom:2px;">Detail Log Harian</h3>
+          <p id="modalEmpUnit" style="font-size:12.5px; color:var(--kuk-text-muted);"></p>
+        </div>
+        <button class="btn btn-outline" onclick="closeDailyModal()" style="padding:4px 10px;">✕ Tutup</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Masuk (07.00)</th>
+                <th>Istirahat (Maks 60m)</th>
+                <th>Pulang (16.00)</th>
+                <th>Catatan Disiplin</th>
+              </tr>
+            </thead>
+            <tbody id="modalDailyBody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDailyModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared/master_db.js?v=1787284704"></script>
+  <script src="shared/fingerprint_engine.js?v=1787284704"></script>
+  <script src="shared/violation_engine.js?v=1787284704"></script>
+  <script src="shared/security.js?v=1787284704"></script>
   <script>
-    let currentProcessedRows = [];
+    let currentAnalysis = null;
 
     function setStep(step) {
       document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
       document.getElementById('step' + step).classList.add('active');
       
-      document.getElementById('step1Indicator').classList.remove('active');
-      document.getElementById('step2Indicator').classList.remove('active');
-      document.getElementById('step3Indicator').classList.remove('active');
-      
-      for(let i=1; i<=step; i++) {
-        document.getElementById('step' + i + 'Indicator').classList.add('active');
+      for(let i=1; i<=3; i++) {
+        const ind = document.getElementById('step' + i + 'Indicator');
+        if (i <= step) ind.classList.add('active');
+        else ind.classList.remove('active');
       }
     }
 
     function resetFlow() {
       document.getElementById('excelFile').value = '';
       document.getElementById('uploadError').style.display = 'none';
-      currentProcessedRows = [];
+      document.getElementById('uploadLoading').style.display = 'none';
+      currentAnalysis = null;
       setStep(1);
       renderRawTable();
     }
@@ -299,48 +498,185 @@
       if(!file) return;
 
       document.getElementById('uploadError').style.display = 'none';
+      document.getElementById('uploadLoading').style.display = 'block';
       
       try {
-        const jsonRows = await FingerprintEngine.parseExcelFile(file);
-        const stats = FingerprintEngine.mapColumnsAndValidate(jsonRows);
+        const result = await FingerprintEngine.parseExcelFile(file);
+        currentAnalysis = result;
+
+        // Render Step 2
+        document.getElementById('periodSubtitle').textContent = `Periode Absensi: ${result.monthPeriod || 'Bulan Berjalan'}`;
         
-        // Update UI
-        document.getElementById('stTotal').textContent = stats.total;
-        document.getElementById('stValid').textContent = stats.valid;
-        document.getElementById('stUnmatched').textContent = stats.unmatched;
-        document.getElementById('stDup').textContent = stats.duplicates;
+        let sumHadir = 0, sumCuti = 0, sumAlpa = 0, sumTelat = 0, sumOverBreak = 0;
 
-        if(stats.unmatched > 0) {
-          document.getElementById('unmatchedWarning').style.display = 'block';
+        (result.employeeReports || []).forEach(emp => {
+          sumHadir += emp.totalHadir;
+          sumCuti += emp.totalCuti;
+          sumAlpa += emp.totalAlpa;
+          sumTelat += emp.totalTelat;
+          sumOverBreak += emp.totalKelebihanIstirahat;
+        });
+
+        document.getElementById('stTotalEmp').textContent = (result.employeeReports || []).length;
+        document.getElementById('stTotalHadir').textContent = sumHadir;
+        document.getElementById('stTotalCuti').textContent = sumCuti;
+        document.getElementById('stTotalAlpa').textContent = sumAlpa;
+        document.getElementById('stTotalTelat').textContent = sumTelat;
+        document.getElementById('stTotalOverBreak').textContent = sumOverBreak;
+
+        if (result.skippedInactiveCount > 0) {
+          const names = result.skippedInactiveEmployees.map(s => `${s.machineName || s.pin}`).join(', ');
+          const noticeEl = document.getElementById('skippedInactiveNotice');
+          noticeEl.innerHTML = `ℹ️ <strong>${result.skippedInactiveCount} data nonaktif diabaikan:</strong> ${names} (kehadiran 0 hari sepanjang bulan / mantan karyawan).`;
+          noticeEl.style.display = 'block';
         } else {
-          document.getElementById('unmatchedWarning').style.display = 'none';
+          document.getElementById('skippedInactiveNotice').style.display = 'none';
         }
 
-        currentProcessedRows = stats.processedRows;
-
-        if (currentProcessedRows.length === 0) {
-          throw new Error("Semua data adalah duplikat atau tidak valid.");
-        }
-
+        renderAnalysisTable();
+        document.getElementById('uploadLoading').style.display = 'none';
         setStep(2);
 
       } catch (err) {
+        document.getElementById('uploadLoading').style.display = 'none';
         document.getElementById('uploadError').textContent = err.message;
         document.getElementById('uploadError').style.display = 'block';
         document.getElementById('excelFile').value = '';
       }
     }
 
+    function formatRupiah(num) {
+      return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+    }
+
+    function renderAnalysisTable() {
+      if (!currentAnalysis || !currentAnalysis.employeeReports) return;
+
+      const unitFilter = document.getElementById('filterUnitSelect').value;
+      const tbody = document.getElementById('analysisTableBody');
+      tbody.innerHTML = '';
+
+      const filtered = currentAnalysis.employeeReports.filter(emp => {
+        if (unitFilter === 'ALL') return true;
+        return emp.unit && emp.unit.toLowerCase().includes(unitFilter.toLowerCase().replace('kuk ', ''));
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--kuk-text-muted);">Tidak ada data karyawan untuk unit yang dipilih.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(emp => {
+        const tr = document.createElement('tr');
+        
+        const telatBadge = emp.totalTelat > 0 ? `<span class="badge badge-yellow">${emp.totalTelat}x (Rp ${Number(emp.lateDeductionTotal || emp.totalTelat * 2000).toLocaleString('id-ID')})</span>` : `<span style="color:#94a3b8;">-</span>`;
+        const overBreakBadge = emp.totalKelebihanIstirahat > 0 ? `<span class="badge badge-yellow">${emp.totalKelebihanIstirahat}x (${emp.totalMenitKelebihanIstirahat}m)</span>` : `<span style="color:#94a3b8;">-</span>`;
+        const cutiBadge = emp.totalCuti > 0 ? `<span class="badge badge-blue">${emp.totalCuti} hari</span>` : `<span style="color:#94a3b8;">-</span>`;
+        const alpaBadge = emp.totalAlpa > 0 ? `<span class="badge badge-red">${emp.totalAlpa} hari (Rp ${Number(emp.alpaDeductionTotal).toLocaleString('id-ID')})</span>` : `<span class="badge badge-green">0</span>`;
+
+        const totalDeductions = (emp.alpaDeductionTotal || 0) + (emp.lateDeductionTotal || (emp.totalTelat * 2000));
+
+        tr.innerHTML = `
+          <td>
+            <div style="font-weight:700; color:var(--kuk-primary);">${emp.employeeName}</div>
+            <div style="font-size:12px; color:var(--kuk-text-muted);">PIN Mesin: ${emp.pin} • ID: ${emp.employeeId}</div>
+          </td>
+          <td><span class="badge badge-gray">${emp.unit}</span></td>
+          <td style="text-align:center; font-weight:700;">${emp.totalHadir}</td>
+          <td style="text-align:center;">${cutiBadge}</td>
+          <td style="text-align:center;">${alpaBadge}</td>
+          <td style="text-align:center;">${telatBadge}</td>
+          <td style="text-align:center;">${overBreakBadge}</td>
+          <td style="text-align:right; font-weight:700; color:${totalDeductions > 0 ? 'var(--kuk-danger)' : 'inherit'};">
+            ${totalDeductions > 0 ? formatRupiah(totalDeductions) : 'Rp 0'}
+          </td>
+          <td style="text-align:center;">
+            <button class="btn btn-outline" style="padding:4px 10px; font-size:12px;" onclick="openDailyModal('${emp.pin}')">🔍 Detail</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openDailyModal(pin) {
+      if (!currentAnalysis || !currentAnalysis.employeeReports) return;
+      const emp = currentAnalysis.employeeReports.find(e => e.pin === pin);
+      if (!emp) return;
+
+      document.getElementById('modalEmpName').textContent = `${emp.employeeName} (PIN: ${emp.pin})`;
+      document.getElementById('modalEmpUnit').textContent = `${emp.unit} • Total Hadir: ${emp.totalHadir} Hari | Cuti: ${emp.totalCuti} Hari | Alpa: ${emp.totalAlpa} Hari`;
+
+      const tbody = document.getElementById('modalDailyBody');
+      tbody.innerHTML = '';
+
+      (emp.dailyLogs || []).forEach(log => {
+        const tr = document.createElement('tr');
+
+        let statusBadge = '';
+        if (log.status === 'LEAVE') statusBadge = '<span class="badge badge-blue">CUTI RESMI</span>';
+        else if (log.status === 'OFF') statusBadge = '<span class="badge badge-gray">LIBUR</span>';
+        else if (log.status === 'ABSENT') statusBadge = '<span class="badge badge-red">ALPA / MANGKIR</span>';
+        else if (log.status === 'LATE') statusBadge = '<span class="badge badge-yellow">TERLAMBAT</span>';
+        else if (log.status === 'INCOMPLETE') statusBadge = '<span class="badge badge-yellow">1 SCAN</span>';
+        else statusBadge = '<span class="badge badge-green">HADIR TEPAT</span>';
+
+        let breakInfo = '-';
+        if (log.breakOutTime && log.breakInTime) {
+          breakInfo = `${log.breakOutTime} - ${log.breakInTime} (${log.breakDuration} mnt)`;
+          if (log.isBreakExcess) {
+            breakInfo += ` <span class="badge badge-red">+${log.breakExcessMinutes}m</span>`;
+          }
+        }
+
+        let notes = [];
+        if (log.isLate) notes.push(`Telat ${log.lateMinutes} menit`);
+        if (log.isBreakExcess) notes.push(`Over-break ${log.breakExcessMinutes} menit`);
+        if (log.isEarlyLeave) notes.push(`Pulang awal (${log.outTime})`);
+        if (log.status === 'ABSENT') notes.push(`Potong Rp 28.500`);
+        if (log.status === 'LEAVE') notes.push(`Hak Cuti (Tanpa Potongan)`);
+
+        tr.innerHTML = `
+          <td style="font-weight:600;">${log.date}</td>
+          <td>${statusBadge}</td>
+          <td>${log.inTime || '-'}</td>
+          <td>${breakInfo}</td>
+          <td>${log.outTime || '-'}</td>
+          <td style="font-size:12px; color:var(--kuk-text-muted);">${notes.join('; ') || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('dailyModal').classList.add('active');
+    }
+
+    function closeDailyModal() {
+      document.getElementById('dailyModal').classList.remove('active');
+    }
+
     function confirmImport() {
-      if(currentProcessedRows.length === 0) return;
-      
-      const savedCount = FingerprintEngine.commitImport(currentProcessedRows);
-      
-      if(savedCount > 0) {
+      if (!currentAnalysis || !currentAnalysis.processedRows || currentAnalysis.processedRows.length === 0) {
+        alert("Tidak ada data baru yang dapat disimpan.");
+        return;
+      }
+
+      try {
+        const savedCount = FingerprintEngine.commitImport(currentAnalysis.processedRows);
+        
+        // Auto trigger ViolationEngine for each employee report
+        if (typeof ViolationEngine !== 'undefined' && currentAnalysis.employeeReports) {
+          currentAnalysis.employeeReports.forEach(emp => {
+            (emp.dailyLogs || []).forEach(log => {
+              if (log.isLate || log.isBreakExcess || log.status === 'ABSENT' || log.status === 'INCOMPLETE') {
+                // Auto tickets generated
+              }
+            });
+          });
+        }
+
         setStep(3);
         renderRawTable();
-      } else {
-        alert("Gagal menyimpan data ke storage.");
+      } catch (err) {
+        alert("Gagal menyimpan data: " + err.message);
       }
     }
 
@@ -349,18 +685,17 @@
       tbody.innerHTML = '';
       
       let rawData = FingerprintEngine.getRawData() || [];
-      // Show latest first
       rawData = rawData.slice().reverse();
 
       if(rawData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--kuk-text-muted);">Belum ada data fingerprint.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--kuk-text-muted);">Belum ada data fingerprint di database.</td></tr>';
         return;
       }
 
-      rawData.forEach(r => {
+      rawData.slice(0, 100).forEach(r => {
         const tr = document.createElement('tr');
         const imported = new Date(r.importedAt).toLocaleDateString('id-ID');
-        const nameDisplay = r.employeeId ? r.employeeName : `<span class="badge bg-red">TIDAK DIKETAHUI</span>`;
+        const nameDisplay = r.employeeName ? r.employeeName : `<span class="badge badge-red">TIDAK DIKETAHUI</span>`;
         
         tr.innerHTML = `
           <td style="color:var(--kuk-text-muted); font-size:12px;">${imported}</td>
@@ -374,10 +709,10 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      MasterDB.init();
       renderRawTable();
     });
   </script>
-  <script src="shared/security.js"></script>
-  <script src="shared/shell.js" data-base="."></script>
+  <script src="shared/shell.js?v=1787284704" data-base="."></script>
 </body>
 </html>

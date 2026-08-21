@@ -10,9 +10,10 @@ const AttendanceEngine = (() => {
 
   // Configurable rules
   const RULES = {
-    shiftStart: '08:00',
-    gracePeriodMinutes: 15,
-    shiftEnd: '17:00'
+    shiftStart: '07:00',
+    gracePeriodMinutes: 5, // Toleransi sampai 07:05
+    shiftEnd: '16:00',
+    maxBreakMinutes: 60
   };
 
   function getAuditLog() {
@@ -27,6 +28,10 @@ const AttendanceEngine = (() => {
     return JSON.parse(localStorage.getItem(RAW_FINGERPRINTS_KEY) || '[]');
   }
 
+  function getCutiDatabase() {
+    return JSON.parse(localStorage.getItem('kuk_db_cuti_v1') || '[]');
+  }
+
   /**
    * Helper to check if a form covers a specific date
    */
@@ -38,9 +43,32 @@ const AttendanceEngine = (() => {
       return target >= start && target <= end;
     }
     if (form.module === 'ABSEN') {
-      // The Absen form acts as "Morning Briefing" or "Dinas Luar"
       return form.date === dateStr;
     }
+    return false;
+  }
+
+  /**
+   * Cross-check with Cuti database (kuk_db_cuti_v1)
+   */
+  function isLeaveFromCutiDb(employee, dateStr) {
+    try {
+      const cutiList = getCutiDatabase();
+      for (const item of cutiList) {
+        const matchEmp = (item.idKaryawan && item.idKaryawan === employee.id) ||
+                         (item.nama && employee.nama && item.nama.toLowerCase().includes(employee.nama.toLowerCase())) ||
+                         (item.nama && employee.fullName && item.nama.toLowerCase().includes(employee.fullName.toLowerCase()));
+        if (matchEmp) {
+          // Status disetujui / aktif
+          const status = (item.status || '').toLowerCase();
+          if (status === 'ditolak') continue;
+
+          if (Array.isArray(item.tanggal) && item.tanggal.includes(dateStr)) return true;
+          if (item.startDate && item.endDate && dateStr >= item.startDate && dateStr <= item.endDate) return true;
+          if (item.tanggal === dateStr) return true;
+        }
+      }
+    } catch (e) {}
     return false;
   }
 
@@ -51,14 +79,17 @@ const AttendanceEngine = (() => {
     // 1. Check for manual overrides first
     const audits = getAuditLog().filter(a => a.employeeId === employee.id && a.date === dateStr);
     if (audits.length > 0) {
-      // Return the most recent override
       const latest = audits.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
       return { status: latest.newStatus, isOverride: true, reason: latest.reason };
     }
 
-    // 2. Check for submitted forms (Leave, Sick, Permission, Dinas)
+    // 2. Check for submitted forms (Leave, Sick, Permission, Dinas) & Cuti DB
+    const isCutiDb = isLeaveFromCutiDb(employee, dateStr);
+    if (isCutiDb) {
+      return { status: 'LEAVE', isOverride: false, note: 'Cuti Resmi Terdaftar' };
+    }
+
     const empForms = forms.filter(f => f.employeeId === employee.id && formCoversDate(f, dateStr));
-    
     let hasFormLeave = false;
     let hasFormSick = false;
     let hasFormPermission = false;
@@ -66,8 +97,8 @@ const AttendanceEngine = (() => {
 
     for (let f of empForms) {
       if (f.module === 'CUTI') {
-        if (f.leaveType.toLowerCase().includes('sakit')) hasFormSick = true;
-        else if (f.leaveType.toLowerCase().includes('izin')) hasFormPermission = true;
+        if (f.leaveType && f.leaveType.toLowerCase().includes('sakit')) hasFormSick = true;
+        else if (f.leaveType && f.leaveType.toLowerCase().includes('izin')) hasFormPermission = true;
         else hasFormLeave = true;
       }
       if (f.module === 'ABSEN' && f.location && f.location.toLowerCase().includes('luar kota')) {
@@ -81,41 +112,83 @@ const AttendanceEngine = (() => {
     if (hasDinas) return { status: 'EXCUSED', isOverride: false, note: 'Dinas Luar' };
 
     // 3. Check Fingerprints
-    const empScans = fingerprints.filter(fp => fp.employeeId === employee.id && fp.date === dateStr);
+    const empScans = fingerprints.filter(fp => (fp.employeeId === employee.id || (employee.fingerprintId && fp.pin == employee.fingerprintId)) && fp.date === dateStr);
     
     if (empScans.length === 0) {
-      // Check if it's Sunday (assuming OFF)
+      // Check if it's Sunday (OFF)
       const dayOfWeek = new Date(dateStr).getDay();
       if (dayOfWeek === 0) return { status: 'OFF', isOverride: false };
       
+      // Mangkir murni tanpa cuti/izin
       return { status: 'ABSENT', isOverride: false };
     }
 
     if (empScans.length === 1) {
-      return { status: 'INCOMPLETE', isOverride: false, inTime: empScans[0].time };
+      return { 
+        status: 'INCOMPLETE', 
+        isOverride: false, 
+        inTime: empScans[0].time,
+        outTime: null
+      };
     }
 
-    // Determine LATE or PRESENT based on first scan
     // Sort scans by time
     empScans.sort((a, b) => a.time.localeCompare(b.time));
     const firstScan = empScans[0];
     const lastScan = empScans[empScans.length - 1];
 
-    // Check lateness
-    const scanDate = new Date(`2000-01-01T${firstScan.time}`);
-    const thresholdDate = new Date(`2000-01-01T${RULES.shiftStart}`);
-    thresholdDate.setMinutes(thresholdDate.getMinutes() + RULES.gracePeriodMinutes);
+    const dayOfWeek = new Date(dateStr).getDay();
+    const isFriday = (dayOfWeek === 5);
+
+    // Check lateness (Normal 07:05, Jumat 08:05)
+    const [inH, inM] = firstScan.time.split(':').map(Number);
+    const inTotalMinutes = inH * 60 + inM;
+    const shiftStartMin = isFriday ? (8 * 60) : (7 * 60);
+    const limitMinutes = shiftStartMin + RULES.gracePeriodMinutes; // Jumat: 08:05, Lainnya: 07:05
 
     let finalStatus = 'PRESENT';
-    if (scanDate > thresholdDate) {
+    let lateMinutes = 0;
+    if (inTotalMinutes > limitMinutes) {
       finalStatus = 'LATE';
+      lateMinutes = inTotalMinutes - shiftStartMin;
+    }
+
+    // Check Break (Normal maks 60m, Jumat maks 180m)
+    let breakDuration = 0;
+    let breakExcessMinutes = 0;
+    let isBreakExcess = false;
+    let breakOutTime = null;
+    let breakInTime = null;
+    const maxAllowedBreak = isFriday ? 180 : RULES.maxBreakMinutes;
+
+    if (empScans.length >= 4) {
+      breakOutTime = empScans[1].time;
+      breakInTime = empScans[2].time;
+      const [boH, boM] = breakOutTime.split(':').map(Number);
+      const [biH, biM] = breakInTime.split(':').map(Number);
+      const boTotal = boH * 60 + boM;
+      const biTotal = biH * 60 + biM;
+
+      if (biTotal > boTotal) {
+        breakDuration = biTotal - boTotal;
+        if (breakDuration > maxAllowedBreak) {
+          isBreakExcess = true;
+          breakExcessMinutes = breakDuration - maxAllowedBreak;
+        }
+      }
     }
 
     return { 
       status: finalStatus, 
       isOverride: false, 
       inTime: firstScan.time,
-      outTime: lastScan.time
+      outTime: lastScan.time,
+      lateMinutes: lateMinutes,
+      isBreakExcess: isBreakExcess,
+      breakDuration: breakDuration,
+      breakExcessMinutes: breakExcessMinutes,
+      breakOutTime: breakOutTime,
+      breakInTime: breakInTime
     };
   }
 

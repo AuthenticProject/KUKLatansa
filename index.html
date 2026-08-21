@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -399,6 +399,16 @@
       box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.15);
       background: rgba(0, 0, 0, 0.5);
     }
+    select.form-control option {
+      background: #380000;
+      color: #ffffff;
+      padding: 10px 14px;
+    }
+    select.form-control optgroup {
+      background: #200000;
+      color: var(--gold);
+      font-weight: 800;
+    }
 
     .btn-gold {
       width: 100%;
@@ -609,8 +619,10 @@
           <div class="error-box" id="loginErrorMsg"></div>
 
           <div class="form-group">
-            <label for="inputUsername">Username Staf</label>
-            <input type="text" id="inputUsername" class="form-control" placeholder="Contoh: fariz / andika / raju" autocomplete="username">
+            <label for="selectStaffUser">Pilih Akun Staf Manajemen</label>
+            <select id="selectStaffUser" class="form-control" onchange="onStaffSelectChange()">
+              <option value="" disabled selected>-- Ketuk untuk Memilih Akun Staf --</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -812,18 +824,16 @@
   </div>
 
   <!-- Scripts -->
-  <script src="shared/master_db.js"></script>
-  <script src="shared/security.js"></script>
+  <script src="shared/master_db.js?v=1787283266"></script>
+  <script src="shared/security.js?v=1787283266"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       MasterDB.init();
       updateStaffTileStatus();
+      populateStaffSelect();
 
       // Enter key for login
       document.getElementById('inputPassword').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') doStaffLogin();
-      });
-      document.getElementById('inputUsername').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') doStaffLogin();
       });
     });
@@ -834,6 +844,50 @@
       if (target) target.classList.add('active');
     }
 
+    function populateStaffSelect() {
+      const select = document.getElementById('selectStaffUser');
+      if (!select) return;
+
+      const users = MasterDB.getUsers() || [];
+      const bangunanUsers = users.filter(u => !u.toko || u.toko === 'bangunan');
+      const palenUsers = users.filter(u => u.toko === 'palen');
+
+      select.innerHTML = '<option value="" disabled selected>-- Ketuk untuk Memilih Akun Staf --</option>';
+
+      if (bangunanUsers.length > 0) {
+        const grpB = document.createElement('optgroup');
+        grpB.label = '🏢 KUK BANGUNAN';
+        bangunanUsers.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.username;
+          opt.textContent = `${u.namaLengkap || u.username} (${u.jabatan || 'Staf'})`;
+          grpB.appendChild(opt);
+        });
+        select.appendChild(grpB);
+      }
+
+      if (palenUsers.length > 0) {
+        const grpP = document.createElement('optgroup');
+        grpP.label = '🏬 KUK PALEN';
+        palenUsers.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.username;
+          opt.textContent = `${u.namaLengkap || u.username} (${u.jabatan || 'Staf'})`;
+          grpP.appendChild(opt);
+        });
+        select.appendChild(grpP);
+      }
+    }
+
+    function onStaffSelectChange() {
+      document.getElementById('loginErrorMsg').style.display = 'none';
+      const pwd = document.getElementById('inputPassword');
+      if (pwd) {
+        pwd.value = '';
+        pwd.focus();
+      }
+    }
+
     function openStaffFlow() {
       const activeUser = typeof Security !== 'undefined' && Security.getCurrentUser ? Security.getCurrentUser() : null;
       if (activeUser && activeUser.username) {
@@ -842,8 +896,12 @@
       } else {
         document.getElementById('loginErrorMsg').style.display = 'none';
         document.getElementById('inputPassword').value = '';
+        populateStaffSelect();
         switchView('viewStaffLogin');
-        setTimeout(() => document.getElementById('inputUsername').focus(), 150);
+        setTimeout(() => {
+          const sel = document.getElementById('selectStaffUser');
+          if (sel) sel.focus();
+        }, 150);
       }
     }
 
@@ -866,14 +924,21 @@
     }
 
     function doStaffLogin() {
-      const usernameInput = document.getElementById('inputUsername').value.trim().toLowerCase();
+      const selectElement = document.getElementById('selectStaffUser');
+      const usernameInput = (selectElement ? selectElement.value : '').trim().toLowerCase();
       const passwordInput = document.getElementById('inputPassword').value.trim();
       const errorDiv = document.getElementById('loginErrorMsg');
 
       errorDiv.style.display = 'none';
 
-      if (!usernameInput || !passwordInput) {
-        errorDiv.textContent = 'Harap isi Username dan Kata Sandi.';
+      if (!usernameInput) {
+        errorDiv.textContent = 'Harap pilih akun staf dari daftar.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      if (!passwordInput) {
+        errorDiv.textContent = 'Harap masukkan Kata Sandi.';
         errorDiv.style.display = 'block';
         return;
       }
@@ -882,7 +947,7 @@
       const matched = users.find(u => u.username.toLowerCase() === usernameInput);
 
       if (!matched || matched.password !== passwordInput) {
-        errorDiv.textContent = 'Username atau Kata Sandi salah.';
+        errorDiv.textContent = 'Kata Sandi salah untuk akun yang dipilih.';
         errorDiv.style.display = 'block';
         return;
       }

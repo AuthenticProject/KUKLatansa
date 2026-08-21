@@ -12,8 +12,8 @@ const PayrollEngine = (() => {
   const RULES = {
     default_base_salary_bangunan: 850000,
     default_base_salary_palen: 700000,
-    late_deduction_rate: 15000,
-    absent_deduction_rate: 50000,
+    late_deduction_rate: 2000, // Rp 2.000 / hari terlambat
+    absent_deduction_rate: 28500, // Rp 28.500 / hari alpa (tidak masuk tanpa cuti)
     incomplete_deduction_rate: 20000
   };
 
