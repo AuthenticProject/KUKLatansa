@@ -890,9 +890,8 @@
         localStorage.setItem('kuk_selected_unit', 'bangunan');
       }
 
-      populateStaffProfile(matched);
-      updateStaffTileStatus();
-      switchView('viewStaffPortal');
+      // Langsung masuk dashboard tanpa tampilkan menu pilihan
+      window.location.replace('dashboard/');
     }
 
     function doStaffLogout() {

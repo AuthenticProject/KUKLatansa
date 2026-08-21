@@ -17,6 +17,12 @@
 (function KUKShell() {
   'use strict';
 
+  /* ── Isolated pages: no shell, no auth required ──────────────────── */
+  // Pages listed here are stand-alone (public access).
+  // The shell sidebar/topbar is NOT injected, and auth is NOT checked.
+  // Dashboard data (KPIs, rekap) still reads from MasterDB independently.
+  const SHELL_ISOLATED_PAGES = ['karyawan', 'peminjaman'];
+
   /* ── Storage keys ─────────────────────────────────────────────────── */
   const KEY_USER     = 'kuk_user';
   const KEY_USERS_DB = 'kuk_users_db';
@@ -99,9 +105,9 @@
     { id: 'cuti',             label: 'Cuti',                section: 'Operasional',href: 'cuti.html',  perm: 'cuti',             icon: ICON.cuti },
     { id: 'pelanggaran',      label: 'Pelanggaran',         section: 'Operasional',href: 'pelanggaran.html', perm: 'pelanggaran', icon: ICON.pelanggaran },
     { id: 'tip',              label: 'Tip Kaca',            section: 'Operasional',href: 'tip.html',   perm: 'tip',              icon: ICON.tip },
-    { id: 'peminjaman',       label: 'Pinjam Kendaraan',    section: 'Operasional',href: 'peminjaman.html', perm: 'peminjaman',  icon: ICON.peminjaman },
+    // 'peminjaman' & 'karyawan' dihapus dari nav — halaman standalone (isolated/public),
+    // diakses langsung oleh user ybs, bukan via shell navigation dashboard.
     { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
-    { id: 'karyawan',         label: 'Karyawan',            section: 'Database',   href: 'karyawan.html', perm: 'karyawan',     icon: ICON.karyawan },
     { id: 'peminjaman_admin', label: 'Admin Armada',        section: 'Database',   href: 'peminjaman_admin.html', perm: 'peminjaman_admin', icon: ICON.peminjaman_admin },
     { id: 'users',            label: 'Manajemen Pengguna',  section: 'Sistem',     href: 'users.html', perm: 'users',            icon: ICON.users },
   ];
@@ -722,6 +728,10 @@
 
   /* ── Initialise ───────────────────────────────────────────────────── */
   function init() {
+    // If this page is in the isolated list, skip auth and shell entirely.
+    // The page is public-access; dashboard still reads its data from MasterDB.
+    if (SHELL_ISOLATED_PAGES.includes(getActivePage())) return;
+
     if (!checkAuth()) return;
     injectShell();
   }
