@@ -796,6 +796,12 @@
       const dateInp = document.getElementById('mgmtFilterDate');
       if (dateInp) dateInp.valueAsDate = new Date();
 
+      // ── One-time migration: hapus data karyawan lama yang terkontaminasi staff ──
+      if (!localStorage.getItem('kuk_emp_migrated_v2')) {
+        localStorage.removeItem('kuk_master_employees'); // key lama — data bisa terkontaminasi
+        localStorage.setItem('kuk_emp_migrated_v2', '1');
+      }
+
       renderDashboard();
     });
 

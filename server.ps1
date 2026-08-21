@@ -15,7 +15,7 @@ try {
             } elseif ($path.EndsWith("/")) {
                 $path = $path + "index.html"
             } else {
-                $localFolder = Join-Path "d:\00. Me\Code Project\KUK" $path.TrimStart('/').Replace('/', '\')
+            $localFolder = Join-Path "d:\00. Me\07. Code Project\08. KUK V2" $path.TrimStart('/').Replace('/', '\')
                 if (Test-Path $localFolder -PathType Container) {
                     $res.Redirect($path + "/")
                     $res.Close()
@@ -23,7 +23,7 @@ try {
                 }
             }
             
-            $filePath = Join-Path "d:\00. Me\Code Project\KUK" $path.TrimStart('/').Replace('/', '\')
+            $filePath = Join-Path "d:\00. Me\07. Code Project\08. KUK V2" $path.TrimStart('/').Replace('/', '\')
             if (Test-Path $filePath -PathType Leaf) {
                 $bytes = [System.IO.File]::ReadAllBytes($filePath)
                 $res.ContentLength64 = $bytes.Length

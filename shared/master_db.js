@@ -9,7 +9,7 @@ const MasterDB = (() => {
 
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
 
-  const STORAGE_KEY_EMPLOYEES = 'kuk_master_employees';
+  const STORAGE_KEY_EMPLOYEES = 'kuk_master_employees_v2'; // v2: pisah karyawan dari staff
   const STORAGE_KEY_USERS = 'kuk_master_users';
   const STORAGE_KEY_VEHICLES = 'kuk_master_vehicles';
 
