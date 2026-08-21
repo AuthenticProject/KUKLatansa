@@ -78,7 +78,9 @@ const MasterDB = (() => {
 
   function initDB() {
     let employees = getStored(STORAGE_KEY_EMPLOYEES);
-    if (!employees || employees.length === 0) {
+    // Reset jika kosong ATAU data terkontaminasi user accounts (ada field 'username'/'role')
+    const isContaminated = employees && employees.some(e => e.username || e.role);
+    if (!employees || employees.length === 0 || isContaminated) {
       employees = DEFAULT_EMPLOYEES;
       saveStored(STORAGE_KEY_EMPLOYEES, employees);
     }

@@ -40,7 +40,12 @@ const DashboardEngine = (() => {
 
   function getActiveEmployees(filters = {}) {
     if (typeof MasterDB === 'undefined' || !MasterDB.getEmployees) return [];
-    let list = MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif');
+    let list = MasterDB.getEmployees().filter(e => {
+      // Hanya hitung karyawan murni (workforce) — bukan user account (staff manajemen).
+      // User accounts memiliki field 'username' atau 'role', karyawan tidak.
+      if (e.username || e.role) return false;
+      return e.status === 'Active' || e.status === 'Aktif';
+    });
 
     if (filters.unit && filters.unit !== 'ALL' && filters.unit !== 'semua') {
       const u = filters.unit.toLowerCase();
