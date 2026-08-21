@@ -769,7 +769,7 @@
           <div class="form-row-2">
             <div class="form-group">
               <label for="empUnit">Unit Toko *</label>
-              <select id="empUnit" class="form-control" required>
+              <select id="empUnit" class="form-control" required onchange="onModalUnitChange()">
                 <option value="KUK Bangunan">KUK Bangunan</option>
                 <option value="KUK Palen">KUK Palen</option>
               </select>
@@ -1003,7 +1003,9 @@
           ? `<span class="badge badge-pelanggaran-nol">0 (Aman)</span>`
           : `<span class="badge badge-pelanggaran-ada">⚠️ ${vios} Kali</span>`;
 
-        const gajiPokok = Number(emp.gajiPokok) || 3000000;
+        const isPalen = emp.unit && emp.unit.toLowerCase().includes('palen');
+        const defaultBase = isPalen ? 700000 : 850000;
+        const gajiPokok = Number(emp.gajiPokok) > 0 ? Number(emp.gajiPokok) : defaultBase;
         const gajiBagian = Number(emp.gajiBagian) || 0;
         const tunjanganKeluarga = emp.sudahBerkeluarga ? 50000 : 0;
         const totalEstGaji = gajiPokok + gajiBagian + tunjanganKeluarga;
@@ -1066,6 +1068,26 @@
     }
 
     /* Modal Form Operations */
+    function onModalUnitChange() {
+      const unit = document.getElementById('empUnit').value;
+      const internalId = document.getElementById('empInternalId').value;
+      const curGaji = parseFloat(document.getElementById('empGajiPokok').value);
+      
+      // Jika mode tambah baru atau gaji masih default
+      if (!internalId || curGaji === 850000 || curGaji === 700000 || !curGaji) {
+        if (unit.includes('Palen')) {
+          document.getElementById('empGajiPokok').value = 700000;
+          document.getElementById('empDepartment').value = 'Operasional Palen';
+        } else {
+          document.getElementById('empGajiPokok').value = 850000;
+          if (document.getElementById('empDepartment').value === 'Operasional Palen') {
+            document.getElementById('empDepartment').value = 'Operasional Toko';
+          }
+        }
+        calcPreviewSalary();
+      }
+    }
+
     function openAddModal() {
       document.getElementById('modalTitle').textContent = 'Tambah Karyawan Baru';
       document.getElementById('empInternalId').value = '';
@@ -1080,7 +1102,7 @@
       document.getElementById('empDepartment').value = 'Operasional Toko';
       document.getElementById('empPosition').value = 'Staf Operasional Bangunan';
       document.getElementById('empContact').value = '';
-      document.getElementById('empGajiPokok').value = 3000000;
+      document.getElementById('empGajiPokok').value = 850000;
       document.getElementById('empGajiBagian').value = 200000;
       document.getElementById('empBerkeluarga').checked = false;
       document.getElementById('empPelanggaran').value = 0;
@@ -1095,6 +1117,9 @@
       const emp = employeesData.find(e => e.id === empId);
       if (!emp) return;
 
+      const isPalen = emp.unit && emp.unit.toLowerCase().includes('palen');
+      const defaultBase = isPalen ? 700000 : 850000;
+
       document.getElementById('modalTitle').textContent = 'Edit Data Karyawan: ' + (emp.nama || emp.fullName);
       document.getElementById('empInternalId').value = emp.id;
       document.getElementById('empId').value = emp.id;
@@ -1105,7 +1130,7 @@
       document.getElementById('empDepartment').value = emp.department || 'Operasional Toko';
       document.getElementById('empPosition').value = emp.position || '';
       document.getElementById('empContact').value = emp.contactNumber || '';
-      document.getElementById('empGajiPokok').value = emp.gajiPokok || 3000000;
+      document.getElementById('empGajiPokok').value = Number(emp.gajiPokok) > 0 ? emp.gajiPokok : defaultBase;
       document.getElementById('empGajiBagian').value = emp.gajiBagian || 200000;
       document.getElementById('empBerkeluarga').checked = !!emp.sudahBerkeluarga;
       document.getElementById('empPelanggaran').value = emp.totalPelanggaran || 0;

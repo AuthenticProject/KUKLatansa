@@ -10,7 +10,8 @@ const PayrollEngine = (() => {
   const DB_KEY = 'kuk_payroll_db';
 
   const RULES = {
-    default_base_salary: 3000000,
+    default_base_salary_bangunan: 850000,
+    default_base_salary_palen: 700000,
     late_deduction_rate: 15000,
     absent_deduction_rate: 50000,
     incomplete_deduction_rate: 20000
@@ -107,7 +108,9 @@ const PayrollEngine = (() => {
         tipKacaNominal = empTips.reduce((acc, t) => acc + (parseFloat(t.nominalTip || t.tip || 0) || 0), 0);
       }
 
-      const baseSalary = Number(emp.gajiPokok) || RULES.default_base_salary;
+      const isPalen = emp.unit && emp.unit.toLowerCase().includes('palen');
+      const defaultBase = isPalen ? RULES.default_base_salary_palen : RULES.default_base_salary_bangunan;
+      const baseSalary = Number(emp.gajiPokok) > 0 ? Number(emp.gajiPokok) : defaultBase;
       const gajiBagian = Number(emp.gajiBagian) || 0;
       const tunjanganKeluarga = emp.sudahBerkeluarga ? 50000 : 0;
 
