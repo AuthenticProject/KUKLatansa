@@ -21,7 +21,7 @@
   // Pages listed here are stand-alone (public access).
   // The shell sidebar/topbar is NOT injected, and auth is NOT checked.
   // Dashboard data (KPIs, rekap) still reads from MasterDB independently.
-  const SHELL_ISOLATED_PAGES = ['karyawan', 'peminjaman'];
+  const SHELL_ISOLATED_PAGES = ['karyawan', 'peminjaman', 'tip', 'cuti'];
 
   /* ── Storage keys ─────────────────────────────────────────────────── */
   const KEY_USER     = 'kuk_user';
