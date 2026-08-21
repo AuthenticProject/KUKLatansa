@@ -204,9 +204,9 @@ const Security = (() => {
   // 5. ROLE-BASED ACCESS CONTROL (RBAC)
   const ROLE_PERMISSIONS = {
     super_admin: ['*'],
-    hr_admin: ['dashboard', 'absen', 'cuti', 'pelanggaran', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll'],
-    finance: ['dashboard', 'payroll', 'attendance_review', 'tip'],
-    manager: ['dashboard', 'absen', 'cuti', 'pelanggaran', 'peminjaman', 'attendance_review'],
+    hr_admin: ['dashboard', 'absen', 'cuti', 'pelanggaran', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan', 'fingerprint', 'attendance_review', 'violation_review', 'payroll', 'hrd', 'users'],
+    finance: ['dashboard', 'payroll', 'attendance_review', 'tip', 'hrd'],
+    manager: ['dashboard', 'absen', 'cuti', 'pelanggaran', 'peminjaman', 'attendance_review', 'hrd'],
     staff: ['absen', 'cuti', 'peminjaman']
   };
 

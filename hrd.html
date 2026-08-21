@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HRD — Database Karyawan & Gaji — KUK La Tansa</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#540000">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <style>
+    :root {
+      --kuk-maroon: #540000;
+      --kuk-maroon-dark: #380000;
+      --kuk-gold: #FFCC00;
+      --kuk-gold-hover: #ffd633;
+      --kuk-gold-glow: rgba(255, 204, 0, 0.25);
+      --kuk-bg: #f8fafc;
+      --kuk-surface: #ffffff;
+      --kuk-border: #e2e8f0;
+      --kuk-text: #0f172a;
+      --kuk-text-muted: #64748b;
+      --kuk-success: #10b981;
+      --kuk-danger: #ef4444;
+      --kuk-warning: #f59e0b;
+      --kuk-info: #0284c7;
+      --kuk-radius: 16px;
+      --kuk-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background-color: var(--kuk-bg);
+      color: var(--kuk-text);
+      min-height: 100vh;
+      padding: 30px 20px 100px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Section */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: linear-gradient(135deg, #4a0000 0%, #2b0000 100%);
+      color: #fff;
+      padding: 24px 28px;
+      border-radius: 20px;
+      box-shadow: 0 12px 32px rgba(84, 0, 0, 0.25);
+    }
+
+    .header-titles h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-titles p {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.75);
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      padding: 18px 20px;
+      box-shadow: var(--kuk-shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .kpi-info h3 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--kuk-text);
+      line-height: 1.1;
+    }
+
+    .kpi-info p {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--kuk-text-muted);
+      margin-top: 2px;
+    }
+
+    /* Filter & Search Bar */
+    .controls-card {
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      padding: 18px 22px;
+      box-shadow: var(--kuk-shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .search-input-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--kuk-text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 11px 16px 11px 40px;
+      font-size: 14px;
+      border: 1.5px solid var(--kuk-border);
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s;
+      background: #f8fafc;
+    }
+
+    .search-input:focus {
+      border-color: var(--kuk-maroon);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      padding: 11px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border: 1.5px solid var(--kuk-border);
+      border-radius: 12px;
+      outline: none;
+      background: #f8fafc;
+      color: var(--kuk-text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-select:focus {
+      border-color: var(--kuk-maroon);
+      background: #fff;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 11px 18px;
+      border-radius: 12px;
+      border: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-gold {
+      background: var(--kuk-gold);
+      color: #380000;
+    }
+
+    .btn-gold:hover {
+      background: var(--kuk-gold-hover);
+      box-shadow: 0 6px 16px var(--kuk-gold-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--kuk-maroon);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #730000;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(84, 0, 0, 0.25);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--kuk-border);
+      color: var(--kuk-text);
+    }
+
+    .btn-outline:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: 12.5px;
+      border-radius: 8px;
+    }
+
+    .btn-icon {
+      padding: 8px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--kuk-border);
+      color: var(--kuk-text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-icon.danger:hover {
+      background: #fee2e2;
+      color: var(--kuk-danger);
+      border-color: #fca5a5;
+    }
+
+    /* Main Table Card */
+    .table-card {
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      box-shadow: var(--kuk-shadow);
+      overflow: hidden;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: #f8fafc;
+      padding: 14px 18px;
+      font-weight: 700;
+      color: var(--kuk-text-muted);
+      border-bottom: 1.5px solid var(--kuk-border);
+      text-transform: uppercase;
+      font-size: 11.5px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--kuk-border);
+      vertical-align: middle;
+      color: var(--kuk-text);
+    }
+
+    tbody tr:hover {
+      background: rgba(84, 0, 0, 0.02);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-unit-bangunan { background: rgba(84, 0, 0, 0.1); color: var(--kuk-maroon); border: 1px solid rgba(84, 0, 0, 0.2); }
+    .badge-unit-palen { background: rgba(2, 132, 199, 0.1); color: var(--kuk-info); border: 1px solid rgba(2, 132, 199, 0.25); }
+
+    .badge-keluarga-ya { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-keluarga-tidak { background: rgba(100, 116, 139, 0.1); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.2); }
+
+    .badge-pelanggaran-nol { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-pelanggaran-ada { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); font-weight: 800; }
+
+    .badge-status-active { background: rgba(16, 185, 129, 0.15); color: #059669; }
+    .badge-status-inactive { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
+
+    .emp-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .emp-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--kuk-maroon);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .emp-name-main {
+      font-weight: 700;
+      color: var(--kuk-text);
+      font-size: 14px;
+    }
+
+    .emp-name-sub {
+      font-size: 12px;
+      color: var(--kuk-text-muted);
+    }
+
+    .salary-tag {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: #1e293b;
+    }
+
+    .total-salary-tag {
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--kuk-maroon);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #fff;
+      width: 100%;
+      max-width: 620px;
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1.5px solid var(--kuk-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+    }
+
+    .modal-header h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--kuk-maroon);
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 11px 14px;
+      font-size: 14px;
+      border: 1.5px solid var(--kuk-border);
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      border-color: var(--kuk-maroon);
+      box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1);
+    }
+
+    .form-check-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(255, 204, 0, 0.12) 100%);
+      border: 1.5px solid rgba(16, 185, 129, 0.3);
+      padding: 14px 18px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+
+    .form-check-card:hover {
+      border-color: var(--kuk-success);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(255, 204, 0, 0.18) 100%);
+    }
+
+    .form-check-card input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--kuk-maroon);
+    }
+
+    .check-desc h4 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #065f46;
+    }
+
+    .check-desc p {
+      font-size: 12px;
+      color: #047857;
+      margin-top: 2px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1.5px solid var(--kuk-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: #f8fafc;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: toastIn 0.3s forwards;
+    }
+
+    .toast.success { background: #065f46; border-left: 4px solid var(--kuk-success); }
+    .toast.error { background: #7f1d1d; border-left: 4px solid var(--kuk-danger); }
+    .toast.info { background: #0c4a6e; border-left: 4px solid var(--kuk-info); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(20px); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .header-actions { width: 100%; }
+      .controls-card { flex-direction: column; align-items: stretch; }
+      .filter-group { flex-direction: column; }
+      .filter-select { width: 100%; }
+      .form-row-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- 1. Page Header -->
+    <header class="page-header">
+      <div class="header-titles">
+        <h1>
+          <span>👥</span> Database Karyawan HRD
+        </h1>
+        <p>Pusat master data karyawan, gaji pokok & bagian, tunjangan keluarga, serta catatan disiplin operasional.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-gold" onclick="openAddModal()">
+          <span>➕</span>
+          <span>Tambah Karyawan Baru</span>
+        </button>
+        <button class="btn btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.3);" onclick="exportEmployeesCSV()">
+          <span>📥 Export CSV</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. KPI Summary Grid -->
+    <section class="kpi-grid">
+      <!-- KPI 1 -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(84, 0, 0, 0.1); color: var(--kuk-maroon);">
+          👥
+        </div>
+        <div class="kpi-info">
+          <h3 id="statTotalKaryawan">0</h3>
+          <p>Total Karyawan Aktif</p>
+        </div>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(84, 0, 0, 0.1); color: var(--kuk-maroon);">
+          🏢
+        </div>
+        <div class="kpi-info">
+          <h3 id="statBangunan">0</h3>
+          <p>KUK Bangunan</p>
+        </div>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(2, 132, 199, 0.12); color: var(--kuk-info);">
+          🏬
+        </div>
+        <div class="kpi-info">
+          <h3 id="statPalen">0</h3>
+          <p>KUK Palen</p>
+        </div>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: var(--kuk-success);">
+          👨‍👩‍👧
+        </div>
+        <div class="kpi-info">
+          <h3 id="statBerkeluarga">0</h3>
+          <p>Berkeluarga (+Rp 50rb)</p>
+        </div>
+      </div>
+
+      <!-- KPI 5 -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.12); color: var(--kuk-danger);">
+          ⚠️
+        </div>
+        <div class="kpi-info">
+          <h3 id="statPelanggaran">0</h3>
+          <p>Total Pelanggaran</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Search & Filter Bar -->
+    <section class="controls-card">
+      <div class="search-input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, NIK, atau bagian..." oninput="renderTable()">
+      </div>
+
+      <div class="filter-group">
+        <select id="filterUnit" class="filter-select" onchange="renderTable()">
+          <option value="ALL">Semua Unit Toko</option>
+          <option value="KUK Bangunan">KUK Bangunan</option>
+          <option value="KUK Palen">KUK Palen</option>
+        </select>
+
+        <select id="filterKeluarga" class="filter-select" onchange="renderTable()">
+          <option value="ALL">Semua Status Keluarga</option>
+          <option value="YES">Sudah Berkeluarga (+Rp 50rb)</option>
+          <option value="NO">Belum Berkeluarga</option>
+        </select>
+
+        <select id="filterStatus" class="filter-select" onchange="renderTable()">
+          <option value="Active">Status: Aktif</option>
+          <option value="Inactive">Status: Nonaktif</option>
+          <option value="ALL">Semua Status</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- 4. Main Employees Table Card -->
+    <main class="table-card">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>No & ID</th>
+              <th>Karyawan</th>
+              <th>Unit & Bagian</th>
+              <th>Gaji Pokok</th>
+              <th>Gaji Bagian</th>
+              <th>Berkeluarga (+50rb)</th>
+              <th>Pelanggaran</th>
+              <th>Est. Gaji Bersih</th>
+              <th>Status</th>
+              <th style="text-align: right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTableBody">
+            <tr>
+              <td colspan="10" style="text-align: center; padding: 40px; color: var(--kuk-text-muted);">
+                Memuat data database karyawan...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==================== MODAL TAMBAH / EDIT KARYAWAN ==================== -->
+  <div class="modal-overlay" id="employeeModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modalTitle">Tambah Karyawan Baru</h2>
+        <button class="btn-icon" onclick="closeEmployeeModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="employeeForm" onsubmit="saveEmployeeSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="empInternalId">
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="empId">ID Karyawan</label>
+              <input type="text" id="empId" class="form-control" placeholder="Contoh: K-014" required>
+            </div>
+            <div class="form-group">
+              <label for="empNik">NIK (Nomor Induk Kependudukan)</label>
+              <input type="text" id="empNik" class="form-control" placeholder="Nomor KTP / NIK">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="empNama">Nama Panggilan *</label>
+              <input type="text" id="empNama" class="form-control" placeholder="Contoh: Wiba" required>
+            </div>
+            <div class="form-group">
+              <label for="empFullName">Nama Lengkap Sesuai KTP *</label>
+              <input type="text" id="empFullName" class="form-control" placeholder="Contoh: Wiba Prasetiyo" required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="empUnit">Unit Toko *</label>
+              <select id="empUnit" class="form-control" required>
+                <option value="KUK Bangunan">KUK Bangunan</option>
+                <option value="KUK Palen">KUK Palen</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="empDepartment">Bagian / Divisi *</label>
+              <select id="empDepartment" class="form-control" required>
+                <option value="Gudang & Stok">Gudang & Stok</option>
+                <option value="Operasional Toko">Operasional Toko</option>
+                <option value="Logistik & Pengiriman">Logistik & Pengiriman</option>
+                <option value="Penjualan & Kasir">Penjualan & Kasir</option>
+                <option value="Admin & Kasir">Admin & Kasir</option>
+                <option value="Produksi & Potong Kaca">Produksi & Potong Kaca</option>
+                <option value="Operasional Palen">Operasional Palen</option>
+                <option value="HR & Manajemen">HR & Manajemen</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="empPosition">Jabatan / Posisi</label>
+              <input type="text" id="empPosition" class="form-control" placeholder="Contoh: Staf Gudang Bangunan">
+            </div>
+            <div class="form-group">
+              <label for="empContact">No. WhatsApp / Kontak</label>
+              <input type="tel" id="empContact" class="form-control" placeholder="Contoh: 081234567890">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="empGajiPokok">Gaji Pokok (Rp) *</label>
+              <input type="number" id="empGajiPokok" class="form-control" placeholder="3000000" step="50000" min="0" required oninput="calcPreviewSalary()">
+            </div>
+            <div class="form-group">
+              <label for="empGajiBagian">Gaji Bagian / Tunjangan (Rp) *</label>
+              <input type="number" id="empGajiBagian" class="form-control" placeholder="200000" step="25000" min="0" required oninput="calcPreviewSalary()">
+            </div>
+          </div>
+
+          <!-- CHECKBOX BERKELUARGA (+50.000) -->
+          <label class="form-check-card" for="empBerkeluarga">
+            <input type="checkbox" id="empBerkeluarga" onchange="calcPreviewSalary()">
+            <div class="check-desc">
+              <h4>Sudah Berkeluarga (Checklist Bonus)</h4>
+              <p>Otomatis menambahkan <strong>Bonus Tunjangan Keluarga Rp 50.000 / bulan</strong> ke rekapan payroll gaji.</p>
+            </div>
+          </label>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="empPelanggaran">Berapa Kali Melanggar (Catatan SP/Disiplin)</label>
+              <input type="number" id="empPelanggaran" class="form-control" placeholder="0" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label for="empStatus">Status Keaktifan *</label>
+              <select id="empStatus" class="form-control" required>
+                <option value="Active">Active (Aktif Bekerja)</option>
+                <option value="Inactive">Inactive (Nonaktif / Keluar)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px dashed var(--kuk-border); padding: 12px 16px; border-radius: 12px; font-size: 13px; color: #475569;">
+            <strong>Estimasi Gaji Dasar Bulanan: </strong>
+            <span id="previewTotalSalary" style="font-weight: 800; color: var(--kuk-maroon); font-size: 15px;">Rp 0</span>
+            <div style="font-size: 11.5px; color: #64748b; margin-top: 3px;">
+              = Gaji Pokok + Gaji Bagian + Tunjangan Keluarga (<span id="previewBonusKeluarga">Rp 0</span>)
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeEmployeeModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">💾 Simpan Data Karyawan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DELETE CONFIRMATION ==================== -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h2 style="color: var(--kuk-danger);">Hapus Data Karyawan?</h2>
+        <button class="btn-icon" onclick="closeDeleteModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14px; line-height: 1.5; color: #334155;">
+          Apakah Anda yakin ingin menghapus data karyawan <strong id="deleteEmpName" style="color: var(--kuk-maroon);">-</strong>?
+        </p>
+        <p style="font-size: 12.5px; color: #64748b; margin-top: 6px;">
+          Tindakan ini akan menghapus profil dari database master HRD.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeDeleteModal()">Batal</button>
+        <button type="button" class="btn btn-danger" style="background:#ef4444; color:#fff;" onclick="confirmDeleteEmployee()">Ya, Hapus Karyawan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="shared/master_db.js"></script>
+  <script src="shared/security.js"></script>
+  <script src="shared/shell.js" data-base="."></script>
+
+  <script>
+    let employeesData = [];
+    let deleteTargetId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      MasterDB.init();
+      loadEmployees();
+    });
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span> <span>${msg}</span>`;
+      container.appendChild(t);
+      setTimeout(() => {
+        t.style.animation = 'toastOut 0.3s forwards';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    function formatIDR(val) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0);
+    }
+
+    function loadEmployees() {
+      // 1. Get raw employees from MasterDB
+      employeesData = MasterDB.getEmployees() || [];
+      
+      // Auto count violations if kuk_violations_db exists
+      try {
+        const violations = JSON.parse(localStorage.getItem('kuk_violations_db') || '[]');
+        employeesData.forEach(emp => {
+          const empVios = violations.filter(v => v.employeeId === emp.id || (v.employeeName && v.employeeName.toLowerCase() === (emp.fullName || emp.nama || '').toLowerCase()));
+          if (empVios.length > 0 && (!emp.totalPelanggaran || emp.totalPelanggaran === 0)) {
+            emp.totalPelanggaran = empVios.length;
+          }
+        });
+      } catch (e) {}
+
+      updateKPICards();
+      renderTable();
+    }
+
+    function updateKPICards() {
+      const activeEmps = employeesData.filter(e => e.status === 'Active' || e.status === 'Aktif');
+      const bangunanCount = activeEmps.filter(e => e.unit && e.unit.toLowerCase().includes('bangunan')).length;
+      const palenCount = activeEmps.filter(e => e.unit && e.unit.toLowerCase().includes('palen')).length;
+      const keluargaCount = activeEmps.filter(e => e.sudahBerkeluarga).length;
+      const totalVios = employeesData.reduce((acc, e) => acc + (Number(e.totalPelanggaran) || 0), 0);
+
+      document.getElementById('statTotalKaryawan').textContent = activeEmps.length;
+      document.getElementById('statBangunan').textContent = bangunanCount;
+      document.getElementById('statPalen').textContent = palenCount;
+      document.getElementById('statBerkeluarga').textContent = keluargaCount;
+      document.getElementById('statPelanggaran').textContent = totalVios;
+    }
+
+    function renderTable() {
+      const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      const unitFilter = document.getElementById('filterUnit').value;
+      const keluargaFilter = document.getElementById('filterKeluarga').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+
+      const filtered = employeesData.filter(emp => {
+        // Query search
+        const matchName = (emp.nama || '').toLowerCase().includes(query) ||
+                          (emp.fullName || '').toLowerCase().includes(query) ||
+                          (emp.id || '').toLowerCase().includes(query) ||
+                          (emp.nik || '').toLowerCase().includes(query) ||
+                          (emp.department || '').toLowerCase().includes(query) ||
+                          (emp.position || '').toLowerCase().includes(query);
+        if (!matchName) return false;
+
+        // Unit filter
+        if (unitFilter !== 'ALL') {
+          if (!emp.unit || !emp.unit.toLowerCase().includes(unitFilter.toLowerCase().replace('kuk ', ''))) return false;
+        }
+
+        // Keluarga filter
+        if (keluargaFilter === 'YES' && !emp.sudahBerkeluarga) return false;
+        if (keluargaFilter === 'NO' && emp.sudahBerkeluarga) return false;
+
+        // Status filter
+        if (statusFilter !== 'ALL') {
+          const isActive = emp.status === 'Active' || emp.status === 'Aktif';
+          if (statusFilter === 'Active' && !isActive) return false;
+          if (statusFilter === 'Inactive' && isActive) return false;
+        }
+
+        return true;
+      });
+
+      const tbody = document.getElementById('employeeTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" style="text-align: center; padding: 40px; color: var(--kuk-text-muted);">
+              Tidak ada data karyawan yang cocok dengan kriteria pencarian.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((emp, index) => {
+        const isBangunan = !emp.unit || emp.unit.toLowerCase().includes('bangunan');
+        const unitBadge = isBangunan
+          ? `<span class="badge badge-unit-bangunan">🏢 KUK Bangunan</span>`
+          : `<span class="badge badge-unit-palen">🏬 KUK Palen</span>`;
+
+        const keluargaBadge = emp.sudahBerkeluarga
+          ? `<span class="badge badge-keluarga-ya">👨‍👩‍👧 Sudah (+50rb)</span>`
+          : `<span class="badge badge-keluarga-tidak">Belum</span>`;
+
+        const vios = Number(emp.totalPelanggaran) || 0;
+        const viosBadge = vios === 0
+          ? `<span class="badge badge-pelanggaran-nol">0 (Aman)</span>`
+          : `<span class="badge badge-pelanggaran-ada">⚠️ ${vios} Kali</span>`;
+
+        const gajiPokok = Number(emp.gajiPokok) || 3000000;
+        const gajiBagian = Number(emp.gajiBagian) || 0;
+        const tunjanganKeluarga = emp.sudahBerkeluarga ? 50000 : 0;
+        const totalEstGaji = gajiPokok + gajiBagian + tunjanganKeluarga;
+
+        const isActive = emp.status === 'Active' || emp.status === 'Aktif';
+        const statusBadge = isActive
+          ? `<span class="badge badge-status-active">● Aktif</span>`
+          : `<span class="badge badge-status-inactive">● Nonaktif</span>`;
+
+        const initial = (emp.nama || emp.fullName || 'K')[0].toUpperCase();
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 800; font-size: 13.5px; color: var(--kuk-maroon);">${emp.id || 'K-???'}</div>
+              <div style="font-size: 11px; color: var(--kuk-text-muted);">${emp.nik || '-'}</div>
+            </td>
+            <td>
+              <div class="emp-profile">
+                <div class="emp-avatar">${initial}</div>
+                <div>
+                  <div class="emp-name-main">${emp.nama || emp.fullName}</div>
+                  <div class="emp-name-sub">${emp.fullName && emp.fullName !== emp.nama ? emp.fullName : (emp.position || 'Staf')}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div>${unitBadge}</div>
+              <div style="font-size: 12px; color: var(--kuk-text-muted); margin-top: 3px;">${emp.department || 'Operasional'}</div>
+            </td>
+            <td>
+              <span class="salary-tag">${formatIDR(gajiPokok)}</span>
+            </td>
+            <td>
+              <span class="salary-tag">${formatIDR(gajiBagian)}</span>
+            </td>
+            <td>
+              ${keluargaBadge}
+            </td>
+            <td>
+              ${viosBadge}
+            </td>
+            <td>
+              <span class="total-salary-tag">${formatIDR(totalEstGaji)}</span>
+            </td>
+            <td>
+              ${statusBadge}
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button class="btn-icon" title="Edit Karyawan" onclick="openEditModal('${emp.id}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn-icon danger" title="Hapus Karyawan" onclick="openDeleteModal('${emp.id}', '${(emp.nama || emp.fullName || '').replace(/'/g, "\\'")}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* Modal Form Operations */
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Tambah Karyawan Baru';
+      document.getElementById('empInternalId').value = '';
+      
+      // Auto next ID
+      const nextNum = employeesData.length + 1;
+      document.getElementById('empId').value = 'K-' + String(nextNum).padStart(3, '0');
+      document.getElementById('empNik').value = '';
+      document.getElementById('empNama').value = '';
+      document.getElementById('empFullName').value = '';
+      document.getElementById('empUnit').value = 'KUK Bangunan';
+      document.getElementById('empDepartment').value = 'Operasional Toko';
+      document.getElementById('empPosition').value = 'Staf Operasional Bangunan';
+      document.getElementById('empContact').value = '';
+      document.getElementById('empGajiPokok').value = 3000000;
+      document.getElementById('empGajiBagian').value = 200000;
+      document.getElementById('empBerkeluarga').checked = false;
+      document.getElementById('empPelanggaran').value = 0;
+      document.getElementById('empStatus').value = 'Active';
+
+      calcPreviewSalary();
+      document.getElementById('employeeModal').classList.add('active');
+      document.getElementById('empNama').focus();
+    }
+
+    function openEditModal(empId) {
+      const emp = employeesData.find(e => e.id === empId);
+      if (!emp) return;
+
+      document.getElementById('modalTitle').textContent = 'Edit Data Karyawan: ' + (emp.nama || emp.fullName);
+      document.getElementById('empInternalId').value = emp.id;
+      document.getElementById('empId').value = emp.id;
+      document.getElementById('empNik').value = emp.nik || '';
+      document.getElementById('empNama').value = emp.nama || '';
+      document.getElementById('empFullName').value = emp.fullName || emp.nama || '';
+      document.getElementById('empUnit').value = emp.unit || 'KUK Bangunan';
+      document.getElementById('empDepartment').value = emp.department || 'Operasional Toko';
+      document.getElementById('empPosition').value = emp.position || '';
+      document.getElementById('empContact').value = emp.contactNumber || '';
+      document.getElementById('empGajiPokok').value = emp.gajiPokok || 3000000;
+      document.getElementById('empGajiBagian').value = emp.gajiBagian || 200000;
+      document.getElementById('empBerkeluarga').checked = !!emp.sudahBerkeluarga;
+      document.getElementById('empPelanggaran').value = emp.totalPelanggaran || 0;
+      document.getElementById('empStatus').value = emp.status || 'Active';
+
+      calcPreviewSalary();
+      document.getElementById('employeeModal').classList.add('active');
+    }
+
+    function closeEmployeeModal() {
+      document.getElementById('employeeModal').classList.remove('active');
+    }
+
+    function calcPreviewSalary() {
+      const gPokok = parseFloat(document.getElementById('empGajiPokok').value) || 0;
+      const gBagian = parseFloat(document.getElementById('empGajiBagian').value) || 0;
+      const isKel = document.getElementById('empBerkeluarga').checked;
+      const bonusKel = isKel ? 50000 : 0;
+      const total = gPokok + gBagian + bonusKel;
+
+      document.getElementById('previewBonusKeluarga').textContent = formatIDR(bonusKel);
+      document.getElementById('previewTotalSalary').textContent = formatIDR(total);
+    }
+
+    function saveEmployeeSubmit(e) {
+      e.preventDefault();
+      const internalId = document.getElementById('empInternalId').value;
+      const id = document.getElementById('empId').value.trim();
+      const nama = document.getElementById('empNama').value.trim();
+      const fullName = document.getElementById('empFullName').value.trim();
+      const unit = document.getElementById('empUnit').value;
+      const department = document.getElementById('empDepartment').value;
+      const position = document.getElementById('empPosition').value.trim() || department;
+      const contactNumber = document.getElementById('empContact').value.trim();
+      const gajiPokok = parseFloat(document.getElementById('empGajiPokok').value) || 3000000;
+      const gajiBagian = parseFloat(document.getElementById('empGajiBagian').value) || 0;
+      const sudahBerkeluarga = document.getElementById('empBerkeluarga').checked;
+      const totalPelanggaran = parseInt(document.getElementById('empPelanggaran').value) || 0;
+      const status = document.getElementById('empStatus').value;
+      const nik = document.getElementById('empNik').value.trim();
+
+      if (!nama || !fullName) {
+        showToast('Nama dan Nama Lengkap wajib diisi!', 'error');
+        return;
+      }
+
+      const empPayload = {
+        id: internalId || id,
+        nik,
+        nama,
+        fullName,
+        unit,
+        department,
+        position,
+        contactNumber,
+        gajiPokok,
+        gajiBagian,
+        sudahBerkeluarga,
+        totalPelanggaran,
+        status,
+        hireDate: internalId ? (employeesData.find(x => x.id === internalId)?.hireDate || new Date().toISOString().split('T')[0]) : new Date().toISOString().split('T')[0]
+      };
+
+      MasterDB.saveEmployee(empPayload);
+      closeEmployeeModal();
+      loadEmployees();
+      showToast(`Data karyawan ${nama} berhasil disimpan!`, 'success');
+    }
+
+    /* Delete Operations */
+    function openDeleteModal(empId, empName) {
+      deleteTargetId = empId;
+      document.getElementById('deleteEmpName').textContent = empName;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      deleteTargetId = null;
+      document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    function confirmDeleteEmployee() {
+      if (!deleteTargetId) return;
+      MasterDB.deleteEmployee(deleteTargetId);
+      closeDeleteModal();
+      loadEmployees();
+      showToast('Karyawan berhasil dihapus dari database.', 'success');
+    }
+
+    /* Export to CSV */
+    function exportEmployeesCSV() {
+      const headers = ['ID', 'NIK', 'Nama Panggilan', 'Nama Lengkap', 'Unit', 'Bagian', 'Jabatan', 'Gaji Pokok', 'Gaji Bagian', 'Sudah Berkeluarga', 'Tunjangan Keluarga', 'Total Pelanggaran', 'Status'];
+      const rows = employeesData.map(e => [
+        `"${e.id || ''}"`,
+        `"${e.nik || ''}"`,
+        `"${e.nama || ''}"`,
+        `"${e.fullName || ''}"`,
+        `"${e.unit || ''}"`,
+        `"${e.department || ''}"`,
+        `"${e.position || ''}"`,
+        e.gajiPokok || 0,
+        e.gajiBagian || 0,
+        e.sudahBerkeluarga ? 'YA' : 'TIDAK',
+        e.sudahBerkeluarga ? 50000 : 0,
+        e.totalPelanggaran || 0,
+        `"${e.status || 'Active'}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `Database_Karyawan_HRD_KUK_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Data database karyawan berhasil diexport ke CSV!', 'success');
+    }
+  </script>
+</body>
+</html>

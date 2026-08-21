@@ -110,6 +110,7 @@
     { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
     { id: 'peminjaman_admin', label: 'Admin Armada',        section: 'Database',   href: 'peminjaman_admin.html', perm: 'peminjaman_admin', icon: ICON.peminjaman_admin },
     { id: 'users',            label: 'Manajemen Pengguna',  section: 'Sistem',     href: 'users.html', perm: 'users',            icon: ICON.users },
+    { id: 'hrd',              label: 'HRD',                 section: 'Sistem',     href: 'hrd.html',   perm: 'hrd',              icon: ICON.karyawan },
   ];
 
   const PAGE_TITLES = {
@@ -122,6 +123,7 @@
     peminjaman_admin: 'Administrasi Armada',
     karyawan:         'Manajemen Karyawan',
     users:            'Manajemen Pengguna',
+    hrd:              'HRD — Database Karyawan',
   };
 
   /* ── Auth helpers ─────────────────────────────────────────────────── */
@@ -211,6 +213,7 @@
     if (path.includes('tip'))              return 'tip';
     if (path.includes('karyawan'))         return 'karyawan';
     if (path.includes('users'))            return 'users';
+    if (path.includes('hrd'))              return 'hrd';
     return '';
   }
 

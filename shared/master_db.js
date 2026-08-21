@@ -9,7 +9,7 @@ const MasterDB = (() => {
 
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
 
-  const STORAGE_KEY_EMPLOYEES = 'kuk_master_employees_v2'; // v2: pisah karyawan dari staff
+  const STORAGE_KEY_EMPLOYEES = 'kuk_master_employees_v3'; // v3: HRD schema (gajiPokok, gajiBagian, sudahBerkeluarga, pelanggaran)
   const STORAGE_KEY_USERS = 'kuk_master_users';
   const STORAGE_KEY_VEHICLES = 'kuk_master_vehicles';
 
@@ -17,19 +17,19 @@ const MasterDB = (() => {
   const DEPARTMENTS = ['Admin & Kasir', 'Operasional Toko', 'Gudang & Stok', 'Logistik & Pengiriman', 'Penjualan & Kasir', 'Produksi & Potong Kaca', 'Operasional Palen', 'HR & Manajemen'];
   const POSITIONS = ['Admin', 'Kepala Toko Operasional', 'Kepala Gudang', 'Pengiriman', 'Frontliner', 'Staf Palen', 'Koordinator', 'Pimpinan', 'HRD', 'Bendahara', 'Inventaris', 'Sekretaris'];
 
-  // 11 Real Workforce Employees from Google Sheets
+  // 11 Karyawan Resmi KUK (Database HRD Utama)
   const DEFAULT_EMPLOYEES = [
-    { id: 'K-002', nik: '3502010002', fullName: 'Wiba', unit: 'KUK Bangunan', department: 'Admin & Kasir', position: 'Admin', status: 'Active', fingerprintId: '2', hireDate: '2023-01-01', contactNumber: '08123456002' },
-    { id: 'K-003', nik: '3502010003', fullName: 'Ulin', unit: 'KUK Bangunan', department: 'Operasional Toko', position: 'Kepala Toko Operasional', status: 'Active', fingerprintId: '3', hireDate: '2022-05-10', contactNumber: '08123456003' },
-    { id: 'K-004', nik: '3502010004', fullName: 'Kahfi', unit: 'KUK Bangunan', department: 'Admin & Kasir', position: 'Admin', status: 'Active', fingerprintId: '4', hireDate: '2023-03-15', contactNumber: '08123456004' },
-    { id: 'K-005', nik: '3502010005', fullName: 'Nur', unit: 'KUK Bangunan', department: 'Gudang & Stok', position: 'Kepala Gudang', status: 'Active', fingerprintId: '5', hireDate: '2021-08-20', contactNumber: '08123456005' },
-    { id: 'K-007', nik: '3502010007', fullName: 'Alip', unit: 'KUK Bangunan', department: 'Logistik & Pengiriman', position: 'Pengiriman', status: 'Active', fingerprintId: '7', hireDate: '2023-06-01', contactNumber: '08123456007' },
-    { id: 'K-008', nik: '3502010008', fullName: 'Riyan', unit: 'KUK Bangunan', department: 'Penjualan & Kasir', position: 'Frontliner', status: 'Active', fingerprintId: '8', hireDate: '2023-07-10', contactNumber: '08123456008' },
-    { id: 'K-009', nik: '3502010009', fullName: 'Hiba', unit: 'KUK Bangunan', department: 'Penjualan & Kasir', position: 'Frontliner', status: 'Active', fingerprintId: '9', hireDate: '2023-07-15', contactNumber: '08123456009' },
-    { id: 'K-010', nik: '3502010010', fullName: 'Rohman', unit: 'KUK Bangunan', department: 'Penjualan & Kasir', position: 'Frontliner', status: 'Active', fingerprintId: '10', hireDate: '2023-08-01', contactNumber: '08123456010' },
-    { id: 'K-011', nik: '3502010011', fullName: 'Irfan', unit: 'KUK Bangunan', department: 'Admin & Kasir', position: 'Admin', status: 'Active', fingerprintId: '11', hireDate: '2023-09-01', contactNumber: '08123456011' },
-    { id: 'K-012', nik: '3502020012', fullName: 'Nukul', unit: 'KUK Palen', department: 'Operasional Palen', position: 'Staf Palen', status: 'Active', fingerprintId: '12', hireDate: '2023-10-01', contactNumber: '08123456012' },
-    { id: 'K-013', nik: '3502020013', fullName: 'Miftah', unit: 'KUK Palen', department: 'Operasional Palen', position: 'Staf Palen', status: 'Active', fingerprintId: '13', hireDate: '2023-10-15', contactNumber: '08123456013' }
+    { id: 'K-002', nik: '3502010002', nama: 'Wiba', fullName: 'Wiba Prasetiyo', unit: 'KUK Bangunan', department: 'Gudang & Stok', position: 'Staf Gudang Bangunan', gajiPokok: 3350000, gajiBagian: 250000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '2', hireDate: '2023-01-01', contactNumber: '085712345678' },
+    { id: 'K-003', nik: '3502010003', nama: 'Ulin', fullName: 'Nurhadi (Ulin)', unit: 'KUK Bangunan', department: 'Gudang & Stok', position: 'Kepala Gudang Bangunan', gajiPokok: 3800000, gajiBagian: 350000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '3', hireDate: '2022-05-10', contactNumber: '081345678901' },
+    { id: 'K-004', nik: '3502010004', nama: 'Kahfi', fullName: 'Kahfi Ashari', unit: 'KUK Bangunan', department: 'Penjualan & Kasir', position: 'Staf Pelayanan Bangunan', gajiPokok: 3150000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '4', hireDate: '2023-03-15', contactNumber: '081377889900' },
+    { id: 'K-005', nik: '3502010005', nama: 'Agus', fullName: 'Agus Santoso', unit: 'KUK Bangunan', department: 'Operasional Toko', position: 'Staf Operasional Bangunan', gajiPokok: 3300000, gajiBagian: 250000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '5', hireDate: '2021-08-20', contactNumber: '081298765432' },
+    { id: 'K-007', nik: '3502010007', nama: 'Alip', fullName: 'Alif Kurniawan', unit: 'KUK Bangunan', department: 'Logistik & Pengiriman', position: 'Pengiriman & Supir', gajiPokok: 3250000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '7', hireDate: '2023-06-01', contactNumber: '085733445566' },
+    { id: 'K-008', nik: '3502010008', nama: 'Riyan', fullName: 'Ariyan Saputra', unit: 'KUK Bangunan', department: 'Penjualan & Kasir', position: 'Staf Pelayanan Bangunan', gajiPokok: 3150000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '8', hireDate: '2023-07-10', contactNumber: '085711223344' },
+    { id: 'K-009', nik: '3502010009', nama: 'Hiba', fullName: 'Hiba Pratama', unit: 'KUK Bangunan', department: 'Gudang & Stok', position: 'Staf Gudang Bangunan', gajiPokok: 3050000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '9', hireDate: '2023-07-15', contactNumber: '085799887766' },
+    { id: 'K-010', nik: '3502010010', nama: 'Rohman', fullName: 'Lailurrohman', unit: 'KUK Bangunan', department: 'Gudang & Stok', position: 'Staf Gudang Bangunan', gajiPokok: 3050000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '10', hireDate: '2023-08-01', contactNumber: '081288990011' },
+    { id: 'K-011', nik: '3502010011', nama: 'Irfan', fullName: 'Irfan Maulana (Logistik)', unit: 'KUK Bangunan', department: 'Logistik & Pengiriman', position: 'Supir Armada Logistik', gajiPokok: 3500000, gajiBagian: 300000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '11', hireDate: '2023-09-01', contactNumber: '085755667788' },
+    { id: 'K-012', nik: '3502020012', nama: 'Nukul', fullName: 'Nukul Hidayat', unit: 'KUK Palen', department: 'Operasional Palen', position: 'Staf Gudang Palen', gajiPokok: 3200000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '12', hireDate: '2023-10-01', contactNumber: '085678912344' },
+    { id: 'K-013', nik: '3502020013', nama: 'Miftah', fullName: 'Miftahul Huda', unit: 'KUK Palen', department: 'Operasional Palen', position: 'Staf Operasional Palen', gajiPokok: 3200000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '13', hireDate: '2023-10-15', contactNumber: '081234567811' }
   ];
 
   // 12 Real Management Staff Accounts from Google Sheets

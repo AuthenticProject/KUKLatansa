@@ -717,6 +717,10 @@
     </div>
   </div>
 
+  <script src="shared/master_db.js?v=1787281737"></script>
+  <script src="shared/security.js?v=1787281737"></script>
+  <script src="shared/shell.js?v=1787281737" data-base="."></script>
+
   <script>
     // --- KONFIGURASI API ---
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
@@ -734,17 +738,25 @@
     let leavesMap = {};
     let activeUser = null;
     let isLocked = false;
-
+    
     // --- UTILS ---
     const toKey = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const formatLabel = (k) => { const [y, m, d] = k.split('-'); return `${+d} ${MONTHS[+m - 1]} ${y}`; };
 
+    function getLoggedUsername() {
+      const rawUser = sessionStorage.getItem('kuk_user');
+      if (!rawUser) return null;
+      try {
+        const parsed = JSON.parse(rawUser);
+        if (parsed && typeof parsed === 'object' && parsed.username) return parsed.username.toLowerCase().trim();
+      } catch(e){}
+      return String(rawUser).toLowerCase().trim();
+    }
+
     function filterDataByRole(dataArray) {
       if (!Array.isArray(dataArray)) return dataArray;
-      const rawUser = sessionStorage.getItem('kuk_user');
-      if (!rawUser) return dataArray;
-      
-      const loggedUser = String(rawUser).toLowerCase().trim();
+      const loggedUser = getLoggedUsername();
+      if (!loggedUser) return dataArray;
 
       let hasUsersPerm = false;
       const storedDb = localStorage.getItem('kuk_users_db');
@@ -755,12 +767,12 @@
           if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
         } catch(e){}
       } else {
-        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
+        if (['fariz', 'irsyadil', 'admin'].includes(loggedUser)) hasUsersPerm = true;
       }
       if (hasUsersPerm) return dataArray;
       const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
       return dataArray.filter(item => {
-        const nameStr = String(item.nama || '').toLowerCase().trim();
+        const nameStr = String(item.nama || item.fullName || '').toLowerCase().trim();
         const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
         return isPalen ? isEmpPalen : !isEmpPalen;
       });
@@ -775,28 +787,46 @@
       setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
     }
 
+    function renderSelectDropdown() {
+      const sel = document.createElement('select');
+      sel.id = 'nama';
+      sel.innerHTML = `<option value="">Ketuk untuk memilih</option>` +
+        dbKaryawan.map(k => `<option value="${k.id}">${k.nama || k.fullName}</option>`).join('');
+      sel.onchange = onUserChange;
+
+      const wrap = document.getElementById('namaWrap');
+      wrap.innerHTML = '';
+      wrap.appendChild(sel);
+    }
+
     // --- INIT ---
     function init() {
+      // 1. Instan fallback dari MasterDB lokal
+      if (typeof MasterDB !== 'undefined' && MasterDB.getEmployees) {
+        const localEmps = MasterDB.getEmployees()
+          .filter(e => e.status === 'Active' || e.status === 'Aktif')
+          .map(e => ({ id: e.id, nama: e.fullName, bagian: e.department || e.position || 'Operasional' }));
+        dbKaryawan = filterDataByRole(localEmps);
+        renderSelectDropdown();
+        renderCalendar();
+      }
+
+      // 2. Sync dari Cloud Google Apps Script
       fetch(`${SCRIPT_URL}?action=init`).then(r => r.json()).then(res => {
-        dbKaryawan = filterDataByRole(res.karyawan || []);
+        if (res && res.karyawan && res.karyawan.length > 0) {
+          dbKaryawan = filterDataByRole(res.karyawan);
+          renderSelectDropdown();
+        }
 
         if (res.batasWaktu && new Date() > new Date(res.batasWaktu)) {
           isLocked = true;
           document.getElementById('deadlineAlert').style.display = 'flex';
         }
 
-        const sel = document.createElement('select');
-        sel.id = 'nama';
-        sel.innerHTML = `<option value="">Ketuk untuk memilih</option>` +
-          dbKaryawan.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
-        sel.onchange = onUserChange;
-
-        const wrap = document.getElementById('namaWrap');
-        wrap.innerHTML = '';
-        wrap.appendChild(sel);
-
         renderCalendar();
-      }).catch(e => showToast('Gagal memuat data server.', 'error'));
+      }).catch(e => {
+        console.warn('Init server cuti offline, menggunakan database lokal:', e);
+      });
     }
 
     function onUserChange() {
@@ -1068,9 +1098,6 @@
       }
     }
   </script>
-  <script src="shared/master_db.js?v=1787281369"></script>
-  <script src="shared/security.js?v=1787281369"></script>
-  <script src="shared/shell.js?v=1787281369" data-base="."></script>
 </body>
 
 </html>

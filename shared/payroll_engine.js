@@ -107,12 +107,19 @@ const PayrollEngine = (() => {
         tipKacaNominal = empTips.reduce((acc, t) => acc + (parseFloat(t.nominalTip || t.tip || 0) || 0), 0);
       }
 
+      const baseSalary = Number(emp.gajiPokok) || RULES.default_base_salary;
+      const gajiBagian = Number(emp.gajiBagian) || 0;
+      const tunjanganKeluarga = emp.sudahBerkeluarga ? 50000 : 0;
+
       empData[emp.id] = {
-        employeeName: emp.fullName,
+        employeeName: emp.fullName || emp.nama,
         unit: emp.unit,
         department: emp.department || 'Operasional',
         position: emp.position || 'Staf',
-        baseSalary: RULES.default_base_salary,
+        baseSalary: baseSalary,
+        gajiBagian: gajiBagian,
+        sudahBerkeluarga: !!emp.sudahBerkeluarga,
+        tunjanganKeluarga: tunjanganKeluarga,
         tipKaca: tipKacaNominal,
         counts: { PRESENT: 0, LATE: 0, ABSENT: 0, INCOMPLETE: 0, LEAVE: 0, SICK: 0, PERMISSION: 0, EXCUSED: 0, OFF: 0 }
       };
@@ -140,7 +147,9 @@ const PayrollEngine = (() => {
       const incompleteDeduction = data.counts.INCOMPLETE * RULES.incomplete_deduction_rate;
       const totalDeductions = lateDeduction + absentDeduction + incompleteDeduction;
 
-      const takeHomePay = (data.baseSalary + data.tipKaca) - totalDeductions;
+      // Gaji Kotor = Gaji Pokok + Gaji Bagian + Tunjangan Keluarga (Rp 50.000 jika sudah berkeluarga) + Tip Kaca
+      const grossSalary = data.baseSalary + data.gajiBagian + data.tunjanganKeluarga + data.tipKaca;
+      const takeHomePay = grossSalary - totalDeductions;
 
       if (data.unit && data.unit.toLowerCase().includes('palen')) {
         totalPalen += takeHomePay;
@@ -155,7 +164,11 @@ const PayrollEngine = (() => {
         department: data.department,
         position: data.position,
         baseSalary: data.baseSalary,
+        gajiBagian: data.gajiBagian,
+        sudahBerkeluarga: data.sudahBerkeluarga,
+        tunjanganKeluarga: data.tunjanganKeluarga,
         tipKaca: data.tipKaca,
+        grossSalary: grossSalary,
         attendanceCounts: data.counts,
         breakdown: {
           lateDeduction,
