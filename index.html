@@ -875,14 +875,16 @@
         return;
       }
 
-      // Login Successful
-      if (typeof Security !== 'undefined' && Security.login) {
-        Security.login(matched.username, matched.password);
-      } else {
-        sessionStorage.setItem('kuk_user', matched.username);
-        localStorage.setItem('kuk_user', matched.username);
-        localStorage.setItem('kuk_user_record', JSON.stringify(matched));
-      }
+      // Simpan session object lengkap agar Security.validateSession() berhasil di dashboard
+      const sessionData = {
+        username:    matched.username,
+        role:        matched.role || 'hr_admin',
+        permissions: matched.permissions || [],
+        namaLengkap: matched.namaLengkap || matched.username,
+        toko:        matched.toko || 'bangunan',
+        loginAt:     new Date().toISOString()
+      };
+      sessionStorage.setItem('kuk_user', JSON.stringify(sessionData));
 
       if (matched.toko === 'palen') {
         localStorage.setItem('kuk_selected_unit', 'palen');
