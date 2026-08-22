@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dashboard Peminjaman Kendaraan - KUK HR Portal</title>
+  <title>Dashboard Peminjaman Kendaraan & Armada - KUK HR Portal</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#540000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -15,49 +15,43 @@
   <link rel="shortcut icon" href="favicon-32x32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <style>
     :root {
-      --bg: #0f172a;
-      --surface: #1e293b;
-      --surface2: #273549;
-      --surface-card: rgba(30, 41, 59, 0.85);
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: rgba(255, 255, 255, 0.1);
-      --radius: 20px;
+      --kuk-maroon: #540000;
+      --kuk-maroon-dark: #380000;
+      --kuk-maroon-light: #700000;
+      --kuk-gold: #FFCC00;
+      --kuk-gold-hover: #ffd633;
+      --kuk-gold-glow: rgba(255, 204, 0, 0.25);
+      --kuk-bg: #f8fafc;
+      --kuk-surface: #ffffff;
+      --kuk-surface2: #f1f5f9;
+      --kuk-border: #e2e8f0;
+      --kuk-text: #0f172a;
+      --kuk-text-muted: #64748b;
+      --kuk-success: #10b981;
+      --kuk-warning: #f59e0b;
+      --kuk-danger: #ef4444;
+      --kuk-info: #0284c7;
+      --kuk-radius: 20px;
+      --kuk-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--kuk-bg);
+      color: var(--kuk-text);
       min-height: 100vh;
       padding: 30px 24px 100px;
       position: relative;
     }
 
-    /* Ambient Glow */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -200px; right: -150px;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
-    }
-
     .container {
-      max-width: 1250px;
+      max-width: 1280px;
       margin: 0 auto;
       position: relative;
       z-index: 1;
@@ -73,67 +67,78 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 16px;
-      background: rgba(30, 41, 59, 0.65);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      padding: 16px 24px;
-      border-radius: var(--radius);
+      background: linear-gradient(135deg, #4a0000 0%, #2b0000 100%);
+      border: 1px solid rgba(255, 204, 0, 0.2);
+      padding: 22px 28px;
+      border-radius: var(--kuk-radius);
+      box-shadow: 0 12px 32px rgba(84, 0, 0, 0.22);
+      color: #fff;
     }
-    .brand-info { display: flex; align-items: center; gap: 14px; }
+    .brand-info { display: flex; align-items: center; gap: 16px; }
     .brand-icon {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #FFCC00 0%, #d97706 100%);
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
+      font-size: 26px;
+      box-shadow: 0 8px 20px rgba(255, 204, 0, 0.3);
+      color: #1e1b4b;
     }
     .brand-info h1 {
       font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+      color: #ffffff;
     }
-    .brand-info p { font-size: 13px; color: var(--text-muted); }
-    .nav-actions { display: flex; gap: 10px; }
+    .brand-info p { font-size: 13.5px; color: rgba(255, 255, 255, 0.75); margin-top: 3px; }
+    .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-nav {
-      padding: 10px 16px;
+      padding: 10px 18px;
       border-radius: 12px;
-      font-size: 13px; font-weight: 600;
+      font-size: 13px; font-weight: 700;
       text-decoration: none;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
       display: inline-flex; align-items: center; gap: 8px;
       transition: all 0.2s;
+      backdrop-filter: blur(8px);
     }
-    .btn-nav:hover { background: var(--surface2); transform: translateY(-2px); }
+    .btn-nav:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
 
     /* Summary Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
     }
     .stat-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
       border-radius: 18px;
-      padding: 20px;
+      padding: 22px;
       display: flex;
       align-items: center;
       gap: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(84,0,0,0.06);
     }
     .stat-icon {
-      width: 54px; height: 54px;
+      width: 52px; height: 52px;
       border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
+      font-size: 24px;
       flex-shrink: 0;
     }
-    .stat-card.all .stat-icon { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
-    .stat-card.active .stat-icon { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
-    .stat-card.done .stat-icon { background: rgba(16, 185, 129, 0.18); color: #34d399; }
-    .stat-card.problem .stat-icon { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+    .stat-card.all .stat-icon { background: rgba(84, 0, 0, 0.08); color: var(--kuk-maroon); }
+    .stat-card.active .stat-icon { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+    .stat-card.done .stat-icon { background: rgba(16, 185, 129, 0.15); color: #059669; }
+    .stat-card.problem .stat-icon { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
 
-    .stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
-    .stat-value { font-size: 26px; font-weight: 800; color: var(--text); margin-top: 4px; }
+    .stat-label { font-size: 11.5px; font-weight: 700; color: var(--kuk-text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .stat-value { font-size: 26px; font-weight: 900; color: var(--kuk-text); margin-top: 3px; }
 
     /* Filter Bar */
     .filter-bar {
@@ -142,10 +147,11 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 16px;
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px 22px;
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.02);
     }
     .filter-pills {
       display: flex;
@@ -155,49 +161,53 @@
     .pill {
       padding: 9px 18px;
       border-radius: 100px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
+      background: #f1f5f9;
+      border: 1px solid var(--kuk-border);
+      color: #475569;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .pill:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+    .pill:hover { color: var(--kuk-maroon); border-color: var(--kuk-maroon); background: rgba(84,0,0,0.04); }
     .pill.active {
-      background: var(--primary);
+      background: linear-gradient(135deg, #700000 0%, #4a0000 100%);
       color: #fff;
-      border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+      border-color: #540000;
+      box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25);
     }
     .search-wrap {
       position: relative;
       width: 100%;
-      max-width: 300px;
+      max-width: 320px;
     }
     .search-wrap input {
       width: 100%;
-      padding: 10px 14px 10px 40px;
+      padding: 11px 16px 11px 42px;
       border-radius: 12px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-      font-size: 14px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      color: var(--kuk-text);
+      font-size: 13.5px;
       outline: none;
+      transition: all 0.2s;
     }
-    .search-wrap input:focus { border-color: var(--primary); }
+    .search-wrap input:focus {
+      border-color: var(--kuk-maroon);
+      box-shadow: 0 0 0 3px rgba(84,0,0,0.12);
+    }
     .search-wrap svg {
       position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-      color: var(--text-muted);
+      color: #94a3b8;
     }
 
     /* Table Container */
     .table-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
       overflow: hidden;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.04);
     }
     .table-responsive {
       overflow-x: auto;
@@ -208,74 +218,78 @@
       text-align: left;
     }
     th {
-      background: rgba(15, 23, 42, 0.6);
+      background: #f8fafc;
       padding: 16px 20px;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 11.5px;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.6px;
+      color: #475569;
+      border-bottom: 1.5px solid var(--kuk-border);
     }
     td {
       padding: 16px 20px;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+      border-bottom: 1px solid #f1f5f9;
       vertical-align: middle;
+      color: #1e293b;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255, 255, 255, 0.03); }
+    tr:hover td { background: rgba(84, 0, 0, 0.02); }
 
-    .user-info h4 { font-size: 14px; font-weight: 700; color: var(--text); }
-    .user-info p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .user-info h4 { font-size: 14px; font-weight: 800; color: #0f172a; }
+    .user-info p { font-size: 12px; color: var(--kuk-text-muted); margin-top: 3px; }
 
     .vehicle-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-weight: 600;
+      font-weight: 700;
+      color: #1e293b;
     }
     .plat-chip {
-      font-size: 12px;
-      font-weight: 700;
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
+      font-size: 11.5px;
+      font-weight: 800;
+      background: rgba(84, 0, 0, 0.08);
+      color: var(--kuk-maroon);
       padding: 3px 8px;
       border-radius: 6px;
+      border: 1px solid rgba(84,0,0,0.15);
     }
 
     .time-info {
       font-size: 13px;
-      color: var(--text);
+      font-weight: 700;
+      color: #0f172a;
     }
     .time-sub {
-      font-size: 11px;
-      color: var(--text-muted);
+      font-size: 11.5px;
+      color: var(--kuk-text-muted);
       margin-top: 3px;
     }
 
     /* Status Badge */
     .status-badge {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 5px 12px;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 4px 12px;
       border-radius: 100px;
       display: inline-block;
     }
     .status-badge.aktif {
-      background: rgba(59, 130, 246, 0.18);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.35);
+      background: rgba(245, 158, 11, 0.14);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.3);
     }
     .status-badge.selesai {
-      background: rgba(16, 185, 129, 0.18);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.14);
+      color: #047857;
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
     .status-badge.rusak {
-      background: rgba(239, 68, 68, 0.18);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.14);
+      color: #b91c1c;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     /* Action Buttons */
@@ -285,9 +299,9 @@
       flex-wrap: wrap;
     }
     .btn-action {
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
       font-weight: 700;
       cursor: pointer;
       border: none;
@@ -297,28 +311,28 @@
       gap: 6px;
     }
     .btn-action.selesai {
-      background: rgba(16, 185, 129, 0.18);
-      color: #34d399;
+      background: rgba(16, 185, 129, 0.15);
+      color: #065f46;
       border: 1px solid rgba(16, 185, 129, 0.3);
     }
     .btn-action.selesai:hover {
       background: #10b981; color: #fff;
     }
     .btn-action.rusak {
-      background: rgba(239, 68, 68, 0.18);
-      color: #f87171;
+      background: rgba(239, 68, 68, 0.12);
+      color: #b91c1c;
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
     .btn-action.rusak:hover {
       background: #ef4444; color: #fff;
     }
     .btn-action.cetak {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      background: linear-gradient(135deg, #FFCC00 0%, #d97706 100%);
+      color: #1e1b4b;
+      box-shadow: 0 4px 10px rgba(255, 204, 0, 0.25);
     }
     .btn-action.cetak:hover {
-      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+      box-shadow: 0 6px 16px rgba(255, 204, 0, 0.4);
       transform: translateY(-1px);
     }
 
@@ -327,8 +341,8 @@
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(10px);
       z-index: 5000;
       display: none;
       align-items: center;
@@ -338,16 +352,16 @@
     .modal-backdrop.show { display: flex; }
 
     .modal-card {
-      background: #1e293b;
-      border: 1px solid var(--border);
-      border-radius: 24px;
+      background: #ffffff;
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
       width: 100%;
       max-width: 520px;
       padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+      gap: 18px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.25);
       max-height: 90vh;
       overflow-y: auto;
     }
@@ -355,34 +369,38 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1.5px solid var(--kuk-border);
       padding-bottom: 14px;
     }
     .modal-header h3 {
-      font-size: 18px; font-weight: 800; color: var(--text);
+      font-size: 18px; font-weight: 800; color: var(--kuk-maroon);
     }
     .btn-close {
       background: none; border: none;
-      color: var(--text-muted); cursor: pointer;
-      font-size: 24px;
+      color: var(--kuk-text-muted); cursor: pointer;
+      font-size: 22px; font-weight: bold;
     }
     .form-group {
-      display: flex; flex-direction: column; gap: 8px;
+      display: flex; flex-direction: column; gap: 7px;
     }
     .form-group label {
-      font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+      font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase;
     }
     .modal-input {
       width: 100%;
       padding: 12px 14px;
-      background: #0f172a;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      color: #fff;
-      font-size: 14px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      color: var(--kuk-text);
+      font-size: 13.5px;
       outline: none;
+      transition: all 0.2s;
     }
-    .modal-input:focus { border-color: var(--primary); }
+    .modal-input:focus {
+      border-color: var(--kuk-maroon);
+      box-shadow: 0 0 0 3px rgba(84,0,0,0.12);
+    }
     textarea.modal-input { min-height: 90px; resize: vertical; }
 
     /* Modal Surat Print Layout */
@@ -390,7 +408,7 @@
       max-width: 760px;
       background: #ffffff;
       color: #0f172a;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 36px 44px;
       max-height: 90vh;
       overflow-y: auto;
@@ -430,14 +448,14 @@
     }
     .toast {
       background: #1e293b; color: #f8fafc;
-      padding: 14px 22px; border-radius: 14px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-      border: 1px solid var(--border);
-      border-left: 5px solid var(--primary);
-      font-size: 14px; font-weight: 600;
+      padding: 14px 20px; border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      border-left: 5px solid var(--kuk-maroon);
+      font-size: 13.5px; font-weight: 600;
       pointer-events: auto;
     }
-    .toast.success { border-left-color: var(--success); }
+    .toast.success { border-left-color: var(--kuk-success); }
+    .toast.error { border-left-color: var(--kuk-danger); }
   </style>
 </head>
 <body>
@@ -457,7 +475,7 @@
 
         <div class="form-group">
           <label>Detail Kendaraan & Peminjam</label>
-          <input type="text" id="modalLoanInfo" class="modal-input" readonly style="background: #1e293b; font-weight: 700;">
+          <input type="text" id="modalLoanInfo" class="modal-input" readonly style="background: #f8fafc; font-weight: 800; color: var(--kuk-maroon);">
         </div>
 
         <div class="form-group">
@@ -476,10 +494,10 @@
         </div>
 
         <div style="display: flex; gap: 12px; margin-top: 10px;">
-          <button type="button" onclick="closeModalKerusakan()" style="flex: 1; padding: 14px; border-radius: 12px; background: #334155; color: #fff; border: none; font-weight: 700; cursor: pointer;">
+          <button type="button" onclick="closeModalKerusakan()" style="flex: 1; padding: 13px; border-radius: 10px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; cursor: pointer;">
             Batal
           </button>
-          <button type="submit" style="flex: 1.5; padding: 14px; border-radius: 12px; background: var(--danger); color: #fff; border: none; font-weight: 700; cursor: pointer;">
+          <button type="submit" style="flex: 1.5; padding: 13px; border-radius: 10px; background: var(--kuk-danger); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.3);">
             Simpan & Ubah Status
           </button>
         </div>
@@ -493,10 +511,10 @@
       <!-- Area yang akan dicetak -->
       <div id="printArea" class="surat-container">
         <!-- KOP SURAT RESMI -->
-        <div style="border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px; text-align: center;">
-          <h2 style="font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase;">PT. KOPERASI ASURANSI INDONESIA (KUK HR PORTAL)</h2>
-          <p style="font-size: 13px; margin: 4px 0 0;">DIVISI MANAJEMEN ASET & OPERASIONAL KENDARAAN</p>
-          <p style="font-size: 12px; margin: 2px 0 0;">Gedung Kantor Utama &bull; Internal Use Record System</p>
+        <div style="border-bottom: 3px double #540000; padding-bottom: 12px; margin-bottom: 24px; text-align: center;">
+          <h2 style="font-size: 18px; font-weight: 800; margin: 0; color: #540000; text-transform: uppercase;">KOPERASI USAHA KELUARGA (KUK) LA TANSA GONTOR</h2>
+          <p style="font-size: 13px; font-weight: 600; margin: 4px 0 0; color: #334155;">DIVISI LOGISTIK, MANAJEMEN ASET & ARMADA OPERASIONAL</p>
+          <p style="font-size: 12px; margin: 2px 0 0; color: #64748b;">Pondok Modern Darussalam Gontor &bull; Sistem Kendaraan Operasional Terpadu</p>
         </div>
 
         <div style="text-align: center; margin-bottom: 24px;">
@@ -579,11 +597,11 @@
       </div>
 
       <!-- Tombol Aksi Cetak (Sembunyi saat Print) -->
-      <div class="no-print" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 10px;">
-        <button type="button" onclick="closeModalSurat()" style="padding: 12px 20px; border-radius: 10px; background: #64748b; color: #fff; border: none; font-weight: 700; cursor: pointer;">
+      <div class="no-print" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1.5px solid var(--kuk-border); padding-top: 16px; margin-top: 10px;">
+        <button type="button" onclick="closeModalSurat()" style="padding: 11px 20px; border-radius: 10px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; cursor: pointer;">
           Tutup
         </button>
-        <button type="button" onclick="cetakSuratSekarang()" style="padding: 12px 24px; border-radius: 10px; background: #2563eb; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <button type="button" onclick="cetakSuratSekarang()" style="padding: 11px 24px; border-radius: 10px; background: linear-gradient(135deg, #700000 0%, #4a0000 100%); color: #fff; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(84,0,0,0.25);">
           <span>🖨️ Cetak / Simpan PDF</span>
         </button>
       </div>
@@ -594,7 +612,7 @@
     <!-- Top Nav -->
     <header class="top-nav">
       <div class="brand-info">
-        <div class="brand-icon">📊</div>
+        <div class="brand-icon">🚘</div>
         <div>
           <h1>Dashboard Administrasi Peminjaman & Armada</h1>
           <p>Operasional Kendaraan, Log BBM, & Servis Rutin &bull; KUK HR Portal</p>
@@ -604,21 +622,21 @@
         <a href="index.html" class="btn-nav">
           <span>← Portal Utama</span>
         </a>
-        <a href="peminjaman.html" class="btn-nav" style="background: var(--primary); color: #fff; border: none;">
+        <a href="peminjaman.html" class="btn-nav" style="background: linear-gradient(135deg, #FFCC00 0%, #d97706 100%); color: #1e1b4b; border: none; font-weight: 800; box-shadow: 0 4px 14px rgba(255, 204, 0, 0.35);">
           <span>+ Form Peminjaman Baru</span>
         </a>
       </div>
     </header>
 
     <!-- Navigasi Tab Utama -->
-    <div style="display:flex; gap:10px; border-bottom:1px solid var(--border); padding-bottom:12px; flex-wrap:wrap;">
-      <button class="pill active" id="tabBtnPinjam" onclick="switchMainTab('pinjam')" style="font-size:14px; padding:10px 22px;">
+    <div style="display:flex; gap:10px; border-bottom:1.5px solid var(--kuk-border); padding-bottom:12px; flex-wrap:wrap;">
+      <button class="pill active" id="tabBtnPinjam" onclick="switchMainTab('pinjam')" style="font-size:13.5px; padding:10px 22px;">
         📋 Riwayat Peminjaman
       </button>
-      <button class="pill" id="tabBtnBbm" onclick="switchMainTab('bbm')" style="font-size:14px; padding:10px 22px;">
+      <button class="pill" id="tabBtnBbm" onclick="switchMainTab('bbm')" style="font-size:13.5px; padding:10px 22px;">
         ⛽ Log BBM & Struk SPBU
       </button>
-      <button class="pill" id="tabBtnServis" onclick="switchMainTab('servis')" style="font-size:14px; padding:10px 22px;">
+      <button class="pill" id="tabBtnServis" onclick="switchMainTab('servis')" style="font-size:13.5px; padding:10px 22px;">
         🛠️ Jadwal & Servis Armada
       </button>
     </div>
@@ -701,21 +719,21 @@
       <!-- Stats BBM -->
       <div class="stats-grid" style="margin-bottom:20px;">
         <div class="stat-card" style="border-left:4px solid #f59e0b;">
-          <div class="stat-icon" style="background:rgba(245,158,11,0.18); color:#f59e0b;">⛽</div>
+          <div class="stat-icon" style="background:rgba(245,158,11,0.15); color:#d97706;">⛽</div>
           <div>
             <div class="stat-label">Total Pengisian BBM</div>
             <div class="stat-value" id="statBbmTotalTransaksi">0</div>
           </div>
         </div>
         <div class="stat-card" style="border-left:4px solid #10b981;">
-          <div class="stat-icon" style="background:rgba(16,185,129,0.18); color:#10b981;">📊</div>
+          <div class="stat-icon" style="background:rgba(16,185,129,0.15); color:#059669;">📊</div>
           <div>
             <div class="stat-label">Total Volume (Liter)</div>
             <div class="stat-value" id="statBbmTotalLiter">0 L</div>
           </div>
         </div>
-        <div class="stat-card" style="border-left:4px solid #3b82f6;">
-          <div class="stat-icon" style="background:rgba(59,130,246,0.18); color:#3b82f6;">💰</div>
+        <div class="stat-card" style="border-left:4px solid var(--kuk-maroon);">
+          <div class="stat-icon" style="background:rgba(84,0,0,0.08); color:var(--kuk-maroon);">💰</div>
           <div>
             <div class="stat-label">Total Biaya BBM</div>
             <div class="stat-value" id="statBbmTotalBiaya">Rp 0</div>
@@ -725,8 +743,8 @@
 
       <!-- Table BBM Section -->
       <div class="table-card">
-        <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-          <h3 style="font-size:16px; font-weight:700; color:#f8fafc;">📋 Rekap Pengisian Bahan Bakar Armada</h3>
+        <div style="padding:16px 22px; border-bottom:1.5px solid var(--kuk-border); display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+          <h3 style="font-size:16px; font-weight:800; color:var(--kuk-maroon);">📋 Rekap Pengisian Bahan Bakar Armada</h3>
         </div>
         <div class="table-responsive">
           <table>
@@ -752,8 +770,8 @@
     <!-- ================= TAB 3: JADWAL & SERVIS ARMADA ================= -->
     <div id="tabContentServis" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
-        <h3 style="font-size:18px; font-weight:700; color:#f8fafc;">🛠️ Manajemen Perawatan & Servis Berkala Armada</h3>
-        <button class="pill active" onclick="openModalServis()" style="padding:10px 18px; background:linear-gradient(135deg, #3b82f6, #1d4ed8);">
+        <h3 style="font-size:18px; font-weight:800; color:var(--kuk-maroon);">🛠️ Manajemen Perawatan & Servis Berkala Armada</h3>
+        <button class="pill active" onclick="openModalServis()" style="padding:10px 20px; background:linear-gradient(135deg, #FFCC00 0%, #d97706 100%); color:#1e1b4b; border:none; font-weight:800; box-shadow:0 4px 12px rgba(255,204,0,0.3);">
           + Tambah Jadwal Servis
         </button>
       </div>
@@ -847,10 +865,10 @@
         </div>
 
         <div style="display:flex; gap:12px; margin-top:10px;">
-          <button type="button" onclick="closeModalServis()" style="flex:1; padding:14px; border-radius:12px; background:#334155; color:#fff; border:none; font-weight:700; cursor:pointer;">
+          <button type="button" onclick="closeModalServis()" style="flex:1; padding:13px; border-radius:10px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-weight:700; cursor:pointer;">
             Batal
           </button>
-          <button type="submit" style="flex:1.5; padding:14px; border-radius:12px; background:var(--primary); color:#fff; border:none; font-weight:700; cursor:pointer;">
+          <button type="submit" style="flex:1.5; padding:13px; border-radius:10px; background:linear-gradient(135deg, #700000 0%, #4a0000 100%); color:#fff; border:none; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(84,0,0,0.25);">
             Simpan Jadwal Servis
           </button>
         </div>
@@ -1055,25 +1073,25 @@
           <td>
             <div class="vehicle-badge">
               <span class="plat-chip">${item.platKendaraan}</span>
-              <span>${item.namaKendaraan}</span>
+              <span style="font-weight:700;">${item.namaKendaraan}</span>
             </div>
           </td>
-          <td><b>${item.peminjamNama}</b></td>
-          <td>${formatDateTime(item.tanggal)}</td>
-          <td><span style="background:rgba(245,158,11,0.18); color:#fbbf24; padding:3px 8px; border-radius:6px; font-weight:700; font-size:12px;">${item.jenisBbm}</span></td>
+          <td><b style="color:#0f172a;">${item.peminjamNama}</b></td>
+          <td style="color:#334155; font-size:13px;">${formatDateTime(item.tanggal)}</td>
+          <td><span style="background:rgba(255,204,0,0.18); color:#b45309; padding:4px 10px; border-radius:6px; font-weight:800; font-size:11.5px; border:1px solid rgba(245,158,11,0.3);">${item.jenisBbm}</span></td>
           <td>
-            <div style="font-weight:700; color:#34d399;">Rp ${Number(item.totalRupiah).toLocaleString('id-ID')}</div>
-            <div style="font-size:12px; color:#94a3b8;">${item.jumlahLiter} Liter</div>
+            <div style="font-weight:800; color:#047857;">Rp ${Number(item.totalRupiah).toLocaleString('id-ID')}</div>
+            <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${item.jumlahLiter} Liter</div>
           </td>
           <td>
-            <div>${item.spbuLocation || '-'}</div>
-            <div style="font-size:12px; color:#94a3b8;">${item.kmOdometer ? item.kmOdometer.toLocaleString('id-ID') + ' KM' : '-'}</div>
+            <div style="font-weight:600; color:#0f172a;">${item.spbuLocation || '-'}</div>
+            <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${item.kmOdometer ? item.kmOdometer.toLocaleString('id-ID') + ' KM' : '-'}</div>
           </td>
           <td>
             ${
               item.fotoStruk 
-                ? `<a href="${item.fotoStruk}" target="_blank" style="color:#38bdf8; font-weight:600; text-decoration:underline; font-size:12px;">🔍 Lihat Struk</a>`
-                : `<span style="color:#64748b; font-size:12px;">Tanpa Struk</span>`
+                ? `<a href="${item.fotoStruk}" target="_blank" style="color:#0284c7; font-weight:700; text-decoration:underline; font-size:12px;">🔍 Lihat Struk</a>`
+                : `<span style="color:#94a3b8; font-size:12px;">Tanpa Struk</span>`
             }
           </td>
         </tr>
@@ -1087,49 +1105,49 @@
       if (!tbody) return;
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada jadwal servis armada.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--kuk-text-muted);">Belum ada jadwal servis armada.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = list.map(item => {
         const isOverdue = item.status === 'Terjadwal' && item.nextServisDate && (new Date(item.nextServisDate) < new Date());
         const statusBadge = item.status === 'Selesai' 
-          ? `<span style="background:rgba(16,185,129,0.18); color:#34d399; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;">✓ Selesai</span>`
+          ? `<span style="background:rgba(16,185,129,0.14); color:#065f46; padding:4px 12px; border-radius:20px; font-size:11.5px; font-weight:800; border:1px solid rgba(16,185,129,0.3);">✓ Selesai</span>`
           : (isOverdue 
-            ? `<span style="background:rgba(239,68,68,0.18); color:#f87171; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;">⚠️ Jatuh Tempo</span>`
-            : `<span style="background:rgba(245,158,11,0.18); color:#fbbf24; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;">⏳ Terjadwal</span>`);
+            ? `<span style="background:rgba(239,68,68,0.14); color:#b91c1c; padding:4px 12px; border-radius:20px; font-size:11.5px; font-weight:800; border:1px solid rgba(239,68,68,0.3);">⚠️ Jatuh Tempo</span>`
+            : `<span style="background:rgba(245,158,11,0.14); color:#b45309; padding:4px 12px; border-radius:20px; font-size:11.5px; font-weight:800; border:1px solid rgba(245,158,11,0.3);">⏳ Terjadwal</span>`);
 
         return `
           <tr>
             <td>
               <div class="vehicle-badge">
                 <span class="plat-chip">${item.platKendaraan}</span>
-                <span>${item.namaKendaraan}</span>
+                <span style="font-weight:700;">${item.namaKendaraan}</span>
               </div>
             </td>
             <td>
-              <div style="font-weight:700;">${item.jenisServis}</div>
-              <div style="font-size:12px; color:#94a3b8;">${item.catatan || '-'}</div>
+              <div style="font-weight:800; color:#0f172a;">${item.jenisServis}</div>
+              <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${item.catatan || '-'}</div>
             </td>
             <td>
-              <div>${formatDateOnly(item.tanggalServis)}</div>
-              <div style="font-size:12px; color:#94a3b8;">${item.kmSaatServis ? item.kmSaatServis.toLocaleString('id-ID') + ' KM' : '-'}</div>
+              <div style="font-weight:600;">${formatDateOnly(item.tanggalServis)}</div>
+              <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${item.kmSaatServis ? item.kmSaatServis.toLocaleString('id-ID') + ' KM' : '-'}</div>
             </td>
             <td>
-              <div style="color:${isOverdue ? '#f87171' : '#f8fafc'}; font-weight:700;">${item.nextServisDate ? formatDateOnly(item.nextServisDate) : '-'}</div>
-              <div style="font-size:12px; color:#94a3b8;">${item.nextServisKm ? 'Target: ' + item.nextServisKm.toLocaleString('id-ID') + ' KM' : ''}</div>
+              <div style="color:${isOverdue ? '#dc2626' : '#0f172a'}; font-weight:800;">${item.nextServisDate ? formatDateOnly(item.nextServisDate) : '-'}</div>
+              <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${item.nextServisKm ? 'Target: ' + item.nextServisKm.toLocaleString('id-ID') + ' KM' : ''}</div>
             </td>
-            <td style="font-weight:700; color:#60a5fa;">Rp ${Number(item.estimasiBiaya).toLocaleString('id-ID')}</td>
-            <td>${item.bengkel || '-'}</td>
+            <td style="font-weight:800; color:var(--kuk-maroon);">Rp ${Number(item.estimasiBiaya).toLocaleString('id-ID')}</td>
+            <td style="font-weight:600; color:#334155;">${item.bengkel || '-'}</td>
             <td>${statusBadge}</td>
             <td>
               <div style="display:flex; gap:6px;">
                 ${
                   item.status !== 'Selesai'
-                    ? `<button onclick="handleStatusServis('${item.id}', 'Selesai')" style="background:#10b981; color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">✓ Selesai</button>`
+                    ? `<button onclick="handleStatusServis('${item.id}', 'Selesai')" style="background:#10b981; color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:11.5px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(16,185,129,0.25);">✓ Selesai</button>`
                     : ''
                 }
-                <button onclick="handleHapusServis('${item.id}')" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">🗑️</button>
+                <button onclick="handleHapusServis('${item.id}')" style="background:#f1f5f9; color:#ef4444; border:1px solid #fca5a5; padding:5px 9px; border-radius:6px; font-size:11.5px; font-weight:700; cursor:pointer;">🗑️</button>
               </div>
             </td>
           </tr>

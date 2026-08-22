@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Form Peminjaman Kendaraan - KUK HR Portal</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#540000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -15,33 +15,35 @@
   <link rel="shortcut icon" href="favicon-32x32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <style>
     :root {
-      --bg: #0f172a;
-      --surface: #1e293b;
-      --surface-hover: #273549;
-      --surface-card: rgba(30, 41, 59, 0.82);
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --primary-glow: rgba(59, 130, 246, 0.35);
-      --accent: #06b6d4;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: rgba(255, 255, 255, 0.1);
-      --radius: 24px;
+      --kuk-maroon: #540000;
+      --kuk-maroon-dark: #380000;
+      --kuk-maroon-light: #700000;
+      --kuk-gold: #FFCC00;
+      --kuk-gold-hover: #ffd633;
+      --kuk-gold-glow: rgba(255, 204, 0, 0.25);
+      --kuk-bg: #f8fafc;
+      --kuk-surface: #ffffff;
+      --kuk-border: #e2e8f0;
+      --kuk-text: #0f172a;
+      --kuk-text-muted: #64748b;
+      --kuk-success: #10b981;
+      --kuk-warning: #f59e0b;
+      --kuk-danger: #ef4444;
+      --kuk-info: #0284c7;
+      --kuk-radius: 20px;
+      --kuk-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--kuk-bg);
+      color: var(--kuk-text);
       min-height: 100vh;
       padding: 30px 20px 80px;
       position: relative;
@@ -51,20 +53,9 @@
       overflow-x: hidden;
     }
 
-    /* Ambient Glow Background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -150px; left: 50%;
-      transform: translateX(-50%);
-      width: 600px; height: 500px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
-    }
-
     .container {
       width: 100%;
-      max-width: 640px;
+      max-width: 680px;
       position: relative;
       z-index: 1;
       display: flex;
@@ -79,11 +70,12 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 16px;
-      background: rgba(30, 41, 59, 0.65);
-      backdrop-filter: blur(14px);
-      border: 1px solid var(--border);
-      padding: 16px 22px;
-      border-radius: 20px;
+      background: linear-gradient(135deg, #4a0000 0%, #2b0000 100%);
+      border: 1px solid rgba(255, 204, 0, 0.2);
+      padding: 20px 24px;
+      border-radius: var(--kuk-radius);
+      box-shadow: 0 12px 32px rgba(84, 0, 0, 0.22);
+      color: #fff;
     }
     .top-nav .brand-info {
       display: flex;
@@ -93,70 +85,70 @@
     .top-nav .brand-icon {
       width: 48px; height: 48px;
       border-radius: 14px;
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      background: linear-gradient(135deg, #FFCC00 0%, #d97706 100%);
       display: flex; align-items: center; justify-content: center;
       font-size: 24px;
-      box-shadow: 0 8px 20px var(--primary-glow);
+      box-shadow: 0 8px 20px rgba(255, 204, 0, 0.3);
+      color: #1e1b4b;
     }
     .top-nav h1 {
       font-size: 20px;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #ffffff;
     }
     .top-nav p {
       font-size: 13px;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.75);
+      margin-top: 2px;
     }
     .btn-nav {
-      padding: 10px 16px;
+      padding: 10px 18px;
       border-radius: 12px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       transition: all 0.2s ease;
       cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      backdrop-filter: blur(8px);
     }
     .btn-nav:hover {
-      background: var(--surface-hover);
+      background: rgba(255, 255, 255, 0.2);
       transform: translateY(-2px);
     }
 
     /* Card Form Panel */
     .panel {
-      background: var(--surface-card);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      padding: 30px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      gap: 22px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
     }
 
     .panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1.5px solid var(--kuk-border);
       padding-bottom: 16px;
     }
     .panel-header h2 {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 800;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: var(--kuk-maroon);
     }
 
     /* Form Styles */
@@ -165,14 +157,15 @@
       grid-template-columns: 1fr 1fr;
       gap: 18px;
     }
-    @media (max-width: 520px) {
+    @media (max-width: 580px) {
       .form-grid { grid-template-columns: 1fr; }
-      .panel { padding: 22px; }
+      .panel { padding: 20px; }
+      .top-nav { flex-direction: column; align-items: flex-start; }
     }
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
     }
     .form-group.full {
       grid-column: 1 / -1;
@@ -180,57 +173,50 @@
     .form-label {
       font-size: 12px;
       font-weight: 700;
-      color: var(--text-muted);
+      color: #475569;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.5px;
     }
     input[type="text"],
     input[type="tel"],
+    input[type="number"],
+    input[type="date"],
     input[type="datetime-local"],
     select,
     textarea {
       width: 100%;
-      padding: 14px 16px;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      color: var(--text);
+      padding: 13px 16px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      color: var(--kuk-text);
       font-size: 14px;
       font-weight: 500;
       outline: none;
       transition: all 0.2s ease;
     }
     input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
-      background: rgba(15, 23, 42, 0.95);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+      border-color: var(--kuk-maroon);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.12);
     }
     textarea {
       resize: vertical;
-      min-height: 95px;
+      min-height: 90px;
     }
     select {
       cursor: pointer;
-    }
-    select option {
-      background: #0f172a;
-      color: #f8fafc;
-      padding: 8px;
-    }
-    select option:disabled {
-      color: #f87171;
-      font-style: italic;
     }
 
     /* Submit Button */
     .btn-submit {
       width: 100%;
-      padding: 16px;
+      padding: 15px;
       border-radius: 14px;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      background: linear-gradient(135deg, #700000 0%, #4a0000 100%);
       color: #ffffff;
       border: none;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -238,16 +224,17 @@
       justify-content: center;
       gap: 10px;
       transition: all 0.25s ease;
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 6px 18px rgba(84, 0, 0, 0.25);
       margin-top: 6px;
     }
     .btn-submit:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(59, 130, 246, 0.55);
+      box-shadow: 0 10px 24px rgba(84, 0, 0, 0.35);
+      background: linear-gradient(135deg, #850000 0%, #540000 100%);
     }
     .btn-submit:disabled {
-      background: #334155;
-      color: #94a3b8;
+      background: #94a3b8;
+      color: #e2e8f0;
       box-shadow: none;
       cursor: not-allowed;
     }
@@ -260,7 +247,7 @@
     .combobox-input {
       width: 100%;
       padding-right: 36px !important;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       cursor: text;
@@ -272,10 +259,10 @@
       right: 0;
       max-height: 230px;
       overflow-y: auto;
-      background: var(--card-bg, #1e293b);
-      border: 1px solid var(--border, #334155);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+      background: #ffffff;
+      border: 1px solid var(--kuk-border);
+      border-radius: 12px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
       z-index: 100;
       display: none;
     }
@@ -284,19 +271,19 @@
     }
     .combobox-option {
       padding: 11px 14px;
-      font-size: 14px;
-      color: var(--text, #f8fafc);
+      font-size: 13.5px;
+      color: var(--kuk-text);
       cursor: pointer;
-      border-bottom: 1px solid var(--border, #334155);
+      border-bottom: 1px solid #f1f5f9;
       transition: background 0.15s, color 0.15s;
     }
     .combobox-option:last-child {
       border-bottom: none;
     }
     .combobox-option:hover, .combobox-option.active {
-      background: rgba(6, 182, 212, 0.18);
-      color: #38bdf8;
-      font-weight: 600;
+      background: rgba(84, 0, 0, 0.08);
+      color: var(--kuk-maroon);
+      font-weight: 700;
     }
 
     /* Toast Notification */
@@ -304,7 +291,7 @@
       position: fixed;
       top: 24px;
       right: 24px;
-      z-index: 1000;
+      z-index: 10000;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -312,13 +299,12 @@
     }
     .toast {
       background: #1e293b;
-      color: #f8fafc;
-      padding: 14px 22px;
+      color: #ffffff;
+      padding: 14px 20px;
       border-radius: 14px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-      border: 1px solid var(--border);
-      border-left: 5px solid var(--primary);
-      font-size: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      border-left: 5px solid var(--kuk-maroon);
+      font-size: 13.5px;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -326,8 +312,8 @@
       animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: auto;
     }
-    .toast.success { border-left-color: var(--success); }
-    .toast.error { border-left-color: var(--danger); }
+    .toast.success { border-left-color: var(--kuk-success); }
+    .toast.error { border-left-color: var(--kuk-danger); }
     @keyframes toastIn {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
@@ -348,59 +334,62 @@
           <p>KUK HR Portal &bull; Internal Operasional</p>
         </div>
       </div>
-      <div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <a href="index.html" class="btn-nav">
-          <span>← Kembali ke Portal</span>
+          <span>← Portal Utama</span>
+        </a>
+        <a href="peminjaman_admin.html" class="btn-nav" style="background: linear-gradient(135deg, #FFCC00 0%, #d97706 100%); color: #1e1b4b; border: none; font-weight: 800; box-shadow: 0 4px 12px rgba(255,204,0,0.35);">
+          <span>📊 Admin Armada</span>
         </a>
       </div>
     </header>
 
     <!-- Active Loan / Sukses Panel -->
     <div id="activeLoanPanel" class="panel" style="display: none;">
-      <div class="panel-header" style="background: linear-gradient(135deg, #059669, #10b981);">
-        <h2>🎉 Peminjaman Berhasil Dicatat!</h2>
-        <span style="font-size: 12px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-weight: 700;">Sedang Dipinjam</span>
+      <div class="panel-header" style="background: linear-gradient(135deg, #065f46, #10b981); color: #fff; border-radius: 14px; padding: 16px 20px; margin: -10px -10px 10px -10px;">
+        <h2 style="color: #fff; font-size: 18px;">🎉 Peminjaman Berhasil Dicatat!</h2>
+        <span style="font-size: 12px; background: rgba(255,255,255,0.25); color: #fff; padding: 4px 12px; border-radius: 20px; font-weight: 700;">Sedang Dipinjam</span>
       </div>
 
-      <div style="padding: 24px; text-align: center;">
-        <div id="overdueAlertBanner" style="display: none; background: rgba(239, 68, 68, 0.18); border: 2px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #f87171; font-weight: 700; font-size: 14px; animation: pulse 1.5s infinite;">
+      <div style="padding: 10px 0; text-align: center;">
+        <div id="overdueAlertBanner" style="display: none; background: rgba(239, 68, 68, 0.12); border: 2px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #dc2626; font-weight: 700; font-size: 14px; animation: pulse 1.5s infinite;">
           ⚠️ WAKTU PEMINJAMAN TELAH MELEWATI BATAS PERKIRAAN KEMBALI! Mohon segera kembalikan kendaraan.
         </div>
 
-        <div style="background: var(--card-bg, #1e293b); border: 1px solid var(--border, #334155); border-radius: 16px; padding: 24px; margin-bottom: 24px; text-align: left;">
-          <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #38bdf8;">Terima kasih sudah mengisi form</h3>
-          <p id="activeLoanMessage" style="font-size: 15px; color: #f8fafc; line-height: 1.65; margin: 0 0 16px 0;">
-            Anda sedang meminjam kendaraan <strong id="actKendaraanName" style="color:#facc15;">-</strong> (<strong id="actPlat">-</strong>).
+        <div style="background: #f8fafc; border: 1px solid var(--kuk-border); border-radius: 16px; padding: 22px; margin-bottom: 22px; text-align: left;">
+          <h3 style="margin: 0 0 8px 0; font-size: 17px; color: var(--kuk-maroon);">Terima kasih sudah mengisi form</h3>
+          <p id="activeLoanMessage" style="font-size: 14.5px; color: #334155; line-height: 1.6; margin: 0 0 16px 0;">
+            Anda sedang meminjam kendaraan <strong id="actKendaraanName" style="color:var(--kuk-maroon); font-weight:800;">-</strong> (<strong id="actPlat">-</strong>).
           </p>
 
-          <div style="display: flex; flex-wrap: wrap; gap: 16px; background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid var(--border, #334155);">
+          <div style="display: flex; flex-wrap: wrap; gap: 14px; background: #ffffff; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--kuk-border);">
             <div style="flex: 1; min-width: 140px;">
-              <div style="font-size: 12px; color: #94a3b8;">Mulai Pinjam</div>
-              <div id="actWaktuMulai" style="font-size: 14px; font-weight: 700; color: #f8fafc; margin-top: 4px;">-</div>
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Mulai Pinjam</div>
+              <div id="actWaktuMulai" style="font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 4px;">-</div>
             </div>
             <div style="flex: 1; min-width: 140px;">
-              <div style="font-size: 12px; color: #94a3b8;">Perkiraan Kembali</div>
-              <div id="actWaktuKembali" style="font-size: 14px; font-weight: 700; color: #f87171; margin-top: 4px;">-</div>
+              <div style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Perkiraan Kembali</div>
+              <div id="actWaktuKembali" style="font-size: 14px; font-weight: 800; color: #ef4444; margin-top: 4px;">-</div>
             </div>
           </div>
         </div>
 
         <!-- QR Pertamina Card (Khusus L300 & Engkel) -->
-        <div id="pertaminaQrContainer" style="display: none; background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #ef4444; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+        <div id="pertaminaQrContainer" style="display: none; background: linear-gradient(145deg, #380000, #540000); border: 2px solid #FFCC00; border-radius: 18px; padding: 24px; margin-bottom: 22px; color: #fff; box-shadow: 0 10px 25px rgba(84,0,0,0.2);">
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
-            <span style="background: #ef4444; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">SUBSIDI BBM PERTAMINA</span>
-            <span style="color: #38bdf8; font-weight: 700; font-size: 14px;">MyPertamina QR Pass</span>
+            <span style="background: #FFCC00; color: #1e1b4b; padding: 4px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px;">SUBSIDI BBM PERTAMINA</span>
+            <span style="color: #fef08a; font-weight: 700; font-size: 13.5px;">MyPertamina QR Pass</span>
           </div>
-          <div style="font-size:12px; color:#94a3b8; text-align:center; margin-bottom:14px;">
-            Kendaraan: <strong id="qrKendaraanNama" style="color:#facc15;">-</strong> &bull; Plat: <strong id="qrPlatNomor" style="color:#fff;">-</strong>
+          <div style="font-size:12.5px; color:rgba(255,255,255,0.85); text-align:center; margin-bottom:14px;">
+            Kendaraan: <strong id="qrKendaraanNama" style="color:#FFCC00;">-</strong> &bull; Plat: <strong id="qrPlatNomor" style="color:#fff;">-</strong>
           </div>
-          <p style="font-size: 13px; color: #cbd5e1; margin: 0 0 16px 0; text-align:center;">
+          <p style="font-size: 13px; color: rgba(255,255,255,0.9); margin: 0 0 16px 0; text-align:center;">
             Tunjukkan QR Code ini kepada operator SPBU Pertamina saat pengisian Solar / BBM subsidi.
           </p>
 
           <!-- Area Barcode -->
           <div id="qrBoxWrapper" style="text-align:center; margin-bottom:14px;">
-            <div id="qrBoxInner" style="background: #ffffff; padding: 18px; border-radius: 14px; display: inline-block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); max-width:100%;">
+            <div id="qrBoxInner" style="background: #ffffff; padding: 18px; border-radius: 14px; display: inline-block; box-shadow: 0 8px 25px rgba(0,0,0,0.3); max-width:100%;">
               <!-- diisi oleh JS -->
               <div id="qrLoadingState" style="width:180px; height:180px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;">
                 <div style="font-size:40px;">🔲</div>
@@ -411,35 +400,35 @@
 
           <!-- Tombol Aksi Barcode -->
           <div id="qrActionButtons" style="display:none; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
-            <a id="btnDownloadBarcode" download="Barcode_Pertamina.jpg" style="background:#10b981; color:#fff; padding:8px 18px; border-radius:20px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+            <a id="btnDownloadBarcode" download="Barcode_Pertamina.jpg" style="background:#10b981; color:#fff; padding:9px 20px; border-radius:20px; font-size:12.5px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
               📥 Download Barcode
             </a>
-            <button type="button" onclick="printBarcodeKendaraan()" style="background:#3b82f6; color:#fff; padding:8px 18px; border-radius:20px; font-size:12px; font-weight:700; border:none; cursor:pointer;">🖨️ Cetak Barcode</button>
+            <button type="button" onclick="printBarcodeKendaraan()" style="background:#0284c7; color:#fff; padding:9px 20px; border-radius:20px; font-size:12.5px; font-weight:700; border:none; cursor:pointer; box-shadow: 0 4px 12px rgba(2,132,199,0.3);">🖨️ Cetak Barcode</button>
           </div>
 
           <!-- Pesan tidak ada barcode -->
-          <div id="qrNoBarcodeMsg" style="display:none; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.4); border-radius:10px; padding:14px; font-size:13px; color:#fca5a5; text-align:center;">
+          <div id="qrNoBarcodeMsg" style="display:none; background:rgba(255,255,255,0.1); border:1px solid rgba(255,204,0,0.4); border-radius:10px; padding:14px; font-size:13px; color:#fef08a; text-align:center;">
             ⚠️ Barcode kendaraan belum diupload oleh Admin.<br>
-            <span style="color:#94a3b8; font-size:12px;">Hubungi Admin KUK untuk mendapatkan Barcode Pertamina.</span>
+            <span style="color:rgba(255,255,255,0.7); font-size:12px;">Hubungi Admin KUK untuk mendapatkan Barcode Pertamina.</span>
           </div>
 
-          <div style="font-size: 11px; color: #64748b; margin-top: 12px; text-align:center;">
-            📂 Barcode disimpan di: <a href="https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline;">Google Drive KUK</a>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 12px; text-align:center;">
+            📂 Barcode disimpan di: <a href="https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing" target="_blank" rel="noopener noreferrer" style="color: #FFCC00; text-decoration: underline;">Google Drive KUK</a>
           </div>
         </div>
 
         <!-- Tombol Aksi Operasional (BBM & WhatsApp Dispatch) -->
         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
-          <button type="button" class="btn-submit" onclick="openModalLogBbm()" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: auto; padding: 12px 20px; margin-top:0; font-size: 14px;">
+          <button type="button" class="btn-submit" onclick="openModalLogBbm()" style="background: linear-gradient(135deg, #FFCC00 0%, #d97706 100%); color: #1e1b4b; width: auto; padding: 12px 22px; margin-top:0; font-size: 14px; font-weight: 800; box-shadow: 0 4px 14px rgba(255,204,0,0.35);">
             <span>⛽ Catat Pengisian BBM & Struk</span>
           </button>
-          <button type="button" class="btn-submit" onclick="dispatchLoanToWhatsApp()" style="background: linear-gradient(135deg, #10b981, #059669); width: auto; padding: 12px 20px; margin-top:0; font-size: 14px;">
+          <button type="button" class="btn-submit" onclick="dispatchLoanToWhatsApp()" style="background: linear-gradient(135deg, #10b981, #059669); width: auto; padding: 12px 22px; margin-top:0; font-size: 14px; box-shadow: 0 4px 14px rgba(16,185,129,0.3);">
             <span>📲 Bagikan ke WhatsApp</span>
           </button>
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-          <button type="button" class="btn-submit" onclick="selesaiAtauPinjamBaru()" style="background: #334155; width: auto; padding: 12px 24px; margin-top:0; font-size: 14px;">
+          <button type="button" class="btn-submit" onclick="selesaiAtauPinjamBaru()" style="background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; width: auto; padding: 12px 24px; margin-top:0; font-size: 14px; box-shadow: none;">
             <span>✓ Selesai / Ajukan Peminjaman Baru</span>
           </button>
         </div>
@@ -447,20 +436,20 @@
     </div>
 
     <!-- Modal Catat Pengisian BBM & Upload Struk -->
-    <div id="modalBbm" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
-      <div style="background:#1e293b; border:1px solid rgba(255,255,255,0.15); border-radius:20px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
-          <h3 style="margin:0; font-size:18px; color:#facc15; display:flex; align-items:center; gap:8px;">
+    <div id="modalBbm" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:#ffffff; border:1px solid var(--kuk-border); border-radius:20px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; padding:26px; box-shadow:0 25px 60px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1.5px solid var(--kuk-border); padding-bottom:12px;">
+          <h3 style="margin:0; font-size:18px; font-weight:800; color:var(--kuk-maroon); display:flex; align-items:center; gap:8px;">
             <span>⛽</span> Catat Pengisian BBM & Struk SPBU
           </h3>
-          <button type="button" onclick="closeModalLogBbm()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+          <button type="button" onclick="closeModalLogBbm()" style="background:none; border:none; color:#64748b; font-size:22px; cursor:pointer; font-weight:bold;">✕</button>
         </div>
 
         <form id="formLogBbm" onsubmit="handleSimpanLogBbm(event)">
           <div style="display:flex; flex-direction:column; gap:14px;">
             <div>
               <label class="form-label">Kendaraan</label>
-              <input type="text" id="bbmKendaraan" readonly style="background:rgba(15,23,42,0.6); color:#facc15; font-weight:700;">
+              <input type="text" id="bbmKendaraan" readonly style="background:#f8fafc; color:var(--kuk-maroon); font-weight:800;">
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
@@ -499,15 +488,15 @@
             <div>
               <label class="form-label">Upload Foto Struk / Nota SPBU</label>
               <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
-                <div id="bbmStrukPreview" style="width:100px; height:70px; border:1px dashed rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(15,23,42,0.8); overflow:hidden;">
+                <div id="bbmStrukPreview" style="width:100px; height:70px; border:1.5px dashed #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:center; background:#f8fafc; overflow:hidden;">
                   <span style="font-size:11px; color:#94a3b8;">Belum ada</span>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:6px;">
-                  <label class="btn-submit" style="cursor:pointer; font-size:12px; padding:6px 14px; text-align:center; width:auto; margin:0; background:#0284c7;">
+                  <label class="btn-submit" style="cursor:pointer; font-size:12px; padding:7px 16px; text-align:center; width:auto; margin:0; background:#0284c7;">
                     📷 Foto Struk
                     <input type="file" id="inBbmStrukFile" accept="image/*" style="display:none;" onchange="handleBbmStrukUpload(event)">
                   </label>
-                  <button type="button" class="btn-submit" style="padding:4px 10px; background:#ef4444; font-size:11px; width:auto; margin:0;" onclick="clearBbmStruk()">🗑️ Hapus</button>
+                  <button type="button" class="btn-submit" style="padding:5px 12px; background:#ef4444; font-size:11px; width:auto; margin:0;" onclick="clearBbmStruk()">🗑️ Hapus</button>
                 </div>
               </div>
               <input type="hidden" id="bbmStrukImage">
@@ -522,20 +511,18 @@
               <button type="submit" class="btn-submit" style="flex:1; background:linear-gradient(135deg, #10b981, #059669); margin-top:0;">
                 💾 Simpan & Kirim WhatsApp
               </button>
-              <button type="button" onclick="closeModalLogBbm()" class="btn-submit" style="background:#475569; width:auto; margin-top:0;">
+              <button type="button" onclick="closeModalLogBbm()" class="btn-submit" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; width:auto; margin-top:0; box-shadow:none;">
                 Batal
               </button>
             </div>
           </div>
         </form>
       </div>
-    </div>
-
     <!-- Main Card Form -->
     <div id="formPanel" class="panel">
       <div class="panel-header">
         <h2>📝 Form Input Peminjaman Kendaraan</h2>
-        <span style="font-size: 12px; color: #34d399; font-weight: 600;">● Online</span>
+        <span style="font-size: 12px; color: var(--kuk-success); font-weight: 700; background: rgba(16,185,129,0.12); padding: 4px 10px; border-radius: 20px;">● Sistem Aktif</span>
       </div>
 
       <form id="formPeminjaman" onsubmit="handleAjukanPeminjaman(event)">
@@ -570,21 +557,21 @@
           </div>
 
           <!-- Upload Kartu SIM (Khusus L300 & Engkel) -->
-          <div class="form-group full" id="simUploadContainer" style="display: none; background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(250, 204, 21, 0.4); border-radius: 10px; padding: 14px; margin-top: 4px;">
-            <label class="form-label" style="color: #facc15; font-weight: 700;">Upload Foto Kartu SIM (Wajib untuk Peminjaman L300 & Truk Engkel) *</label>
-            <div style="font-size:11px; margin-bottom:6px; color:#cbd5e1;">
-              📂 Alokasi Drive: <a href="https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:underline;">Google Drive Folder SIM & Barcode</a>
+          <div class="form-group full" id="simUploadContainer" style="display: none; background: #fffbeb; border: 1.5px dashed #f59e0b; border-radius: 14px; padding: 16px; margin-top: 4px;">
+            <label class="form-label" style="color: #b45309; font-weight: 800;">Upload Foto Kartu SIM (Wajib untuk Peminjaman L300 & Truk Engkel) *</label>
+            <div style="font-size:11.5px; margin-bottom:8px; color:#92400e;">
+              📂 Folder Penyimpanan: <a href="https://drive.google.com/drive/folders/1gmv0TIJvTJcCyKD8rs7ichW4LANGFtyZ?usp=sharing" target="_blank" rel="noopener noreferrer" style="color:#b45309; text-decoration:underline; font-weight:700;">Google Drive Folder SIM & Barcode</a>
             </div>
             <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
-              <div id="simImagePreview" style="width:110px; height:65px; border:1px dashed rgba(255,255,255,0.25); border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(15,23,42,0.8); overflow:hidden;">
+              <div id="simImagePreview" style="width:110px; height:65px; border:1px dashed #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:center; background:#ffffff; overflow:hidden;">
                 <span style="font-size:11px; color:#94a3b8;">Belum ada SIM</span>
               </div>
               <div style="display:flex; flex-direction:column; gap:6px;">
-                <label class="btn-submit" style="cursor:pointer; font-size:12px; padding:6px 14px; text-align:center; width:auto; margin:0; background:#0284c7;">
+                <label class="btn-submit" style="cursor:pointer; font-size:12px; padding:7px 16px; text-align:center; width:auto; margin:0; background:#0284c7;">
                   📤 Upload Foto SIM
                   <input type="file" id="inSimFile" accept="image/*" style="display:none;" onchange="handleSimUpload(event)">
                 </label>
-                <button type="button" class="btn-submit" style="padding:4px 10px; background:#ef4444; font-size:11px; width:auto; margin:0;" onclick="clearSimImage()">🗑️ Hapus SIM</button>
+                <button type="button" class="btn-submit" style="padding:5px 12px; background:#ef4444; font-size:11px; width:auto; margin:0;" onclick="clearSimImage()">🗑️ Hapus SIM</button>
               </div>
             </div>
             <input type="hidden" id="inSimImage">
