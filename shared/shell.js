@@ -299,6 +299,8 @@
     });
 
     return [
+      '<div class="kuk-sidebar-trigger" id="kukSidebarTrigger"></div>',
+      '<div class="kuk-sidebar-handle" id="kukSidebarHandle" title="Arahkan kursor ke sisi kiri untuk membuka menu"></div>',
       '<aside class="kuk-sidebar" id="kukSidebar">',
       '  <div class="kuk-sidebar-brand">',
       '    <div class="kuk-sidebar-logo-mark"><span>KUK</span></div>',
@@ -328,12 +330,8 @@
   function buildNavItem(item, activePage) {
     var isActive = item.id === activePage;
     var href = _base(item.href);
-    var extraAttr = '';
-    if (item.id === 'cuti') {
-      extraAttr = ' onclick="if(document.getElementById(\'sectionRekapCuti\')){document.getElementById(\'sectionRekapCuti\').scrollIntoView({behavior:\'smooth\'});return false;}"';
-    }
     return [
-      '<a href="' + href + '" class="kuk-nav-item' + (isActive ? ' active' : '') + '" data-page="' + item.id + '"' + extraAttr + '>',
+      '<a href="' + href + '" class="kuk-nav-item' + (isActive ? ' active' : '') + '" data-page="' + item.id + '">',
       '  <span class="kuk-nav-icon">' + item.icon + '</span>',
       '  <span class="kuk-nav-label">' + item.label + '</span>',
       '</a>'
@@ -545,11 +543,56 @@
 
     document.body.insertAdjacentElement('afterbegin', container);
 
-    // Initialize auto-hiding topbar with cursor proximity detection
+    // Initialize auto-hiding topbar & sidebar with cursor proximity detection
     initTopbarAutoHide();
+    initSidebarAutoHide();
 
     // Load notifications after a short delay (to allow DB scripts to initialise)
     setTimeout(refreshNotifications, 800);
+  }
+
+  function initSidebarAutoHide() {
+    var sidebar = document.getElementById('kukSidebar');
+    if (!sidebar) return;
+
+    var hideTimer = null;
+
+    function showSidebar() {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      sidebar.classList.add('kuk-sidebar-visible');
+    }
+
+    function scheduleHideSidebar() {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(function() {
+        if (!sidebar.matches(':hover') && !sidebar.contains(document.activeElement) && !sidebar.classList.contains('kuk-sidebar-open')) {
+          sidebar.classList.remove('kuk-sidebar-visible');
+        }
+      }, 350);
+    }
+
+    // Cursor proximity to left edge
+    document.addEventListener('mousemove', function(e) {
+      if (e.clientX <= 25) {
+        showSidebar();
+      } else if (e.clientX > 260 && !sidebar.classList.contains('kuk-sidebar-open')) {
+        scheduleHideSidebar();
+      }
+    });
+
+    // Touch support near left edge
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches && e.touches[0] && e.touches[0].clientX <= 30) {
+        showSidebar();
+      }
+    }, { passive: true });
+
+    var trigger = document.getElementById('kukSidebarTrigger');
+    if (trigger) {
+      trigger.addEventListener('mouseenter', showSidebar);
+    }
+    sidebar.addEventListener('mouseenter', showSidebar);
+    sidebar.addEventListener('mouseleave', scheduleHideSidebar);
   }
 
   function initTopbarAutoHide() {

@@ -11,9 +11,9 @@
 body.kuk-has-shell {
   font-family: var(--kuk-font) !important;
   background: var(--kuk-bg) !important;
-  /* Auto-hide topbar: content starts with clean top spacing */
-  padding-top: 18px !important;
-  padding-left: var(--kuk-sidebar-w) !important;
+  /* Auto-hide navigation: content takes full fullscreen space cleanly */
+  padding-top: 0 !important;
+  padding-left: 0 !important;
   box-sizing: border-box !important;
   min-height: 100vh;
 }
@@ -31,8 +31,33 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 
 
 /* ═══════════════════════════════════════════════════════════════════════
-   2. SIDEBAR
+   2. SIDEBAR (Auto-Hide with Smooth Hover Slide-In)
    ═══════════════════════════════════════════════════════════════════════ */
+
+.kuk-sidebar-trigger {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 22px;
+  z-index: 198;
+  pointer-events: auto;
+}
+
+.kuk-sidebar-handle {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 80px;
+  background: linear-gradient(180deg, transparent, #FFCC00 40%, #540000 70%, transparent);
+  border-radius: 0 6px 6px 0;
+  z-index: 199;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 2px 0 10px rgba(255, 204, 0, 0.4);
+}
 
 .kuk-sidebar {
   position: fixed;
@@ -41,10 +66,28 @@ body.kuk-has-shell .top-nav                          { display: none !important;
   background: var(--kuk-sidebar-bg);
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  z-index: 200;
   overflow: hidden;
-  transition: width var(--kuk-transition-slow), transform var(--kuk-transition-slow);
-  border-right: 1px solid rgba(0,0,0,0.15);
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  border-right: 1px solid rgba(0,0,0,0.25);
+  box-shadow: 8px 0 35px rgba(0, 0, 0, 0.4);
+}
+
+.kuk-sidebar:hover,
+.kuk-sidebar.kuk-sidebar-visible,
+.kuk-sidebar.kuk-sidebar-open,
+.kuk-sidebar-trigger:hover ~ .kuk-sidebar {
+  transform: translateX(0);
+  box-shadow: 14px 0 45px rgba(0, 0, 0, 0.5);
+}
+
+.kuk-sidebar:hover ~ .kuk-sidebar-handle,
+.kuk-sidebar.kuk-sidebar-visible ~ .kuk-sidebar-handle,
+.kuk-sidebar.kuk-sidebar-open ~ .kuk-sidebar-handle,
+.kuk-sidebar-trigger:hover ~ .kuk-sidebar-handle {
+  opacity: 0;
+  transform: translateY(-50%) translateX(-100%);
 }
 
 /* ── Brand header ──────────────────────────────────────────────────── */
@@ -300,7 +343,7 @@ body.kuk-has-shell .top-nav                          { display: none !important;
   position: fixed;
   top: 0;
   right: 0;
-  left: var(--kuk-sidebar-w);
+  left: 0;
   height: 24px;
   z-index: 92;
   pointer-events: auto;
@@ -309,7 +352,7 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 .kuk-topbar-handle {
   position: fixed;
   top: 0;
-  left: calc(var(--kuk-sidebar-w) + (100vw - var(--kuk-sidebar-w)) / 2);
+  left: 50%;
   transform: translateX(-50%);
   width: 64px;
   height: 4px;
@@ -324,7 +367,7 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 .kuk-topbar {
   position: fixed;
   top: 0; right: 0;
-  left: var(--kuk-sidebar-w);
+  left: 0;
   height: var(--kuk-topbar-h);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(24px) saturate(180%);
@@ -336,7 +379,7 @@ body.kuk-has-shell .top-nav                          { display: none !important;
   padding: 0 28px;
   z-index: 95;
   transform: translateY(-100%);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), left var(--kuk-transition-slow), box-shadow 0.3s ease;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
   box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
 }
 
