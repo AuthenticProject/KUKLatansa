@@ -578,10 +578,13 @@
 
       bMath.innerHTML = `
         <div class="math-row"><span>Gaji Pokok</span> <span>${formatRp(slip.baseSalary)}</span></div>
+        <div class="math-row" style="color:#059669;"><span>+ Gaji Bagian</span> <span>+ ${formatRp(slip.gajiBagian || 0)}</span></div>
+        <div class="math-row" style="color:#059669;"><span>+ Hadiah Pondok</span> <span>+ ${formatRp(slip.hadiahPondok || 0)}</span></div>
         ${tipRow}
-        <div class="math-row" style="color:#d97706;"><span>- Potongan Telat (${slip.attendanceCounts.LATE || 0}x @Rp 15.000)</span> <span>- ${formatRp(slip.breakdown.lateDeduction || 0)}</span></div>
-        <div class="math-row" style="color:#dc2626;"><span>- Potongan Mangkir (${slip.attendanceCounts.ABSENT || 0}x @Rp 50.000)</span> <span>- ${formatRp(slip.breakdown.absentDeduction || 0)}</span></div>
-        <div class="math-row" style="color:#ea580c;"><span>- Potongan Tidak Lengkap (${slip.attendanceCounts.INCOMPLETE || 0}x @Rp 20.000)</span> <span>- ${formatRp(slip.breakdown.incompleteDeduction || 0)}</span></div>
+        <div class="math-row" style="color:#059669;"><span>+ Tunjangan Berkeluarga</span> <span>+ ${formatRp(slip.tunjanganKeluarga || 0)}</span></div>
+        <div class="math-row" style="color:#059669;"><span>+ Insentif Cuti</span> <span>+ ${formatRp(slip.insentifCuti || 0)}</span></div>
+        <div class="math-row" style="color:#d97706;"><span>- Potongan Telat (${slip.attendanceCounts.LATE || 0}x @Rp 2.500)</span> <span>- ${formatRp(slip.breakdown.lateDeduction || 0)}</span></div>
+        <div class="math-row" style="color:#dc2626;"><span>- Potongan Mangkir (${slip.attendanceCounts.ABSENT || 0}x @Rp 28.500)</span> <span>- ${formatRp(slip.breakdown.absentDeduction || 0)}</span></div>
         <div class="math-row total"><span>TOTAL TAKE HOME PAY</span> <span>${formatRp(slip.takeHomePay)}</span></div>
       `;
       document.getElementById('breakdownSection').style.display = 'block';

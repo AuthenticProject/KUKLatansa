@@ -499,13 +499,57 @@ const MasterDB = (() => {
     },
 
     saveEmployeePhoto: (employeeId, photoDataUrl) => {
+      if (!employeeId) return null;
+      const cleanId = employeeId.toString().trim().toLowerCase();
+      try {
+        localStorage.setItem('kuk_emp_photo_' + cleanId, photoDataUrl);
+      } catch(e) {}
+
       let emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
-      const idx = emps.findIndex(e => e.id === employeeId || (e.nama && e.nama.toLowerCase() === employeeId.toLowerCase()));
+      const idx = emps.findIndex(e => e.id.toLowerCase() === cleanId || (e.nama && e.nama.toLowerCase() === cleanId));
       if (idx > -1) {
         emps[idx].foto = photoDataUrl;
         saveStored(STORAGE_KEY_EMPLOYEES, emps);
         return photoDataUrl;
       }
+      return photoDataUrl;
+    },
+
+    getAvatarURL: (identifier) => {
+      if (!identifier) return null;
+      const clean = identifier.toString().trim().toLowerCase();
+
+      // 1. Session Storage check
+      try {
+        const sessRaw = sessionStorage.getItem('kuk_user');
+        if (sessRaw) {
+          const sess = JSON.parse(sessRaw);
+          if (sess && sess.foto && (sess.username || '').toLowerCase() === clean) return sess.foto;
+        }
+      } catch(e) {}
+
+      // 2. Direct localStorage photo keys
+      try {
+        const uKey = localStorage.getItem('kuk_user_photo_' + clean);
+        if (uKey) return uKey;
+        const eKey = localStorage.getItem('kuk_emp_photo_' + clean);
+        if (eKey) return eKey;
+      } catch(e) {}
+
+      // 3. User accounts DB
+      try {
+        const users = getStored(STORAGE_KEY_USERS) || DEFAULT_USERS;
+        const u = users.find(x => (x.username && x.username.toLowerCase() === clean) || (x.id && x.id.toLowerCase() === clean));
+        if (u && u.foto) return u.foto;
+      } catch(e) {}
+
+      // 4. Employee DB
+      try {
+        const emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
+        const e = emps.find(x => (x.id && x.id.toLowerCase() === clean) || (x.nama && x.nama.toLowerCase() === clean) || (x.fullName && x.fullName.toLowerCase().includes(clean)));
+        if (e && e.foto) return e.foto;
+      } catch(e) {}
+
       return null;
     },
 

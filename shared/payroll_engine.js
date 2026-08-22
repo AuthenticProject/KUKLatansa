@@ -12,9 +12,9 @@ const PayrollEngine = (() => {
   const RULES = {
     default_base_salary_bangunan: 850000,
     default_base_salary_palen: 700000,
-    late_deduction_rate: 2000, // Rp 2.000 / hari terlambat
-    absent_deduction_rate: 28500, // Rp 28.500 / hari alpa (tidak masuk tanpa cuti)
-    incomplete_deduction_rate: 20000
+    late_deduction_rate: 2500, // Rp 2.500 / hari terlambat (KUK HR Portal Formula)
+    absent_deduction_rate: 28500, // Rp 28.500 / hari alpa
+    incomplete_deduction_rate: 0 // Tidak ada potongan incomplete (ga ada)
   };
 
   function getPayrolls() {
@@ -113,6 +113,8 @@ const PayrollEngine = (() => {
       const baseSalary = Number(emp.gajiPokok) > 0 ? Number(emp.gajiPokok) : defaultBase;
       const gajiBagian = Number(emp.gajiBagian) || 0;
       const tunjanganKeluarga = emp.sudahBerkeluarga ? 50000 : 0;
+      const hadiahPondok = Number(emp.hadiahPondok) || 0;
+      const insentifCuti = Number(emp.insentifCuti) || 0;
 
       empData[emp.id] = {
         employeeName: emp.fullName || emp.nama,
@@ -123,6 +125,8 @@ const PayrollEngine = (() => {
         gajiBagian: gajiBagian,
         sudahBerkeluarga: !!emp.sudahBerkeluarga,
         tunjanganKeluarga: tunjanganKeluarga,
+        hadiahPondok: hadiahPondok,
+        insentifCuti: insentifCuti,
         tipKaca: tipKacaNominal,
         counts: { PRESENT: 0, LATE: 0, ABSENT: 0, INCOMPLETE: 0, LEAVE: 0, SICK: 0, PERMISSION: 0, EXCUSED: 0, OFF: 0 }
       };
@@ -145,13 +149,14 @@ const PayrollEngine = (() => {
     const slips = Object.keys(empData).map(empId => {
       const data = empData[empId];
       
-      const lateDeduction = data.counts.LATE * RULES.late_deduction_rate;
-      const absentDeduction = data.counts.ABSENT * RULES.absent_deduction_rate;
-      const incompleteDeduction = data.counts.INCOMPLETE * RULES.incomplete_deduction_rate;
+      const lateDeduction = data.counts.LATE * RULES.late_deduction_rate; // 2.500 x jumlah terlambat
+      const absentDeduction = data.counts.ABSENT * RULES.absent_deduction_rate; // 28.500 x hari tidak masuk
+      const incompleteDeduction = 0; // Tidak ada potongan incomplete ("ga ada")
       const totalDeductions = lateDeduction + absentDeduction + incompleteDeduction;
 
-      // Gaji Kotor = Gaji Pokok + Gaji Bagian + Tunjangan Keluarga (Rp 50.000 jika sudah berkeluarga) + Tip Kaca
-      const grossSalary = data.baseSalary + data.gajiBagian + data.tunjanganKeluarga + data.tipKaca;
+      // Rumus Resmi KUK HR Portal:
+      // Take Home Pay = Gaji Pokok - (28.500 x Alpa) - (2.500 x Late) + Gaji Bagian + Hadiah Pondok + Tip Kaca + Tunjangan Berkeluarga + Insentif Cuti
+      const grossSalary = data.baseSalary + data.gajiBagian + data.hadiahPondok + data.tunjanganKeluarga + data.tipKaca + data.insentifCuti;
       const takeHomePay = grossSalary - totalDeductions;
 
       if (data.unit && data.unit.toLowerCase().includes('palen')) {
@@ -168,8 +173,10 @@ const PayrollEngine = (() => {
         position: data.position,
         baseSalary: data.baseSalary,
         gajiBagian: data.gajiBagian,
+        hadiahPondok: data.hadiahPondok,
         sudahBerkeluarga: data.sudahBerkeluarga,
         tunjanganKeluarga: data.tunjanganKeluarga,
+        insentifCuti: data.insentifCuti,
         tipKaca: data.tipKaca,
         grossSalary: grossSalary,
         attendanceCounts: data.counts,
