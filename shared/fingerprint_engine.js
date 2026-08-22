@@ -34,14 +34,15 @@ const FingerprintEngine = (() => {
 
   // Kamus Alias Resmi KUK (Excel Mesin Fingerprint vs Database HRD)
   const EMPLOYEE_ALIASES = {
-    // 1. Nur Hadi (ID: K-005, Nama: Nur, PIN: 5)
+    // 1. Nur Hadi (ID: K-006, Nama: Nur, PIN: 5)
     'masnur': 'Nur',
     'nur': 'Nur',
     'nurhadi': 'Nur',
+    'masnurhadi': 'Nur',
     'nurhad': 'Nur',
     'paknur': 'Nur',
 
-    // 2. Syirojul Kahfi (ID: K-004, Nama: Kahfi, PIN: 4)
+    // 2. Syirojul Kahfi (ID: K-005, Nama: Kahfi, PIN: 4)
     'kahfi': 'Kahfi',
     'syirojulkahfi': 'Kahfi',
     'syirojul': 'Kahfi',
@@ -53,24 +54,24 @@ const FingerprintEngine = (() => {
     'aliprejeki': 'Alip',
     'alifrejeki': 'Alip',
 
-    // 4. Nukul (ID: K-012, Nama: Nukul, PIN: 12)
+    // 4. Nukul (ID: K-002, Nama: Nukul, PIN: 12)
     'nukul': 'Nukul',
 
-    // 5. Irfan Ulinnuha (ID: K-003, Nama: Ulin, PIN: 3)
+    // 5. Irfan Ulinnuha (ID: K-004, Nama: Ulin, PIN: 3)
     'ulin': 'Ulin',
     'irfanulinnuha': 'Ulin',
     'irfanulin': 'Ulin',
     'ulinnuha': 'Ulin',
 
-    // 6. Miftah (ID: K-013, Nama: Miftah, PIN: 13)
+    // 6. Miftah (ID: K-001, Nama: Miftah, PIN: 13)
     'miftah': 'Miftah',
     'miftahul': 'Miftah',
+    'miftahgudang': 'Miftah',
 
     // 7. Lailurrohman (ID: K-010, Nama: Rohman, PIN: 10)
     'rohman': 'Rohman',
     'lailurrohman': 'Rohman',
     'lailur': 'Rohman',
-    'lailurrohman': 'Rohman',
 
     // 8. Muhammad Irvan (ID: K-011, Nama: Irvan, PIN: 11)
     'irvan': 'Irvan',
@@ -78,7 +79,7 @@ const FingerprintEngine = (() => {
     'muhammadirvan': 'Irvan',
     'mirvan': 'Irvan',
 
-    // 9. Wiba Sepdioko (ID: K-002, Nama: Wiba, PIN: 2)
+    // 9. Wiba Sepdioko (ID: K-003, Nama: Wiba, PIN: 2)
     'wiba': 'Wiba',
     'wibasepdioko': 'Wiba',
     'sepdioko': 'Wiba',
@@ -102,31 +103,75 @@ const FingerprintEngine = (() => {
    * Smart Name Matcher: Mencocokkan nama mesin fingerprint dengan master database
    */
   function matchEmployeeSmart(pin, rawName, employees) {
+    if (!employees || !employees.length) return null;
     const pinStr = (pin || '').toString().trim();
+    const cleanPin = parseInt(pinStr, 10);
     const cRaw = cleanName(rawName);
 
-    // 1. Cocokkan berdasarkan Fingerprint PIN jika ada
-    let matched = employees.find(e => e.fingerprintId && e.fingerprintId.toString() === pinStr);
-    if (matched) return matched;
+    // 1. Cocokkan berdasarkan Fingerprint PIN secara angka/string
+    if (!isNaN(cleanPin) && cleanPin > 0) {
+      let matchedByPin = employees.find(e => {
+        const ePin = parseInt(e.fingerprintId, 10);
+        return !isNaN(ePin) && ePin === cleanPin;
+      });
+      if (matchedByPin) return matchedByPin;
+    }
 
     // 2. Kamus Alias Resmi KUK
     for (const [alias, targetShortName] of Object.entries(EMPLOYEE_ALIASES)) {
       const cAlias = cleanName(alias);
-      if (cRaw === cAlias || cRaw === alias || cRaw.includes(cAlias) || cAlias.includes(cRaw)) {
-        matched = employees.find(e => e.nama.toLowerCase() === targetShortName.toLowerCase() || (e.fullName && e.fullName.toLowerCase().includes(targetShortName.toLowerCase())));
-        if (matched) return matched;
+      if (cRaw === cAlias || (cAlias.length >= 3 && (cRaw.includes(cAlias) || cAlias.includes(cRaw)))) {
+        let matchedByAlias = employees.find(e => 
+          e.nama.toLowerCase() === targetShortName.toLowerCase() || 
+          (e.fullName && e.fullName.toLowerCase().includes(targetShortName.toLowerCase()))
+        );
+        if (matchedByAlias) return matchedByAlias;
       }
     }
 
     // 3. Pencocokan langsung substring nama singkat & nama lengkap
-    matched = employees.find(e => {
+    let matchedByName = employees.find(e => {
       const cNama = cleanName(e.nama);
       const cFull = cleanName(e.fullName);
-      return cRaw === cNama || cNama === cRaw || (cNama.length >= 3 && cRaw.includes(cNama)) || (cFull.length >= 4 && (cRaw.includes(cFull) || cFull.includes(cRaw)));
+      if (!cNama && !cFull) return false;
+      return (cNama && (cRaw === cNama || cRaw.includes(cNama) || cNama.includes(cRaw))) ||
+             (cFull && (cRaw === cFull || cRaw.includes(cFull) || cFull.includes(cRaw)));
     });
-    if (matched) return matched;
+    if (matchedByName) return matchedByName;
 
     return null;
+  }
+
+  function isDateCoveredByCuti(emp, dateStr) {
+    if (!emp || !dateStr) return false;
+    try {
+      const cutiRaw = localStorage.getItem(STORAGE_KEY_CUTI);
+      if (!cutiRaw) return false;
+      const cutiList = JSON.parse(cutiRaw);
+      if (!Array.isArray(cutiList)) return false;
+
+      const empId = (emp.id || '').toLowerCase();
+      const empNama = (emp.nama || '').toLowerCase();
+      const empFull = (emp.fullName || '').toLowerCase();
+      const pinStr = (emp.fingerprintId || '').toString();
+
+      return cutiList.some(c => {
+        const cId = (c.idKaryawan || c.employeeId || '').toLowerCase();
+        const cNama = (c.nama || c.employeeName || '').toLowerCase();
+        const cPin = (c.fingerprintId || '').toString();
+
+        const isMatch = (cId && cId === empId) ||
+                        (cNama && (cNama === empNama || cNama === empFull || empFull.includes(cNama) || cNama.includes(empNama))) ||
+                        (cPin && cPin === pinStr);
+
+        if (isMatch && Array.isArray(c.tanggal)) {
+          return c.tanggal.includes(dateStr);
+        }
+        return false;
+      });
+    } catch(e) {
+      return false;
+    }
   }
 
   function getRawData() {
@@ -451,26 +496,50 @@ const FingerprintEngine = (() => {
         const alpaDeductionTotal = totalAlpa * RULES.absenceDeductionRate;
         const lateDeductionTotal = totalTelat * RULES.lateDeductionRate;
 
-        employeeReports.push({
-          pin,
-          machineName,
-          employeeId: empId,
-          employeeName: empFullName,
-          unit: empUnit,
-          isMatched: !!matchedEmp,
-          totalHadir,
-          totalCuti,
-          totalAlpa,
-          totalTelat,
-          totalKelebihanIstirahat,
-          totalMenitKelebihanIstirahat,
-          totalPulangAwal,
-          totalIncomplete,
-          alpaDeductionTotal,
-          lateDeductionTotal,
-          totalPotongan: alpaDeductionTotal + lateDeductionTotal,
-          dailyLogs
-        });
+        // CEK DUPLIKASI ENTRY KARYAWAN: MERGE JIKA SUDAH ADA RECORD KARYAWAN DENGAN ID SAMA
+        const existingReportIdx = employeeReports.findIndex(r => r.employeeId === empId && empId !== 'UNREGISTERED-' + pin);
+        if (existingReportIdx > -1) {
+          const target = employeeReports[existingReportIdx];
+          target.totalHadir += totalHadir;
+          target.totalCuti += totalCuti;
+          target.totalAlpa += totalAlpa;
+          target.totalTelat += totalTelat;
+          target.totalKelebihanIstirahat += totalKelebihanIstirahat;
+          target.totalMenitKelebihanIstirahat += totalMenitKelebihanIstirahat;
+          target.totalPulangAwal += totalPulangAwal;
+          target.alpaDeductionTotal = target.totalAlpa * RULES.absenceDeductionRate;
+          target.lateDeductionTotal = target.totalTelat * RULES.lateDeductionRate;
+          target.totalPotongan = target.alpaDeductionTotal + target.lateDeductionTotal;
+          dailyLogs.forEach(log => {
+            const dIdx = target.dailyLogs.findIndex(dl => dl.date === log.date);
+            if (dIdx > -1) {
+              if (log.punches && log.punches.length > 0) target.dailyLogs[dIdx] = log;
+            } else {
+              target.dailyLogs.push(log);
+            }
+          });
+        } else {
+          employeeReports.push({
+            pin,
+            machineName,
+            employeeId: empId,
+            employeeName: empFullName,
+            unit: empUnit,
+            isMatched: !!matchedEmp,
+            totalHadir,
+            totalCuti,
+            totalAlpa,
+            totalTelat,
+            totalKelebihanIstirahat,
+            totalMenitKelebihanIstirahat,
+            totalPulangAwal,
+            totalIncomplete,
+            alpaDeductionTotal,
+            lateDeductionTotal,
+            totalPotongan: alpaDeductionTotal + lateDeductionTotal,
+            dailyLogs
+          });
+        }
       }
     }
 

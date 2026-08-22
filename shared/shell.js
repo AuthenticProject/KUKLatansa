@@ -781,7 +781,8 @@
         alert("✅ Foto profil berhasil diunggah dan dioptimalkan untuk seluruh perangkat!");
         location.reload();
       } catch(err) {
-        alert("Gagal memproses foto: " + err.message);
+        var msg = (err && err.message) ? err.message : String(err || 'Gagal membaca berkas gambar.');
+        alert("Gagal memproses foto: " + msg);
       }
     };
     input.click();

@@ -509,37 +509,50 @@ const MasterDB = (() => {
       return null;
     },
 
-    compressImage: (file, maxWidth = 300, maxHeight = 300, quality = 0.85) => {
+    compressImage: (file, maxWidth = 320, maxHeight = 320, quality = 0.85) => {
       return new Promise((resolve, reject) => {
-        if (!file) return reject(new Error("No file provided"));
+        if (!file) return reject(new Error("File gambar tidak ditemukan."));
         const reader = new FileReader();
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error("Gagal membaca file gambar dari perangkat."));
         reader.onload = function(e) {
-          const img = new Image();
-          img.onerror = reject;
-          img.onload = function() {
-            let width = img.width;
-            let height = img.height;
-            if (width > height) {
-              if (width > maxWidth) {
-                height = Math.round((height * maxWidth) / width);
-                width = maxWidth;
+          const rawDataUrl = e.target.result;
+          if (!rawDataUrl) return reject(new Error("File gambar kosong."));
+          
+          try {
+            const img = new Image();
+            img.onload = function() {
+              try {
+                let width = img.width || 300;
+                let height = img.height || 300;
+                if (width > height) {
+                  if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                  }
+                } else {
+                  if (height > maxHeight) {
+                    width = Math.round((width * maxHeight) / height);
+                    height = maxHeight;
+                  }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedDataUrl || rawDataUrl);
+              } catch(err) {
+                resolve(rawDataUrl);
               }
-            } else {
-              if (height > maxHeight) {
-                width = Math.round((width * maxHeight) / height);
-                height = maxHeight;
-              }
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            resolve(dataUrl);
-          };
-          img.src = e.target.result;
+            };
+            img.onerror = function() {
+              resolve(rawDataUrl);
+            };
+            img.src = rawDataUrl;
+          } catch(err) {
+            resolve(rawDataUrl);
+          }
         };
         reader.readAsDataURL(file);
       });
