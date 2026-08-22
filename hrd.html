@@ -1110,21 +1110,25 @@
 
     let currentEmpPhoto = null;
 
-    function previewEmpPhoto(input) {
+    async function previewEmpPhoto(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
-        if (file.size > 5 * 1024 * 1024) {
-          showToast('Ukuran foto maksimal 5 MB!', 'error');
-          input.value = '';
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          currentEmpPhoto = e.target.result;
+        try {
+          if (typeof MasterDB !== 'undefined' && MasterDB.compressImage) {
+            currentEmpPhoto = await MasterDB.compressImage(file, 320, 320, 0.85);
+          } else {
+            currentEmpPhoto = await new Promise((res, rej) => {
+              const r = new FileReader();
+              r.onload = e => res(e.target.result);
+              r.onerror = rej;
+              r.readAsDataURL(file);
+            });
+          }
           const preview = document.getElementById('empPhotoPreview');
           preview.innerHTML = `<img src="${currentEmpPhoto}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
-        };
-        reader.readAsDataURL(file);
+        } catch(err) {
+          showToast('Gagal memproses foto: ' + err.message, 'error');
+        }
       }
     }
 

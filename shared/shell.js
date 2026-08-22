@@ -278,21 +278,6 @@
     return notes;
   }
 
-  /* ── Build sidebar HTML ───────────────────────────────────────────── */
-  function buildSidebar(username, userRecord, navItems) {
-    const activePage = getActivePage();
-    const role  = userRecord ? (userRecord.role || 'staff') : 'staff';
-    const label = ROLE_LABELS[role] || 'Staf';
-    const initial = username ? username[0].toUpperCase() : 'U';
-
-    // Group nav items by section
-    var sections = {};
-    var noSection = [];
-    navItems.forEach(function(item) {
-      if (!item.section) { noSection.push(item); }
-      else { if (!sections[item.section]) sections[item.section] = []; sections[item.section].push(item); }
-    });
-
   function getAvatarHTML(username) {
     const user = getUserRecord(username);
     const initial = username ? username[0].toUpperCase() : 'U';
@@ -302,23 +287,21 @@
     return initial;
   }
 
-  function buildSidebar(username) {
-    var user = getUserRecord(username);
-    var role = user ? user.role : '';
-    var label = ROLE_LABELS[role] || role || 'Pengguna';
-    var avatarHtml = getAvatarHTML(username);
+  /* ── Build sidebar HTML ───────────────────────────────────────────── */
+  function buildSidebar(username, userRecord, navItems) {
+    const activePage = getActivePage();
+    const user = userRecord || getUserRecord(username);
+    const role  = user ? (user.role || 'staff') : 'staff';
+    const label = ROLE_LABELS[role] || 'Staf';
+    const avatarHtml = getAvatarHTML(username);
 
-    var navItems = getVisibleNav();
+    const items = navItems || getVisibleNav();
     var sections = {};
     var noSection = [];
 
-    navItems.forEach(function(item) {
-      if (item.section) {
-        if (!sections[item.section]) sections[item.section] = [];
-        sections[item.section].push(item);
-      } else {
-        noSection.push(item);
-      }
+    items.forEach(function(item) {
+      if (!item.section) { noSection.push(item); }
+      else { if (!sections[item.section]) sections[item.section] = []; sections[item.section].push(item); }
     });
 
     var navHTML = '';
@@ -743,16 +726,21 @@
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = function(e) {
+    input.onchange = async function(e) {
       var file = e.target.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Ukuran file foto maksimal 5 MB.");
-        return;
-      }
-      var reader = new FileReader();
-      reader.onload = function(evt) {
-        var photoDataUrl = evt.target.result;
+      try {
+        var photoDataUrl;
+        if (typeof MasterDB !== 'undefined' && MasterDB.compressImage) {
+          photoDataUrl = await MasterDB.compressImage(file, 320, 320, 0.85);
+        } else {
+          photoDataUrl = await new Promise(function(res, rej) {
+            var r = new FileReader();
+            r.onload = function(evt) { res(evt.target.result); };
+            r.onerror = rej;
+            r.readAsDataURL(file);
+          });
+        }
         var username = getUsername();
         if (typeof MasterDB !== 'undefined' && MasterDB.saveUserPhoto) {
           MasterDB.saveUserPhoto(username, photoDataUrl);
@@ -766,10 +754,11 @@
             }
           } catch(err) {}
         }
-        alert("✅ Foto profil berhasil diunggah!");
+        alert("✅ Foto profil berhasil diunggah dan dioptimalkan untuk seluruh perangkat!");
         location.reload();
-      };
-      reader.readAsDataURL(file);
+      } catch(err) {
+        alert("Gagal memproses foto: " + err.message);
+      }
     };
     input.click();
   };
