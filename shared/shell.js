@@ -102,11 +102,9 @@
     { id: 'violation_review', label: 'Review Pelanggaran',  section: 'Operasional',href: 'violation_review.html', perm: 'violation_review', icon: ICON.violation_review },
     { id: 'absen',            label: 'Absen Briefing',      section: 'Operasional',href: 'absen.html', perm: 'absen',            icon: ICON.absen },
     { id: 'fingerprint',      label: 'Import Fingerprint',  section: 'Operasional',href: 'fingerprint_import.html', perm: 'fingerprint', icon: ICON.fingerprint },
-    { id: 'cuti',             label: 'Cuti',                section: 'Operasional',href: 'cuti.html',  perm: 'cuti',             icon: ICON.cuti },
     { id: 'pelanggaran',      label: 'Pelanggaran',         section: 'Operasional',href: 'pelanggaran.html', perm: 'pelanggaran', icon: ICON.pelanggaran },
-    { id: 'tip',              label: 'Tip Kaca',            section: 'Operasional',href: 'tip.html',   perm: 'tip',              icon: ICON.tip },
-    // 'peminjaman' & 'karyawan' dihapus dari nav — halaman standalone (isolated/public),
-    // diakses langsung oleh user ybs, bukan via shell navigation dashboard.
+    // 'cuti', 'tip', 'peminjaman' & 'karyawan' dihapus dari nav — halaman standalone (isolated/public),
+    // diakses langsung oleh user ybs via card karyawan / portal landing, bukan via shell navigation dashboard.
     { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
     { id: 'peminjaman_admin', label: 'Admin Armada',        section: 'Database',   href: 'peminjaman_admin.html', perm: 'peminjaman_admin', icon: ICON.peminjaman_admin },
     { id: 'users',            label: 'Manajemen Pengguna',  section: 'Sistem',     href: 'users.html', perm: 'users',            icon: ICON.users },
