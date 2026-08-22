@@ -1,9 +1,10 @@
-const CACHE_NAME = 'kuk-hr-cache-v27';
+const CACHE_NAME = 'kuk-hr-cache-v28';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './absen.html',
   './cuti.html',
+  './rekap_cuti.html',
   './pelanggaran.html',
   './tip.html',
   './peminjaman.html',

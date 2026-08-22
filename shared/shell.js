@@ -102,7 +102,7 @@
     { id: 'violation_review', label: 'Review Pelanggaran',  section: 'Operasional',href: 'violation_review.html', perm: 'violation_review', icon: ICON.violation_review },
     { id: 'absen',            label: 'Absen Briefing',      section: 'Operasional',href: 'absen.html', perm: 'absen',            icon: ICON.absen },
     { id: 'fingerprint',      label: 'Import Fingerprint',  section: 'Operasional',href: 'fingerprint_import.html', perm: 'fingerprint', icon: ICON.fingerprint },
-    { id: 'cuti',             label: 'Rekap Cuti',          section: 'Operasional',href: 'cuti.html',  perm: 'cuti',             icon: ICON.cuti },
+    { id: 'cuti',             label: 'Rekapan Cuti',        section: 'Operasional',href: 'rekap_cuti.html', perm: 'cuti',             icon: ICON.cuti },
     { id: 'pelanggaran',      label: 'Pelanggaran',         section: 'Operasional',href: 'pelanggaran.html', perm: 'pelanggaran', icon: ICON.pelanggaran },
     // 'tip', 'peminjaman' & 'karyawan' diakses langsung oleh user ybs via card karyawan / portal landing.
     { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
@@ -114,7 +114,7 @@
   const PAGE_TITLES = {
     dashboard:        'Dashboard',
     absen:            'Absen Briefing Pagi',
-    cuti:             'Rekap Cuti',
+    cuti:             'Rekapan Cuti & Jadwal Karyawan',
     pelanggaran:      'Catat Pelanggaran',
     tip:              'Tip Pemotongan Kaca',
     peminjaman:       'Peminjaman Kendaraan',

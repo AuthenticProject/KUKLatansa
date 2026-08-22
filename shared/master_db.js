@@ -94,6 +94,124 @@ const MasterDB = (() => {
     { idKaryawan: 'K-013', nama: 'Miftah', bagian: 'Palen', tanggal: '2026-08-18', bulan: '08', tahun: '2026' }
   ];
 
+  // Data Pelanggaran Historis dari Database Lama
+  const DEFAULT_VIOLATIONS = [
+    {
+      id: 'VIO-2026-001',
+      source: 'MANUAL',
+      employeeId: 'K-010',
+      employeeName: 'Rohman',
+      unit: 'KUK Bangunan',
+      date: '2026-06-21',
+      ruleBroken: 'Menggunakan HP untuk kepentingan pribadi',
+      calculatedValue: 'Menggunakan HP untuk kepentingan pribadi (10 Poin)',
+      points: 10,
+      location: 'Area Kasir',
+      staf: 'fariz',
+      status: 'VERIFIED',
+      reviewer: 'fariz',
+      generatedTime: '2026-06-21T18:36:00.000Z',
+      history: [{ state: 'VERIFIED', timestamp: '2026-06-21T18:36:00.000Z', note: 'Dicatat oleh Staf Fariz', actor: 'fariz' }]
+    },
+    {
+      id: 'VIO-2026-002',
+      source: 'MANUAL',
+      employeeId: 'K-009',
+      employeeName: 'Hiba',
+      unit: 'KUK Bangunan',
+      date: '2026-05-30',
+      ruleBroken: 'Merokok jam operasional',
+      calculatedValue: 'Merokok jam operasional (20 Poin)',
+      points: 20,
+      location: 'Area Belakang',
+      staf: 'fariz',
+      status: 'VERIFIED',
+      reviewer: 'fariz',
+      generatedTime: '2026-05-30T10:00:00.000Z',
+      history: [{ state: 'VERIFIED', timestamp: '2026-05-30T10:00:00.000Z', note: 'Dicatat oleh Staf Fariz', actor: 'fariz' }]
+    },
+    {
+      id: 'VIO-2026-003',
+      source: 'MANUAL',
+      employeeId: 'K-008',
+      employeeName: 'Riyan',
+      unit: 'KUK Bangunan',
+      date: '2026-06-04',
+      ruleBroken: 'Mengambil istirahat berlebihan',
+      calculatedValue: 'Mengambil istirahat berlebihan (10 Poin)',
+      points: 10,
+      location: 'Kamar Belakang',
+      staf: 'andika',
+      status: 'VERIFIED',
+      reviewer: 'andika',
+      generatedTime: '2026-06-04T13:25:00.000Z',
+      history: [{ state: 'VERIFIED', timestamp: '2026-06-04T13:25:00.000Z', note: 'Dicatat oleh Staf Andika', actor: 'andika' }]
+    },
+    {
+      id: 'VIO-2026-004',
+      source: 'MANUAL',
+      employeeId: 'K-007',
+      employeeName: 'Alip',
+      unit: 'KUK Bangunan',
+      date: '2026-06-04',
+      ruleBroken: 'Mengambil istirahat berlebihan',
+      calculatedValue: 'Mengambil istirahat berlebihan (10 Poin)',
+      points: 10,
+      location: 'Kamar Belakang',
+      staf: 'andika',
+      status: 'VERIFIED',
+      reviewer: 'andika',
+      generatedTime: '2026-06-04T13:25:00.000Z',
+      history: [{ state: 'VERIFIED', timestamp: '2026-06-04T13:25:00.000Z', note: 'Dicatat oleh Staf Andika', actor: 'andika' }]
+    }
+  ];
+
+  // Data Payroll Historis dari Database Lama (12 Slip Gaji Karyawan)
+  const DEFAULT_GAJI_HISTORI = [
+    { id: 'PAY-2026-06-001', idKaryawan: 'K-003', namaLengkap: 'Nurhadi', jabatan: 'Kepala Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3800000, gajiBagian: 350000, insentif: 200000, tipKaca: 150000, potonganKsj: 50000, tunjangan: 700000, potongan: 50000, totalGaji: 4450000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Gaji Bagian + Insentif + Tip Kaca', nomorSlip: 'SLIP-KUK-202606-001' },
+    { id: 'PAY-2026-06-002', idKaryawan: 'K-005', namaLengkap: 'Agus', jabatan: 'Staf Operasional Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 1, gajiPokok: 3300000, gajiBagian: 250000, insentif: 150000, tipKaca: 100000, potonganKsj: 50000, tunjangan: 500000, potongan: 50000, totalGaji: 3750000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Gaji Bagian (1 Hari Tidak Masuk)', nomorSlip: 'SLIP-KUK-202606-002' },
+    { id: 'PAY-2026-06-003', idKaryawan: 'K-002', namaLengkap: 'Wiba', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3350000, gajiBagian: 250000, insentif: 150000, tipKaca: 100000, potonganKsj: 50000, tunjangan: 500000, potongan: 50000, totalGaji: 3800000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Gaji Bagian + Insentif + Tip Kaca', nomorSlip: 'SLIP-KUK-202606-003' },
+    { id: 'PAY-2026-06-004', idKaryawan: 'K-008', namaLengkap: 'Ariyan', jabatan: 'Staf Pelayanan Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3150000, gajiBagian: 200000, insentif: 100000, tipKaca: 80000, potonganKsj: 50000, tunjangan: 380000, potongan: 50000, totalGaji: 3480000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Gaji Bagian + Tip Kaca', nomorSlip: 'SLIP-KUK-202606-004' },
+    { id: 'PAY-2026-06-005', idKaryawan: 'K-011', namaLengkap: 'Irfan', jabatan: 'Supir Armada Logistik', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3500000, gajiBagian: 300000, insentif: 250000, tipKaca: 120000, potonganKsj: 50000, tunjangan: 670000, potongan: 50000, totalGaji: 4120000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Insentif Supir + Tip Kaca', nomorSlip: 'SLIP-KUK-202606-005' },
+    { id: 'PAY-2026-06-006', idKaryawan: 'K-009', namaLengkap: 'Hiba', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3050000, gajiBagian: 200000, insentif: 100000, tipKaca: 75000, potonganKsj: 50000, tunjangan: 375000, potongan: 50000, totalGaji: 3375000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Gaji Bagian + Tip Kaca', nomorSlip: 'SLIP-KUK-202606-006' },
+    { id: 'PAY-2026-06-007', idKaryawan: 'K-007', namaLengkap: 'Alip', jabatan: 'Staf Operasional Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3250000, gajiBagian: 200000, insentif: 150000, tipKaca: 90000, potonganKsj: 50000, tunjangan: 440000, potongan: 50000, totalGaji: 3640000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Gaji Bagian + Insentif', nomorSlip: 'SLIP-KUK-202606-007' },
+    { id: 'PAY-2026-06-008', idKaryawan: 'K-004', namaLengkap: 'Kahfi', jabatan: 'Staf Pelayanan Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 2, gajiPokok: 3150000, gajiBagian: 200000, insentif: 100000, tipKaca: 80000, potonganKsj: 50000, tunjangan: 380000, potongan: 50000, totalGaji: 3480000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Gaji Bagian (2 Hari Tidak Masuk)', nomorSlip: 'SLIP-KUK-202606-008' },
+    { id: 'PAY-2026-06-009', idKaryawan: 'K-011', namaLengkap: 'Irvan', jabatan: 'Supir Armada Logistik', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3500000, gajiBagian: 300000, insentif: 250000, tipKaca: 120000, potonganKsj: 50000, tunjangan: 670000, potongan: 50000, totalGaji: 4120000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Bonus Logistik', nomorSlip: 'SLIP-KUK-202606-009' },
+    { id: 'PAY-2026-06-010', idKaryawan: 'K-010', namaLengkap: 'Lailurrohman', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3050000, gajiBagian: 200000, insentif: 100000, tipKaca: 75000, potonganKsj: 50000, tunjangan: 375000, potongan: 50000, totalGaji: 3375000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-010' },
+    { id: 'PAY-2026-06-011', idKaryawan: 'K-013', namaLengkap: 'Miftah', jabatan: 'Staf Operasional Palen', toko: 'palen', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3200000, gajiBagian: 200000, insentif: 150000, tipKaca: 0, potonganKsj: 50000, tunjangan: 450000, potongan: 50000, totalGaji: 3500000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026 KUK Palen', nomorSlip: 'SLIP-KUK-202606-011' },
+    { id: 'PAY-2026-06-012', idKaryawan: 'K-012', namaLengkap: 'Nukul', jabatan: 'Staf Gudang Palen', toko: 'palen', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', absenHari: 0, gajiPokok: 3200000, gajiBagian: 200000, insentif: 150000, tipKaca: 0, potonganKsj: 50000, tunjangan: 450000, potongan: 50000, totalGaji: 3500000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026 KUK Palen', nomorSlip: 'SLIP-KUK-202606-012' }
+  ];
+
+  // Runs Payroll Resmi Terkunci untuk Payroll Dashboard
+  const DEFAULT_PAYROLL_RUNS = [
+    {
+      id: 'PR-2026-06-LOCKED',
+      periodName: 'Payroll Periode Juni 2026 (Arsip Resmi)',
+      startDate: '2026-06-01',
+      endDate: '2026-06-30',
+      targetUnit: 'ALL',
+      status: 'LOCKED',
+      generatedAt: '2026-06-28T10:00:00.000Z',
+      generatedBy: 'irsyadil (HRD)',
+      totalDisbursed: 44040000,
+      totalEmployees: 11,
+      seal: 'a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8',
+      slips: [
+        { employeeId: 'K-003', employeeName: 'Nurhadi (Ulin)', unit: 'KUK Bangunan', position: 'Kepala Gudang', baseSalary: 3800000, gajiBagian: 350000, tunjanganKeluarga: 50000, tipKaca: 150000, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 4550000, totalDeductions: 50000, netSalary: 4500000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-001' },
+        { employeeId: 'K-005', employeeName: 'Agus Santoso', unit: 'KUK Bangunan', position: 'Kepala Toko', baseSalary: 3300000, gajiBagian: 250000, tunjanganKeluarga: 50000, tipKaca: 100000, lateDeduction: 0, absentDeduction: 28500, kasirDeduction: 50000, grossSalary: 3700000, totalDeductions: 78500, netSalary: 3621500, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-002' },
+        { employeeId: 'K-002', employeeName: 'Wiba Prasetiyo', unit: 'KUK Bangunan', position: 'Admin', baseSalary: 3350000, gajiBagian: 250000, tunjanganKeluarga: 50000, tipKaca: 100000, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3750000, totalDeductions: 50000, netSalary: 3700000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-003' },
+        { employeeId: 'K-008', employeeName: 'Ariyan Saputra (Riyan)', unit: 'KUK Bangunan', position: 'Frontliner', baseSalary: 3150000, gajiBagian: 200000, tunjanganKeluarga: 0, tipKaca: 80000, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3430000, totalDeductions: 50000, netSalary: 3380000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-004' },
+        { employeeId: 'K-011', employeeName: 'Irfan Maulana', unit: 'KUK Bangunan', position: 'Kepala Pengiriman', baseSalary: 3500000, gajiBagian: 300000, tunjanganKeluarga: 50000, tipKaca: 120000, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3970000, totalDeductions: 50000, netSalary: 3920000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-005' },
+        { employeeId: 'K-009', employeeName: 'Hiba Pratama', unit: 'KUK Bangunan', position: 'Frontliner', baseSalary: 3050000, gajiBagian: 200000, tunjanganKeluarga: 0, tipKaca: 75000, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3325000, totalDeductions: 50000, netSalary: 3275000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-006' },
+        { employeeId: 'K-007', employeeName: 'Alif Kurniawan (Alip)', unit: 'KUK Bangunan', position: 'Pengiriman', baseSalary: 3250000, gajiBagian: 200000, tunjanganKeluarga: 0, tipKaca: 90000, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3540000, totalDeductions: 50000, netSalary: 3490000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-007' },
+        { employeeId: 'K-004', employeeName: 'Kahfi Ashari', unit: 'KUK Bangunan', position: 'Admin', baseSalary: 3150000, gajiBagian: 200000, tunjanganKeluarga: 0, tipKaca: 80000, lateDeduction: 0, absentDeduction: 57000, kasirDeduction: 50000, grossSalary: 3430000, totalDeductions: 107000, netSalary: 3323000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-008' },
+        { employeeId: 'K-010', employeeName: 'Lailurrohman (Rohman)', unit: 'KUK Bangunan', position: 'Frontliner', baseSalary: 3050000, gajiBagian: 200000, tunjanganKeluarga: 0, tipKaca: 75000, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3325000, totalDeductions: 50000, netSalary: 3275000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-010' },
+        { employeeId: 'K-013', employeeName: 'Miftahul Huda', unit: 'KUK Palen', position: 'Frontliner', baseSalary: 3200000, gajiBagian: 200000, tunjanganKeluarga: 0, tipKaca: 0, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3400000, totalDeductions: 50000, netSalary: 3350000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-011' },
+        { employeeId: 'K-012', employeeName: 'Nukul Hidayat', unit: 'KUK Palen', position: 'Pengiriman', baseSalary: 3200000, gajiBagian: 200000, tunjanganKeluarga: 0, tipKaca: 0, lateDeduction: 0, absentDeduction: 0, kasirDeduction: 50000, grossSalary: 3400000, totalDeductions: 50000, netSalary: 3350000, status: 'Lunas / Ditransfer', slipNumber: 'SLIP-KUK-202606-012' }
+      ]
+    }
+  ];
+
   let dbInitialized = false;
 
   function getStored(key) {
@@ -137,6 +255,18 @@ const MasterDB = (() => {
     let cutiData = getStored('kuk_db_cuti_v1');
     if (!cutiData || cutiData.length === 0) {
       saveStored('kuk_db_cuti_v1', DEFAULT_CUTI_DATA);
+    }
+
+    let violData = getStored('kuk_violations_db');
+    if (!violData || violData.length === 0) {
+      saveStored('kuk_violations_db', DEFAULT_VIOLATIONS);
+      saveStored('kuk_db_pelanggaran_v1', DEFAULT_VIOLATIONS);
+    }
+
+    let payrollRuns = getStored('kuk_payroll_db');
+    if (!payrollRuns || payrollRuns.length === 0) {
+      saveStored('kuk_payroll_db', DEFAULT_PAYROLL_RUNS);
+      saveStored('kuk_db_gaji_v1', DEFAULT_GAJI_HISTORI);
     }
 
     dbInitialized = true;
@@ -218,6 +348,24 @@ const MasterDB = (() => {
         // 4. Sync Violations
         if (json.violations && Array.isArray(json.violations)) {
           localStorage.setItem('kuk_db_pelanggaran_v1', JSON.stringify(json.violations));
+          const vDb = json.violations.map((v, i) => ({
+            id: 'VIO-GAS-' + (i + 1),
+            source: 'MANUAL',
+            employeeId: v.idKaryawan,
+            employeeName: v.nama,
+            unit: (v.nama && ['Nukul', 'Miftah'].includes(v.nama)) ? 'KUK Palen' : 'KUK Bangunan',
+            date: (v.waktu || '').split('T')[0] || new Date().toISOString().split('T')[0],
+            ruleBroken: v.jenis,
+            calculatedValue: `${v.jenis} (${v.poin || 10} Poin)`,
+            points: v.poin || 10,
+            location: v.tempat || 'Operasional Toko',
+            staf: v.staf || 'Admin',
+            status: 'VERIFIED',
+            reviewer: v.staf || 'Admin',
+            generatedTime: v.waktu || new Date().toISOString(),
+            history: [{ state: 'VERIFIED', timestamp: v.waktu || new Date().toISOString(), note: `Dicatat oleh Staf ${v.staf || 'Admin'}`, actor: v.staf || 'Admin' }]
+          }));
+          saveStored('kuk_violations_db', vDb);
         }
 
         // 5. Sync Glass Tips
