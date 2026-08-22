@@ -678,6 +678,17 @@
       filterMatrix();
     }
 
+    function isStaffUserLoggedIn() {
+      try {
+        const raw = sessionStorage.getItem('kuk_user');
+        if (!raw) return false;
+        const user = JSON.parse(raw);
+        return !!(user && (user.username || user.role));
+      } catch(e) {
+        return false;
+      }
+    }
+
     function filterMatrix() {
       const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
       const year = parseInt(document.getElementById('selYear').value, 10);
@@ -688,6 +699,7 @@
 
       const selUnit = document.getElementById('selUnit').value;
       const q = (document.getElementById('searchEmp').value || '').toLowerCase().trim();
+      const isStaff = isStaffUserLoggedIn();
 
       const tbody = document.getElementById('matrixBody');
       let emps = currentEmployees;
@@ -724,17 +736,21 @@
         });
 
         const isBangunan = (emp.unit && emp.unit.includes('Bangunan'));
+        const editBadgeHTML = isStaff
+          ? `<span style="font-size:11px; padding:3px 7px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; color:#475569; font-weight:600;">✏️ Edit</span>`
+          : '';
+
         bHtml += `<tr>
-          <td class="emp-col" style="cursor:pointer;" onclick="openEditCutiModal('${emp.id}', '${safeName}')" title="Klik untuk melihat/mengedit cuti ${empName}">
+          <td class="emp-col" style="${isStaff ? 'cursor:pointer;' : ''}" ${isStaff ? `onclick="openEditCutiModal('${emp.id}', '${safeName}')"` : ''} title="${isStaff ? `Klik untuk mengedit cuti ${empName}` : `Rekapan cuti ${empName}`}">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
               <div>
                 <div style="font-weight:800; color:var(--kuk-text); font-size:13px;">${empName}</div>
                 <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}">${emp.department || emp.position || 'Staff'} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
               </div>
-              <span style="font-size:11px; padding:3px 7px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; color:#475569; font-weight:600;">✏️ Edit</span>
+              ${editBadgeHTML}
             </div>
           </td>
-          <td style="font-weight:800; color:${leaveDays.size > 0 ? '#b91c1c' : 'var(--kuk-text-muted)'}; background:#f8fafc; cursor:pointer;" onclick="openEditCutiModal('${emp.id}', '${safeName}')" title="Klik untuk mengedit cuti ${empName}">
+          <td style="font-weight:800; color:${leaveDays.size > 0 ? '#b91c1c' : 'var(--kuk-text-muted)'}; background:#f8fafc; ${isStaff ? 'cursor:pointer;' : ''}" ${isStaff ? `onclick="openEditCutiModal('${emp.id}', '${safeName}')"` : ''}>
             ${leaveDays.size}
           </td>`;
 
@@ -744,8 +760,9 @@
           const hasLeave = leaveDays.has(d);
 
           bHtml += `<td class="matrix-cell-day ${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''}"
-                        onclick="toggleCutiDate('${emp.id}', '${safeName}', ${year}, ${monthIdx}, ${d})"
-                        title="${hasLeave ? `Klik untuk membatalkan cuti ${empName}: ${d} ${MONTHS[monthIdx]}` : `Klik untuk menambahkan cuti ${empName}: ${d} ${MONTHS[monthIdx]}`}">
+                        ${isStaff ? `onclick="toggleCutiDate('${emp.id}', '${safeName}', ${year}, ${monthIdx}, ${d})"` : ''}
+                        style="${isStaff ? 'cursor:pointer;' : 'cursor:default;'}"
+                        title="${isStaff ? (hasLeave ? `Klik untuk membatalkan cuti ${empName}` : `Klik untuk menambahkan cuti ${empName}`) : `Cuti ${empName}: ${d} ${MONTHS[monthIdx]}`}">
             ${hasLeave ? '🏖️' : ''}
           </td>`;
         }
@@ -756,6 +773,10 @@
     }
 
     function toggleCutiDate(empId, empName, year, monthIdx, day) {
+      if (!isStaffUserLoggedIn()) {
+        showToast("Akses Ditolak: Karyawan tidak dapat mengedit cuti. Perubahan data cuti hanya dapat dilakukan oleh Staf / HRD yang sudah login.", "error");
+        return;
+      }
       const monthStr = String(monthIdx + 1).padStart(2, '0');
       const dayStr = String(day).padStart(2, '0');
       const dateKey = `${year}-${monthStr}-${dayStr}`;
@@ -808,6 +829,10 @@
 
     // --- MODAL POPUP EDIT CUTI KARYAWAN ---
     function openEditCutiModal(empId, empName) {
+      if (!isStaffUserLoggedIn()) {
+        showToast("Akses Ditolak: Karyawan tidak dapat mengedit data cuti. Perubahan hanya dapat dilakukan oleh Staf / HRD yang sudah login.", "error");
+        return;
+      }
       const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
       const year = parseInt(document.getElementById('selYear').value, 10);
 

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rekapan Tip Pemotongan Kaca (3%) — KUK La Tansa</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#540000">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/shell.css">
+  <style>
+    body.kuk-has-shell {
+      padding-top: 80px !important;
+      background-color: var(--kuk-bg, #f8fafc);
+      color: var(--kuk-text, #0f172a);
+      font-family: var(--kuk-font, 'Outfit', sans-serif);
+      min-height: 100vh;
+    }
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .page-header {
+      background: var(--kuk-surface, #ffffff);
+      border-radius: var(--kuk-radius-lg, 20px);
+      padding: 24px 28px;
+      border: 1px solid var(--kuk-border, #e2e8f0);
+      box-shadow: var(--kuk-shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .page-title-group h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--kuk-primary, #540000);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-title-group p {
+      font-size: 13.5px;
+      color: var(--kuk-text-muted, #64748b);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--kuk-surface, #ffffff);
+      border-radius: var(--kuk-radius, 16px);
+      padding: 20px;
+      border: 1px solid var(--kuk-border, #e2e8f0);
+      border-left: 4px solid var(--kuk-primary, #540000);
+      box-shadow: var(--kuk-shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    }
+    .stat-card.gold { border-left-color: #d97706; }
+    .stat-card.green { border-left-color: #059669; }
+    .stat-card.blue { border-left-color: #0284c7; }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--kuk-text-muted, #64748b);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--kuk-text, #0f172a);
+      margin-top: 6px;
+    }
+
+    .panel {
+      background: var(--kuk-surface, #ffffff);
+      border-radius: var(--kuk-radius-lg, 20px);
+      padding: 24px;
+      border: 1px solid var(--kuk-border, #e2e8f0);
+      box-shadow: var(--kuk-shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    }
+
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    select, input[type="month"] {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--kuk-border, #cbd5e1);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      background: #ffffff;
+      color: var(--kuk-text, #0f172a);
+      outline: none;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--kuk-primary, #540000); color: white; }
+    .btn-primary:hover { background: #730000; }
+    .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    th {
+      background: #f8fafc;
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+      color: #475569;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    .badge-tip {
+      background: #dcfce7;
+      color: #15803d;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .emp-profile-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .emp-avatar-box {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--kuk-primary, #540000);
+      color: white;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .emp-avatar-box img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+  </style>
+</head>
+<body class="kuk-has-shell">
+
+  <div class="page-container">
+    
+    <!-- Page Header -->
+    <header class="page-header">
+      <div class="page-title-group">
+        <h1>🪟 Rekapan Tip Pemotongan Kaca (3%)</h1>
+        <p>Ringkasan alokasi tip 3% dari hasil pemotongan kaca harian toko Bangunan</p>
+      </div>
+      <a href="tip.html" class="btn btn-secondary">
+        <span>+ Input Tip Baru</span>
+      </a>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="stats-grid">
+      <div class="stat-card green">
+        <div class="stat-label">Total Alokasi Tip (3%)</div>
+        <div class="stat-value" id="statTotalTip">Rp 0</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Total Omset Pemotongan</div>
+        <div class="stat-value" id="statTotalOmset">Rp 0</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Total Luas Pemotongan</div>
+        <div class="stat-value" id="statTotalLuas">0 m²</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Penerima Tip Active</div>
+        <div class="stat-value" id="statTotalPenerima">0 Orang</div>
+      </div>
+    </div>
+
+    <!-- Main Panel -->
+    <main class="panel">
+      
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label style="font-weight:700; font-size:13px; color:#475569;">Periode Bulan:</label>
+          <input type="month" id="filterMonth" onchange="loadRekapTip()">
+        </div>
+        <div>
+          <button class="btn btn-secondary" onclick="exportToExcel()">📊 Ekspor Excel</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">No</th>
+              <th>Karyawan Pemotong Kaca</th>
+              <th>Unit / Toko</th>
+              <th>Jabatan</th>
+              <th>Total Transaksi</th>
+              <th>Total Tip (3%)</th>
+            </tr>
+          </thead>
+          <tbody id="rekapTipTableBody">
+            <tr>
+              <td colspan="6" style="text-align:center; padding:40px; color:#94a3b8;">
+                Memuat data rekapan tip kaca...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="shared/master_db.js"></script>
+  <script src="shared/security.js"></script>
+  <script src="shared/shell.js" data-base="."></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set default month to current YYYY-MM
+      const now = new Date();
+      const monthStr = now.toISOString().slice(0, 7);
+      document.getElementById('filterMonth').value = monthStr;
+      
+      loadRekapTip();
+    });
+
+    function getTipData() {
+      try {
+        const raw = localStorage.getItem('kuk_db_tip_v1');
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function formatRp(val) {
+      return 'Rp ' + Number(val || 0).toLocaleString('id-ID');
+    }
+
+    function loadRekapTip() {
+      const selectedMonth = document.getElementById('filterMonth').value;
+      const allTips = getTipData();
+      const employees = (typeof MasterDB !== 'undefined' && MasterDB.getEmployees) ? MasterDB.getEmployees() : [];
+      
+      // Filter tips by selected month (e.g. 2026-08)
+      const monthTips = allTips.filter(t => {
+        const tDate = t.tanggal || t.tgl || '';
+        return tDate.startsWith(selectedMonth);
+      });
+
+      let grandTotalTip = 0;
+      let grandTotalOmset = 0;
+      let grandTotalLuas = 0;
+
+      // Group tips by employee
+      const empTipMap = {};
+
+      // Initialize all Bangunan employees
+      employees.forEach(emp => {
+        if (!emp.unit || emp.unit.toLowerCase().includes('bangunan')) {
+          empTipMap[emp.id] = {
+            id: emp.id,
+            nama: emp.fullName || emp.nama,
+            unit: emp.unit || 'KUK Bangunan',
+            position: emp.position || emp.department || 'Operasional',
+            foto: (typeof MasterDB !== 'undefined' && MasterDB.getAvatarURL) ? MasterDB.getAvatarURL(emp.id) : emp.foto,
+            totalTx: 0,
+            totalTip: 0,
+            totalOmset: 0,
+            totalLuas: 0
+          };
+        }
+      });
+
+      monthTips.forEach(t => {
+        const tName = (t.namaKaryawan || t.karyawan || '').toLowerCase();
+        const tTip = parseFloat(t.nominalTip || t.tip || 0) || 0;
+        const tOmset = parseFloat(t.totalOmset || t.omset || 0) || 0;
+        const tLuas = parseFloat(t.luasM2 || t.luas || 0) || 0;
+
+        grandTotalTip += tTip;
+        grandTotalOmset += tOmset;
+        grandTotalLuas += tLuas;
+
+        // Match employee
+        const targetId = Object.keys(empTipMap).find(id => {
+          const emp = empTipMap[id];
+          return emp.nama.toLowerCase() === tName || emp.id.toLowerCase() === tName || tName.includes(emp.nama.toLowerCase());
+        });
+
+        if (targetId) {
+          empTipMap[targetId].totalTx++;
+          empTipMap[targetId].totalTip += tTip;
+          empTipMap[targetId].totalOmset += tOmset;
+          empTipMap[targetId].totalLuas += tLuas;
+        }
+      });
+
+      // Update stat cards
+      document.getElementById('statTotalTip').textContent = formatRp(grandTotalTip);
+      document.getElementById('statTotalOmset').textContent = formatRp(grandTotalOmset);
+      document.getElementById('statTotalLuas').textContent = grandTotalLuas.toFixed(1) + ' m²';
+
+      const activeTipReceivers = Object.values(empTipMap).filter(e => e.totalTip > 0).length;
+      document.getElementById('statTotalPenerima').textContent = activeTipReceivers + ' Orang';
+
+      // Render Table
+      const tbody = document.getElementById('rekapTipTableBody');
+      const empList = Object.values(empTipMap);
+
+      if (empList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Tidak ada data karyawan KUK Bangunan.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = empList.map((emp, idx) => {
+        const avatarContent = emp.foto
+          ? `<img src="${emp.foto}" alt="${emp.nama}">`
+          : emp.nama[0].toUpperCase();
+
+        const tipBadge = emp.totalTip > 0
+          ? `<span class="badge-tip">+ ${formatRp(emp.totalTip)}</span>`
+          : '<span style="color:#94a3b8;">Rp 0</span>';
+
+        return `
+          <tr>
+            <td style="font-weight:700; color:#64748b;">${idx + 1}</td>
+            <td>
+              <div class="emp-profile-cell">
+                <div class="emp-avatar-box">${avatarContent}</div>
+                <div>
+                  <div style="font-weight:800; color:#0f172a;">${emp.nama}</div>
+                  <div style="font-size:11.5px; color:#64748b;">ID: ${emp.id}</div>
+                </div>
+              </div>
+            </td>
+            <td><span style="font-size:12px; font-weight:700; color:#b45309; background:#fef3c7; padding:4px 8px; border-radius:6px;">🏢 ${emp.unit}</span></td>
+            <td style="font-weight:600; color:#475569;">${emp.position}</td>
+            <td style="font-weight:700; color:#0284c7;">${emp.totalTx} Transaksi</td>
+            <td>${tipBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function exportToExcel() {
+      alert("Memproses ekspor rekapan tip kaca ke format Excel...");
+    }
+  </script>
+</body>
+</html>

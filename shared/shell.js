@@ -103,6 +103,7 @@
     { id: 'absen',            label: 'Absen Briefing',      section: 'Operasional',href: 'absen.html', perm: 'absen',            icon: ICON.absen },
     { id: 'fingerprint',      label: 'Import Fingerprint',  section: 'Operasional',href: 'fingerprint_import.html', perm: 'fingerprint', icon: ICON.fingerprint },
     { id: 'rekap_cuti',       label: 'Rekapan Cuti',        section: 'Operasional',href: 'rekap_cuti.html', perm: 'cuti',        icon: ICON.cuti },
+    { id: 'rekap_tip',        label: 'Rekapan Tip Kaca',    section: 'Operasional',href: 'rekap_tip.html',  perm: 'tip',         icon: ICON.tip },
     { id: 'pelanggaran',      label: 'Pelanggaran',         section: 'Operasional',href: 'pelanggaran.html', perm: 'pelanggaran', icon: ICON.pelanggaran },
     // 'tip', 'peminjaman' & 'karyawan' diakses langsung oleh user ybs via card karyawan / portal landing.
     { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
@@ -115,7 +116,8 @@
     dashboard:        'Dashboard',
     absen:            'Absen Briefing Pagi',
     rekap_cuti:       'Rekapan Cuti Karyawan',
-    cuti:             'Pengajuan Cuti Mandiri',
+    rekap_tip:        'Rekapan Tip Pemotongan Kaca (3%)',
+    cuti:             'Cuti',
     pelanggaran:      'Catat Pelanggaran',
     tip:              'Tip Pemotongan Kaca',
     peminjaman:       'Peminjaman Kendaraan',

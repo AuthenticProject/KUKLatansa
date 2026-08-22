@@ -272,11 +272,67 @@ const PayrollEngine = (() => {
     return run;
   }
 
+  function updateSlipSalaryComponents(runId, employeeId, updatedFields) {
+    checkPayrollAccess();
+
+    const existing = getPayrolls();
+    const run = existing.find(r => r.id === runId);
+    if (!run) throw new Error("Payroll Run tidak ditemukan.");
+
+    // ENFORCE IMMUTABILITY: Past locked payrolls CANNOT be edited!
+    if (run.status === 'LOCKED') {
+      if (typeof Security !== 'undefined') {
+        Security.audit('LOCKED_PAYROLL_EDIT_BLOCKED', { runId, employeeId }, 'CRITICAL');
+      }
+      throw new Error("Akses Ditolak: Payroll bulan sebelumnya yang sudah LOCKED (Terkunci Permanen) tidak dapat diubah!");
+    }
+
+    const slip = run.slips.find(s => s.employeeId === employeeId);
+    if (!slip) throw new Error("Slip karyawan tidak ditemukan.");
+
+    if (updatedFields.baseSalary !== undefined) slip.baseSalary = Number(updatedFields.baseSalary) || 0;
+    if (updatedFields.gajiBagian !== undefined) slip.gajiBagian = Number(updatedFields.gajiBagian) || 0;
+    if (updatedFields.hadiahPondok !== undefined) slip.hadiahPondok = Number(updatedFields.hadiahPondok) || 0;
+    if (updatedFields.tipKaca !== undefined) slip.tipKaca = Number(updatedFields.tipKaca) || 0;
+    if (updatedFields.tunjanganKeluarga !== undefined) slip.tunjanganKeluarga = Number(updatedFields.tunjanganKeluarga) || 0;
+    if (updatedFields.insentifCuti !== undefined) slip.insentifCuti = Number(updatedFields.insentifCuti) || 0;
+    if (updatedFields.bonusIncentive !== undefined) slip.bonusIncentive = Number(updatedFields.bonusIncentive) || 0;
+    if (updatedFields.otherDeductions !== undefined) slip.otherDeductions = Number(updatedFields.otherDeductions) || 0;
+
+    const grossSalary = slip.baseSalary + slip.gajiBagian + (slip.hadiahPondok || 0) + (slip.tipKaca || 0) + (slip.tunjanganKeluarga || 0) + (slip.insentifCuti || 0) + (slip.bonusIncentive || 0);
+    const lateDed = slip.breakdown ? (slip.breakdown.lateDeduction || 0) : 0;
+    const absDed = slip.breakdown ? (slip.breakdown.absentDeduction || 0) : 0;
+    const totalDeductions = lateDed + absDed + (slip.otherDeductions || 0);
+
+    slip.grossSalary = grossSalary;
+    if (!slip.breakdown) slip.breakdown = { lateDeduction: lateDed, absentDeduction: absDed, incompleteDeduction: 0, totalDeductions: totalDeductions };
+    else slip.breakdown.totalDeductions = totalDeductions;
+    
+    slip.takeHomePay = grossSalary - totalDeductions;
+
+    let totalB = 0, totalP = 0;
+    run.slips.forEach(s => {
+      if (s.unit && s.unit.toLowerCase().includes('palen')) totalP += s.takeHomePay;
+      else totalB += s.takeHomePay;
+    });
+    run.totals = { all: totalB + totalP, bangunan: totalB, palen: totalP };
+    run.lastModified = new Date().toISOString();
+
+    savePayrolls(existing);
+
+    if (typeof Security !== 'undefined') {
+      Security.audit('PAYROLL_SLIP_EDITED', { runId, employeeId, updatedFields }, 'INFO');
+    }
+
+    return run;
+  }
+
   return {
     RULES,
     getPayrolls,
     generatePayroll,
-    transitionState
+    transitionState,
+    updateSlipSalaryComponents
   };
 })();
 
