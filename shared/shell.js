@@ -299,8 +299,6 @@
     });
 
     return [
-      '<div class="kuk-sidebar-trigger" id="kukSidebarTrigger"></div>',
-      '<div class="kuk-sidebar-handle" id="kukSidebarHandle" title="Arahkan kursor ke sisi kiri untuk membuka menu"></div>',
       '<aside class="kuk-sidebar" id="kukSidebar">',
       '  <div class="kuk-sidebar-brand">',
       '    <div class="kuk-sidebar-logo-mark"><span>KUK</span></div>',
@@ -308,6 +306,7 @@
       '      <span class="kuk-brand-name">KUK La Tansa</span>',
       '      <span class="kuk-brand-sub">Internal System</span>',
       '    </div>',
+      '    <button class="kuk-sidebar-close-btn" onclick="kukToggleSidebar()" title="Tutup Navigasi">&times;</button>',
       '  </div>',
       '  <nav class="kuk-sidebar-nav" id="kukSidebarNav">' + navHTML + '</nav>',
       '  <div class="kuk-sidebar-footer">',
@@ -338,7 +337,17 @@
     ].join('');
   }
 
-  /* ── Build topbar HTML (with Auto-Hide Trigger & Handle) ─────────── */
+  /* ── Build floating navbar toggle button (Click to Push/Open) ─────── */
+  function buildFloatingToggle() {
+    return [
+      '<button class="kuk-floating-toggle" id="kukFloatingToggle" onclick="kukToggleSidebar()" title="Buka / Tutup Menu Navigasi" aria-label="Toggle Menu Navigasi">',
+      '  ' + ICON.menu,
+      '  <span class="kuk-toggle-text">Menu</span>',
+      '</button>'
+    ].join('');
+  }
+
+  /* ── Build topbar HTML (Push Layout alongside Sidebar) ─────────────── */
   function buildTopbar(username) {
     var unit = getUnit();
     var activePage = getActivePage();
@@ -346,8 +355,6 @@
     var initial = username ? username[0].toUpperCase() : 'U';
 
     return [
-      '<div class="kuk-topbar-trigger" id="kukTopbarTrigger"></div>',
-      '<div class="kuk-topbar-handle" id="kukTopbarHandle" title="Arahkan kursor ke sini untuk membuka menu atas"></div>',
       '<header class="kuk-topbar" id="kukTopbar">',
       '  <div class="kuk-topbar-left">',
       '    <button class="kuk-hamburger" id="kukHamburger" onclick="kukToggleSidebar()" aria-label="Toggle Sidebar">' + ICON.menu + '</button>',
@@ -536,6 +543,7 @@
     var container = document.createElement('div');
     container.id = 'kukShellContainer';
     container.innerHTML =
+      buildFloatingToggle() +
       buildSidebar(username, userRecord, navItems) +
       buildTopbar(username) +
       buildPalette() +
@@ -543,104 +551,16 @@
 
     document.body.insertAdjacentElement('afterbegin', container);
 
-    // Initialize auto-hiding topbar & sidebar with cursor proximity detection
-    initTopbarAutoHide();
-    initSidebarAutoHide();
+    // Restore user's preferred sidebar state if previously opened
+    var isExpanded = localStorage.getItem('kuk_sidebar_expanded') === 'true';
+    if (isExpanded) {
+      document.body.classList.add('kuk-sidebar-expanded');
+      var toggleText = document.querySelector('#kukFloatingToggle .kuk-toggle-text');
+      if (toggleText) toggleText.textContent = 'Tutup';
+    }
 
     // Load notifications after a short delay (to allow DB scripts to initialise)
     setTimeout(refreshNotifications, 800);
-  }
-
-  function initSidebarAutoHide() {
-    var sidebar = document.getElementById('kukSidebar');
-    if (!sidebar) return;
-
-    var hideTimer = null;
-
-    function showSidebar() {
-      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-      sidebar.classList.add('kuk-sidebar-visible');
-    }
-
-    function scheduleHideSidebar() {
-      if (hideTimer) clearTimeout(hideTimer);
-      hideTimer = setTimeout(function() {
-        if (!sidebar.matches(':hover') && !sidebar.contains(document.activeElement) && !sidebar.classList.contains('kuk-sidebar-open')) {
-          sidebar.classList.remove('kuk-sidebar-visible');
-        }
-      }, 350);
-    }
-
-    // Cursor proximity to left edge
-    document.addEventListener('mousemove', function(e) {
-      if (e.clientX <= 25) {
-        showSidebar();
-      } else if (e.clientX > 260 && !sidebar.classList.contains('kuk-sidebar-open')) {
-        scheduleHideSidebar();
-      }
-    });
-
-    // Touch support near left edge
-    document.addEventListener('touchstart', function(e) {
-      if (e.touches && e.touches[0] && e.touches[0].clientX <= 30) {
-        showSidebar();
-      }
-    }, { passive: true });
-
-    var trigger = document.getElementById('kukSidebarTrigger');
-    if (trigger) {
-      trigger.addEventListener('mouseenter', showSidebar);
-    }
-    sidebar.addEventListener('mouseenter', showSidebar);
-    sidebar.addEventListener('mouseleave', scheduleHideSidebar);
-  }
-
-  function initTopbarAutoHide() {
-    var topbar = document.getElementById('kukTopbar');
-    if (!topbar) return;
-
-    var hideTimer = null;
-
-    function showTopbar() {
-      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-      topbar.classList.add('kuk-topbar-visible');
-    }
-
-    function scheduleHideTopbar() {
-      if (hideTimer) clearTimeout(hideTimer);
-      hideTimer = setTimeout(function() {
-        var notifPanel = document.getElementById('kukNotifPanel');
-        var notifOpen = notifPanel && notifPanel.style.display !== 'none';
-        var userPanel = document.getElementById('kukUserMenuPanel');
-        var userOpen = userPanel && userPanel.style.display !== 'none';
-        if (!notifOpen && !userOpen && !topbar.matches(':hover') && !topbar.contains(document.activeElement)) {
-          topbar.classList.remove('kuk-topbar-visible');
-        }
-      }, 350);
-    }
-
-    // Window-level mouse proximity listener
-    document.addEventListener('mousemove', function(e) {
-      if (e.clientY <= 30) {
-        showTopbar();
-      } else if (e.clientY > 80) {
-        scheduleHideTopbar();
-      }
-    });
-
-    // Mobile/touch support: touching near top edge reveals topbar
-    document.addEventListener('touchstart', function(e) {
-      if (e.touches && e.touches[0] && e.touches[0].clientY <= 35) {
-        showTopbar();
-      }
-    }, { passive: true });
-
-    var trigger = document.getElementById('kukTopbarTrigger');
-    if (trigger) {
-      trigger.addEventListener('mouseenter', showTopbar);
-    }
-    topbar.addEventListener('mouseenter', showTopbar);
-    topbar.addEventListener('mouseleave', scheduleHideTopbar);
   }
 
   function refreshNotifications() {
@@ -679,14 +599,29 @@
   };
 
   window.kukToggleSidebar = function() {
+    var isExpanded = document.body.classList.toggle('kuk-sidebar-expanded');
+    localStorage.setItem('kuk_sidebar_expanded', isExpanded ? 'true' : 'false');
+    
+    var toggleBtn = document.getElementById('kukFloatingToggle');
+    if (toggleBtn) {
+      var toggleText = toggleBtn.querySelector('.kuk-toggle-text');
+      if (toggleText) toggleText.textContent = isExpanded ? 'Tutup' : 'Menu';
+    }
+
     var sb  = document.getElementById('kukSidebar');
     var bd  = document.getElementById('kukSidebarBackdrop');
-    if (!sb) return;
-    var open = sb.classList.toggle('kuk-sidebar-open');
-    if (bd) bd.classList.toggle('kuk-sidebar-backdrop-show', open);
+    if (sb) sb.classList.toggle('kuk-sidebar-open', isExpanded);
+    if (bd) bd.classList.toggle('kuk-sidebar-backdrop-show', isExpanded);
   };
 
   window.kukCloseMobileSidebar = function() {
+    document.body.classList.remove('kuk-sidebar-expanded');
+    localStorage.setItem('kuk_sidebar_expanded', 'false');
+    var toggleBtn = document.getElementById('kukFloatingToggle');
+    if (toggleBtn) {
+      var toggleText = toggleBtn.querySelector('.kuk-toggle-text');
+      if (toggleText) toggleText.textContent = 'Menu';
+    }
     var sb = document.getElementById('kukSidebar');
     var bd = document.getElementById('kukSidebarBackdrop');
     if (sb) sb.classList.remove('kuk-sidebar-open');

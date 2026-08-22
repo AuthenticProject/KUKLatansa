@@ -11,11 +11,17 @@
 body.kuk-has-shell {
   font-family: var(--kuk-font) !important;
   background: var(--kuk-bg) !important;
-  /* Auto-hide navigation: content takes full fullscreen space cleanly */
+  /* Push layout in same layer: content dynamically adjusts when sidebar is toggled */
   padding-top: 0 !important;
   padding-left: 0 !important;
   box-sizing: border-box !important;
   min-height: 100vh;
+  transition: padding-left 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* When sidebar is opened via CLICK: content pushes smoothly to the right */
+body.kuk-has-shell.kuk-sidebar-expanded {
+  padding-left: var(--kuk-sidebar-w) !important;
 }
 
 /* ── Hide existing navigation elements when shell is active ─────────── */
@@ -31,33 +37,58 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 
 
 /* ═══════════════════════════════════════════════════════════════════════
-   2. SIDEBAR (Auto-Hide with Smooth Hover Slide-In)
+   2. FLOATING TOGGLE BUTTON (Click-to-Toggle Navbar)
    ═══════════════════════════════════════════════════════════════════════ */
 
-.kuk-sidebar-trigger {
+.kuk-floating-toggle {
   position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 22px;
-  z-index: 198;
-  pointer-events: auto;
+  top: 14px;
+  left: 16px;
+  z-index: 220;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--kuk-primary, #540000);
+  color: #ffffff;
+  border: 1.5px solid var(--kuk-gold, #FFCC00);
+  border-radius: var(--kuk-radius-md, 12px);
+  font-family: var(--kuk-font, 'Outfit', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(84, 0, 0, 0.35);
+  transition: left 0.32s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, transform 0.2s, box-shadow 0.2s;
+  user-select: none;
 }
 
-.kuk-sidebar-handle {
-  position: fixed;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 80px;
-  background: linear-gradient(180deg, transparent, #FFCC00 40%, #540000 70%, transparent);
-  border-radius: 0 6px 6px 0;
-  z-index: 199;
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  box-shadow: 2px 0 10px rgba(255, 204, 0, 0.4);
+.kuk-floating-toggle:hover {
+  background: #6e0000;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(84, 0, 0, 0.45);
 }
+
+.kuk-floating-toggle svg {
+  stroke: var(--kuk-gold, #FFCC00);
+  transition: transform 0.3s ease;
+}
+
+/* Shift toggle button alongside sidebar when expanded */
+body.kuk-sidebar-expanded .kuk-floating-toggle {
+  left: calc(var(--kuk-sidebar-w) + 16px);
+  background: #ffffff;
+  color: var(--kuk-text, #0f172a);
+  border-color: var(--kuk-border, #e2e8f0);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+body.kuk-sidebar-expanded .kuk-floating-toggle svg {
+  stroke: var(--kuk-primary, #540000);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. SIDEBAR (Push Layout in Same Layer)
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .kuk-sidebar {
   position: fixed;
@@ -69,25 +100,41 @@ body.kuk-has-shell .top-nav                          { display: none !important;
   z-index: 200;
   overflow: hidden;
   transform: translateX(-100%);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
-  border-right: 1px solid rgba(0,0,0,0.25);
-  box-shadow: 8px 0 35px rgba(0, 0, 0, 0.4);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  border-right: 1px solid rgba(0,0,0,0.15);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
 }
 
-.kuk-sidebar:hover,
-.kuk-sidebar.kuk-sidebar-visible,
-.kuk-sidebar.kuk-sidebar-open,
-.kuk-sidebar-trigger:hover ~ .kuk-sidebar {
+/* Open state exclusively on CLICK */
+body.kuk-sidebar-expanded .kuk-sidebar,
+.kuk-sidebar.kuk-sidebar-open {
   transform: translateX(0);
-  box-shadow: 14px 0 45px rgba(0, 0, 0, 0.5);
 }
 
-.kuk-sidebar:hover ~ .kuk-sidebar-handle,
-.kuk-sidebar.kuk-sidebar-visible ~ .kuk-sidebar-handle,
-.kuk-sidebar.kuk-sidebar-open ~ .kuk-sidebar-handle,
-.kuk-sidebar-trigger:hover ~ .kuk-sidebar-handle {
-  opacity: 0;
-  transform: translateY(-50%) translateX(-100%);
+.kuk-sidebar-close-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.2s;
+}
+
+.kuk-sidebar-close-btn:hover {
+  background: rgba(239,68,68,0.25);
+  border-color: #ef4444;
+  color: #ffaaaa;
+}
+
+body.kuk-sidebar-expanded .kuk-sidebar-close-btn {
+  display: flex;
 }
 
 /* ── Brand header ──────────────────────────────────────────────────── */
@@ -336,33 +383,8 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 
 
 /* ═══════════════════════════════════════════════════════════════════════
-   3. TOPBAR (Auto-Hide with Smooth Hover Peek)
+   4. TOPBAR (Push Layout alongside Sidebar)
    ═══════════════════════════════════════════════════════════════════════ */
-
-.kuk-topbar-trigger {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 24px;
-  z-index: 92;
-  pointer-events: auto;
-}
-
-.kuk-topbar-handle {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 64px;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, rgba(84, 0, 0, 0.4), var(--kuk-gold), rgba(84, 0, 0, 0.4), transparent);
-  border-radius: 0 0 6px 6px;
-  z-index: 93;
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  box-shadow: 0 2px 8px rgba(84, 0, 0, 0.18);
-}
 
 .kuk-topbar {
   position: fixed;
@@ -377,25 +399,15 @@ body.kuk-has-shell .top-nav                          { display: none !important;
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
+  padding-left: 100px; /* Space for floating toggle */
   z-index: 95;
-  transform: translateY(-100%);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  transition: left 0.32s cubic-bezier(0.16, 1, 0.3, 1), padding-left 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.04);
 }
 
-.kuk-topbar:hover,
-.kuk-topbar:focus-within,
-.kuk-topbar.kuk-topbar-visible,
-.kuk-topbar-trigger:hover ~ .kuk-topbar {
-  transform: translateY(0);
-  box-shadow: 0 12px 36px rgba(84, 0, 0, 0.12);
-}
-
-.kuk-topbar:hover ~ .kuk-topbar-handle,
-.kuk-topbar.kuk-topbar-visible ~ .kuk-topbar-handle,
-.kuk-topbar-trigger:hover ~ .kuk-topbar-handle {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-100%);
+body.kuk-sidebar-expanded .kuk-topbar {
+  left: var(--kuk-sidebar-w);
+  padding-left: 28px;
 }
 
 .kuk-topbar-left {

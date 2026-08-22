@@ -1039,10 +1039,10 @@
             </td>
             <td>
               <div class="emp-profile">
-                <div class="emp-avatar">${initial}</div>
+                <div class="emp-avatar">${(emp.fullName || emp.nama || 'K')[0].toUpperCase()}</div>
                 <div>
-                  <div class="emp-name-main">${emp.nama || emp.fullName}</div>
-                  <div class="emp-name-sub">${emp.fullName && emp.fullName !== emp.nama ? emp.fullName : (emp.contactNumber || '-')}</div>
+                  <div class="emp-name-main">${emp.fullName || emp.nama}</div>
+                  <div class="emp-name-sub">${emp.nama && emp.nama !== emp.fullName ? 'Panggilan: ' + emp.nama : (emp.contactNumber || '-')}</div>
                 </div>
               </div>
             </td>

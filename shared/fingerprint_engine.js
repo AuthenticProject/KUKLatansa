@@ -32,52 +32,97 @@ const FingerprintEngine = (() => {
     return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
+  // Kamus Alias Resmi KUK (Excel Mesin Fingerprint vs Database HRD)
+  const EMPLOYEE_ALIASES = {
+    // 1. Nur Hadi (ID: K-005, Nama: Nur, PIN: 5)
+    'masnur': 'Nur',
+    'nur': 'Nur',
+    'nurhadi': 'Nur',
+    'nurhad': 'Nur',
+    'paknur': 'Nur',
+
+    // 2. Syirojul Kahfi (ID: K-004, Nama: Kahfi, PIN: 4)
+    'kahfi': 'Kahfi',
+    'syirojulkahfi': 'Kahfi',
+    'syirojul': 'Kahfi',
+    'kahf': 'Kahfi',
+
+    // 3. Alip Rejeki (ID: K-007, Nama: Alip, PIN: 7)
+    'alif': 'Alip',
+    'alip': 'Alip',
+    'aliprejeki': 'Alip',
+    'alifrejeki': 'Alip',
+
+    // 4. Nukul (ID: K-012, Nama: Nukul, PIN: 12)
+    'nukul': 'Nukul',
+
+    // 5. Irfan Ulinnuha (ID: K-003, Nama: Ulin, PIN: 3)
+    'ulin': 'Ulin',
+    'irfanulinnuha': 'Ulin',
+    'irfanulin': 'Ulin',
+    'ulinnuha': 'Ulin',
+
+    // 6. Miftah (ID: K-013, Nama: Miftah, PIN: 13)
+    'miftah': 'Miftah',
+    'miftahul': 'Miftah',
+
+    // 7. Lailurrohman (ID: K-010, Nama: Rohman, PIN: 10)
+    'rohman': 'Rohman',
+    'lailurrohman': 'Rohman',
+    'lailur': 'Rohman',
+    'lailurrohman': 'Rohman',
+
+    // 8. Muhammad Irvan (ID: K-011, Nama: Irvan, PIN: 11)
+    'irvan': 'Irvan',
+    'irvan~': 'Irvan',
+    'muhammadirvan': 'Irvan',
+    'mirvan': 'Irvan',
+
+    // 9. Wiba Sepdioko (ID: K-002, Nama: Wiba, PIN: 2)
+    'wiba': 'Wiba',
+    'wibasepdioko': 'Wiba',
+    'sepdioko': 'Wiba',
+
+    // 10. Arriyan Muhammad (ID: K-008, Nama: Riyan, PIN: 8)
+    'arian': 'Riyan',
+    'ariyan': 'Riyan',
+    'riyan': 'Riyan',
+    'arriyan': 'Riyan',
+    'arriyanmuhammad': 'Riyan',
+    'mriyan': 'Riyan',
+    'marriyan': 'Riyan',
+
+    // 11. Muhammad Hiba (ID: K-009, Nama: Hiba, PIN: 9)
+    'hiba': 'Hiba',
+    'muhammadhiba': 'Hiba',
+    'mhiba': 'Hiba'
+  };
+
   /**
-   * Smart Name Matcher: Mencocokkan nama mesin (e.g. 'mas agus', 'mas nur', 'IRVAN~', 'Arian', 'Alif') dengan master DB
+   * Smart Name Matcher: Mencocokkan nama mesin fingerprint dengan master database
    */
   function matchEmployeeSmart(pin, rawName, employees) {
     const pinStr = (pin || '').toString().trim();
     const cRaw = cleanName(rawName);
 
-    // 1. Cocokkan berdasarkan Fingerprint PIN jika sudah terdaftar
+    // 1. Cocokkan berdasarkan Fingerprint PIN jika ada
     let matched = employees.find(e => e.fingerprintId && e.fingerprintId.toString() === pinStr);
     if (matched) return matched;
 
-    // 2. Kamus Alias & Panggilan KUK
-    const ALIAS_MAP = {
-      'masagus': 'Agus',
-      'agus': 'Agus',
-      'masnur': 'Ulin',
-      'ulin': 'Ulin',
-      'nurhadi': 'Ulin',
-      'kahfi': 'Kahfi',
-      'alif': 'Alip',
-      'alip': 'Alip',
-      'arian': 'Riyan',
-      'ariyan': 'Riyan',
-      'riyan': 'Riyan',
-      'hiba': 'Hiba',
-      'rohman': 'Rohman',
-      'lailur': 'Rohman',
-      'irvan': 'Irfan',
-      'irfan': 'Irfan',
-      'wiba': 'Wiba',
-      'nukul': 'Nukul',
-      'miftah': 'Miftah'
-    };
-
-    for (const [alias, targetShortName] of Object.entries(ALIAS_MAP)) {
-      if (cRaw === alias || cRaw.includes(alias)) {
-        matched = employees.find(e => e.nama.toLowerCase() === targetShortName.toLowerCase());
+    // 2. Kamus Alias Resmi KUK
+    for (const [alias, targetShortName] of Object.entries(EMPLOYEE_ALIASES)) {
+      const cAlias = cleanName(alias);
+      if (cRaw === cAlias || cRaw === alias || cRaw.includes(cAlias) || cAlias.includes(cRaw)) {
+        matched = employees.find(e => e.nama.toLowerCase() === targetShortName.toLowerCase() || (e.fullName && e.fullName.toLowerCase().includes(targetShortName.toLowerCase())));
         if (matched) return matched;
       }
     }
 
-    // 3. Pencocokan langsung substring
+    // 3. Pencocokan langsung substring nama singkat & nama lengkap
     matched = employees.find(e => {
       const cNama = cleanName(e.nama);
       const cFull = cleanName(e.fullName);
-      return cRaw === cNama || cNama === cRaw || (cNama.length >= 4 && cRaw.includes(cNama));
+      return cRaw === cNama || cNama === cRaw || (cNama.length >= 3 && cRaw.includes(cNama)) || (cFull.length >= 4 && (cRaw.includes(cFull) || cFull.includes(cRaw)));
     });
     if (matched) return matched;
 
@@ -132,7 +177,7 @@ const FingerprintEngine = (() => {
 
   function validateFileMetadata(file) {
     if (!file) throw new Error("File tidak ditemukan.");
-    if (file.size > MAX_FILE_SIZE_BYTES) {
+    if (file.size >= MAX_FILE_SIZE_BYTES) {
       throw new Error(`Ukuran file melebihi batas maksimal (Maks: 10MB). Ukuran file Anda: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
     }
     const fileName = (file.name || '').toLowerCase();
@@ -560,6 +605,8 @@ const FingerprintEngine = (() => {
 
   return {
     RULES,
+    EMPLOYEE_ALIASES,
+    matchEmployeeSmart,
     getRawData,
     validateFileMetadata,
     parseExcelFile,
