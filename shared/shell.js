@@ -102,7 +102,7 @@
     { id: 'violation_review', label: 'Review Pelanggaran',  section: 'Operasional',href: 'violation_review.html', perm: 'violation_review', icon: ICON.violation_review },
     { id: 'absen',            label: 'Absen Briefing',      section: 'Operasional',href: 'absen.html', perm: 'absen',            icon: ICON.absen },
     { id: 'fingerprint',      label: 'Import Fingerprint',  section: 'Operasional',href: 'fingerprint_import.html', perm: 'fingerprint', icon: ICON.fingerprint },
-    { id: 'cuti',             label: 'Rekapan Cuti',        section: 'Operasional',href: 'rekap_cuti.html', perm: 'cuti',        icon: ICON.cuti },
+    { id: 'rekap_cuti',       label: 'Rekapan Cuti',        section: 'Operasional',href: 'rekap_cuti.html', perm: 'cuti',        icon: ICON.cuti },
     { id: 'pelanggaran',      label: 'Pelanggaran',         section: 'Operasional',href: 'pelanggaran.html', perm: 'pelanggaran', icon: ICON.pelanggaran },
     // 'tip', 'peminjaman' & 'karyawan' diakses langsung oleh user ybs via card karyawan / portal landing.
     { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
@@ -114,7 +114,8 @@
   const PAGE_TITLES = {
     dashboard:        'Dashboard',
     absen:            'Absen Briefing Pagi',
-    cuti:             'Rekapan Cuti Karyawan',
+    rekap_cuti:       'Rekapan Cuti Karyawan',
+    cuti:             'Pengajuan Cuti Mandiri',
     pelanggaran:      'Catat Pelanggaran',
     tip:              'Tip Pemotongan Kaca',
     peminjaman:       'Peminjaman Kendaraan',
@@ -206,6 +207,7 @@
     if (path.includes('fingerprint'))       return 'fingerprint';
     if (path.includes('payroll'))           return 'payroll';
     if (path.includes('absen'))            return 'absen';
+    if (path.includes('rekap_cuti'))       return 'rekap_cuti';
     if (path.includes('cuti'))             return 'cuti';
     if (path.includes('pelanggaran'))      return 'pelanggaran';
     if (path.includes('tip'))              return 'tip';
