@@ -948,7 +948,7 @@
       document.getElementById('staffName').textContent = user.namaLengkap || user.username;
       const avatarEl = document.getElementById('staffAvatar');
       const dbUser = (typeof MasterDB !== 'undefined' && MasterDB.getUser) ? MasterDB.getUser(user.username) : user;
-      const foto = (dbUser && dbUser.foto) || user.foto;
+      const foto = (dbUser && dbUser.foto) || user.foto || localStorage.getItem('kuk_user_photo_' + (user.username||'').toLowerCase());
       if (foto) {
         avatarEl.innerHTML = `<img src="${foto}" alt="${user.username}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
       } else {

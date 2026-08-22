@@ -570,8 +570,37 @@
     el.innerHTML = html;
   }
 
+  function ensureFavicons() {
+    try {
+      if (!document.head) return;
+      var existingIcons = document.querySelectorAll('link[rel*="icon"]');
+      existingIcons.forEach(function(el) {
+        var href = el.getAttribute('href');
+        if (href && !href.startsWith('data:') && !href.startsWith('http')) {
+          el.setAttribute('href', _base(href.replace(/^(\.\/|\.\.\/)+/, '')));
+        }
+      });
+      if (!document.querySelector('link[rel*="icon"]')) {
+        var link192 = document.createElement('link');
+        link192.rel = 'icon';
+        link192.type = 'image/png';
+        link192.sizes = '192x192';
+        link192.href = _base('icon-192.png');
+        document.head.appendChild(link192);
+
+        var link32 = document.createElement('link');
+        link32.rel = 'icon';
+        link32.type = 'image/png';
+        link32.sizes = '32x32';
+        link32.href = _base('favicon-32x32.png');
+        document.head.appendChild(link32);
+      }
+    } catch(e) {}
+  }
+
   /* ── Shell injection ──────────────────────────────────────────────── */
   function injectShell() {
+    ensureFavicons();
     var username   = getUsername();
     var userRecord = getUserRecord(username);
     var navItems   = getVisibleNav();
