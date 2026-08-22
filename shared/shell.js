@@ -102,7 +102,7 @@
     { id: 'violation_review', label: 'Review Pelanggaran',  section: 'Operasional',href: 'violation_review.html', perm: 'violation_review', icon: ICON.violation_review },
     { id: 'absen',            label: 'Absen Briefing',      section: 'Operasional',href: 'absen.html', perm: 'absen',            icon: ICON.absen },
     { id: 'fingerprint',      label: 'Import Fingerprint',  section: 'Operasional',href: 'fingerprint_import.html', perm: 'fingerprint', icon: ICON.fingerprint },
-    { id: 'cuti',             label: 'Rekapan Cuti',        section: 'Operasional',href: 'dashboard/#sectionRekapCuti', perm: 'cuti', icon: ICON.cuti },
+    { id: 'cuti',             label: 'Rekapan Cuti',        section: 'Operasional',href: 'rekap_cuti.html', perm: 'cuti',        icon: ICON.cuti },
     { id: 'pelanggaran',      label: 'Pelanggaran',         section: 'Operasional',href: 'pelanggaran.html', perm: 'pelanggaran', icon: ICON.pelanggaran },
     // 'tip', 'peminjaman' & 'karyawan' diakses langsung oleh user ybs via card karyawan / portal landing.
     { id: 'payroll',          label: 'Manajemen Payroll',   section: 'Keuangan',   href: 'payroll_dashboard.html', perm: 'payroll', icon: ICON.payroll },
@@ -114,7 +114,7 @@
   const PAGE_TITLES = {
     dashboard:        'Dashboard',
     absen:            'Absen Briefing Pagi',
-    cuti:             'Rekapan Cuti & Jadwal Karyawan',
+    cuti:             'Rekapan Cuti Karyawan',
     pelanggaran:      'Catat Pelanggaran',
     tip:              'Tip Pemotongan Kaca',
     peminjaman:       'Peminjaman Kendaraan',
@@ -340,7 +340,7 @@
     ].join('');
   }
 
-  /* ── Build topbar HTML ────────────────────────────────────────────── */
+  /* ── Build topbar HTML (with Auto-Hide Trigger & Handle) ─────────── */
   function buildTopbar(username) {
     var unit = getUnit();
     var activePage = getActivePage();
@@ -348,6 +348,8 @@
     var initial = username ? username[0].toUpperCase() : 'U';
 
     return [
+      '<div class="kuk-topbar-trigger" id="kukTopbarTrigger"></div>',
+      '<div class="kuk-topbar-handle" id="kukTopbarHandle" title="Arahkan kursor ke sini untuk membuka menu atas"></div>',
       '<header class="kuk-topbar" id="kukTopbar">',
       '  <div class="kuk-topbar-left">',
       '    <button class="kuk-hamburger" id="kukHamburger" onclick="kukToggleSidebar()" aria-label="Toggle Sidebar">' + ICON.menu + '</button>',
@@ -543,8 +545,59 @@
 
     document.body.insertAdjacentElement('afterbegin', container);
 
+    // Initialize auto-hiding topbar with cursor proximity detection
+    initTopbarAutoHide();
+
     // Load notifications after a short delay (to allow DB scripts to initialise)
     setTimeout(refreshNotifications, 800);
+  }
+
+  function initTopbarAutoHide() {
+    var topbar = document.getElementById('kukTopbar');
+    if (!topbar) return;
+
+    var hideTimer = null;
+
+    function showTopbar() {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      topbar.classList.add('kuk-topbar-visible');
+    }
+
+    function scheduleHideTopbar() {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(function() {
+        var notifPanel = document.getElementById('kukNotifPanel');
+        var notifOpen = notifPanel && notifPanel.style.display !== 'none';
+        var userPanel = document.getElementById('kukUserMenuPanel');
+        var userOpen = userPanel && userPanel.style.display !== 'none';
+        if (!notifOpen && !userOpen && !topbar.matches(':hover') && !topbar.contains(document.activeElement)) {
+          topbar.classList.remove('kuk-topbar-visible');
+        }
+      }, 350);
+    }
+
+    // Window-level mouse proximity listener
+    document.addEventListener('mousemove', function(e) {
+      if (e.clientY <= 30) {
+        showTopbar();
+      } else if (e.clientY > 80) {
+        scheduleHideTopbar();
+      }
+    });
+
+    // Mobile/touch support: touching near top edge reveals topbar
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches && e.touches[0] && e.touches[0].clientY <= 35) {
+        showTopbar();
+      }
+    }, { passive: true });
+
+    var trigger = document.getElementById('kukTopbarTrigger');
+    if (trigger) {
+      trigger.addEventListener('mouseenter', showTopbar);
+    }
+    topbar.addEventListener('mouseenter', showTopbar);
+    topbar.addEventListener('mouseleave', scheduleHideTopbar);
   }
 
   function refreshNotifications() {
