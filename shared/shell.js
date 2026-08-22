@@ -293,6 +293,34 @@
       else { if (!sections[item.section]) sections[item.section] = []; sections[item.section].push(item); }
     });
 
+  function getAvatarHTML(username) {
+    const user = getUserRecord(username);
+    const initial = username ? username[0].toUpperCase() : 'U';
+    if (user && user.foto) {
+      return '<img src="' + user.foto + '" alt="' + username + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">';
+    }
+    return initial;
+  }
+
+  function buildSidebar(username) {
+    var user = getUserRecord(username);
+    var role = user ? user.role : '';
+    var label = ROLE_LABELS[role] || role || 'Pengguna';
+    var avatarHtml = getAvatarHTML(username);
+
+    var navItems = getVisibleNav();
+    var sections = {};
+    var noSection = [];
+
+    navItems.forEach(function(item) {
+      if (item.section) {
+        if (!sections[item.section]) sections[item.section] = [];
+        sections[item.section].push(item);
+      } else {
+        noSection.push(item);
+      }
+    });
+
     var navHTML = '';
     noSection.forEach(function(item) { navHTML += buildNavItem(item, activePage); });
     Object.keys(sections).forEach(function(sec) {
@@ -313,7 +341,7 @@
       '  <nav class="kuk-sidebar-nav" id="kukSidebarNav">' + navHTML + '</nav>',
       '  <div class="kuk-sidebar-footer">',
       '    <div class="kuk-sidebar-user">',
-      '      <div class="kuk-sidebar-avatar">' + initial + '</div>',
+      '      <div class="kuk-sidebar-avatar">' + avatarHtml + '</div>',
       '      <div class="kuk-sidebar-user-info">',
       '        <span class="kuk-sidebar-user-name">' + (username || 'Pengguna') + '</span>',
       '        <span class="kuk-sidebar-user-role">' + label + '</span>',
@@ -354,7 +382,7 @@
     var unit = getUnit();
     var activePage = getActivePage();
     var pageTitle = PAGE_TITLES[activePage] || 'KUK La Tansa';
-    var initial = username ? username[0].toUpperCase() : 'U';
+    var avatarHtml = getAvatarHTML(username);
 
     return [
       '<header class="kuk-topbar" id="kukTopbar">',
@@ -386,14 +414,15 @@
       // User menu
       '    <div class="kuk-user-menu-wrapper" id="kukUserMenuWrapper">',
       '      <button class="kuk-user-menu-btn" id="kukUserMenuBtn" onclick="kukToggleUserMenu()" aria-label="Menu pengguna">',
-      '        <div class="kuk-topbar-avatar">' + initial + '</div>',
+      '        <div class="kuk-topbar-avatar">' + avatarHtml + '</div>',
       '      </button>',
       '      <div class="kuk-user-menu-panel" id="kukUserMenuPanel" style="display:none">',
       '        <div class="kuk-user-menu-header">',
-      '          <div class="kuk-user-menu-avatar">' + initial + '</div>',
+      '          <div class="kuk-user-menu-avatar">' + avatarHtml + '</div>',
       '          <div><div class="kuk-user-menu-name">' + (username || 'Pengguna') + '</div><div class="kuk-user-menu-role">KUK La Tansa</div></div>',
       '        </div>',
       '        <div class="kuk-user-menu-divider"></div>',
+      '        <button class="kuk-user-menu-item" onclick="kukUploadPhoto()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Upload Foto Profil</button>',
       '        <button class="kuk-user-menu-item" onclick="kukChangePassword()">' + ICON.lock + ' Ubah Password</button>',
       '        <div class="kuk-user-menu-divider"></div>',
       '        <button class="kuk-user-menu-item danger" onclick="kukLogout()">' + ICON.logout + ' Keluar</button>',
@@ -708,6 +737,41 @@
       try { localStorage.setItem(KEY_USERS_DB, JSON.stringify(db)); } catch(e) {}
       alert('Password berhasil diubah.');
     }
+  };
+
+  window.kukUploadPhoto = function() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Ukuran file foto maksimal 5 MB.");
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        var photoDataUrl = evt.target.result;
+        var username = getUsername();
+        if (typeof MasterDB !== 'undefined' && MasterDB.saveUserPhoto) {
+          MasterDB.saveUserPhoto(username, photoDataUrl);
+        } else {
+          try {
+            var raw = sessionStorage.getItem('kuk_user');
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              parsed.foto = photoDataUrl;
+              sessionStorage.setItem('kuk_user', JSON.stringify(parsed));
+            }
+          } catch(err) {}
+        }
+        alert("✅ Foto profil berhasil diunggah!");
+        location.reload();
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
   };
 
   window.kukPaletteSearch = kukPaletteSearch;

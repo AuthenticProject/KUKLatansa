@@ -671,7 +671,7 @@
         <!-- Active User Profile Card -->
         <div class="staff-profile-header">
           <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:40px; height:40px; border-radius:12px; background:var(--gold); color:#380000; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:18px;" id="staffAvatar">
+            <div style="width:44px; height:44px; border-radius:12px; background:var(--gold); color:#380000; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:18px; overflow:hidden; position:relative; cursor:pointer;" id="staffAvatar" onclick="kukUploadPhoto()" title="Klik untuk ubah foto profil">
               F
             </div>
             <div>
@@ -679,9 +679,14 @@
               <p style="font-size:12px; color:var(--gold);" id="staffRole">Super Admin &bull; KUK Bangunan</p>
             </div>
           </div>
-          <button type="button" class="btn-back" style="background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="doStaffLogout()">
-            🚪 Keluar
-          </button>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-back" style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.3); color:#fff;" onclick="kukUploadPhoto()" title="Unggah / Ubah foto profil staf">
+              📷 Upload Foto
+            </button>
+            <button type="button" class="btn-back" style="background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="doStaffLogout()">
+              🚪 Keluar
+            </button>
+          </div>
         </div>
 
         <!-- Staff Menus Grid -->
@@ -941,9 +946,16 @@
 
     function populateStaffProfile(user) {
       document.getElementById('staffName').textContent = user.namaLengkap || user.username;
-      document.getElementById('staffAvatar').textContent = (user.username || 'S')[0].toUpperCase();
-      const tokoLabel = user.toko === 'palen' ? 'KUK Palen' : 'KUK Bangunan';
-      const roleLabel = user.role === 'super_admin' ? 'Super Admin' : (user.jabatan || 'Staf');
+      const avatarEl = document.getElementById('staffAvatar');
+      const dbUser = (typeof MasterDB !== 'undefined' && MasterDB.getUser) ? MasterDB.getUser(user.username) : user;
+      const foto = (dbUser && dbUser.foto) || user.foto;
+      if (foto) {
+        avatarEl.innerHTML = `<img src="${foto}" alt="${user.username}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+      } else {
+        avatarEl.textContent = (user.username || 'S')[0].toUpperCase();
+      }
+      const tokoLabel = (user.toko === 'palen') ? 'KUK Palen' : 'KUK Bangunan';
+      const roleLabel = (user.role === 'super_admin') ? 'Super Admin' : (user.jabatan || 'Staf');
       document.getElementById('staffRole').textContent = `${roleLabel} • ${tokoLabel}`;
     }
 

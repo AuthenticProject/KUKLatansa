@@ -47,6 +47,10 @@
       padding: 30px 20px 100px;
     }
 
+    body.kuk-has-shell {
+      padding-top: 80px !important;
+    }
+
     .app-container {
       width: 100%;
       max-width: 1300px;
@@ -171,9 +175,12 @@
     /* Matrix Table Styles */
     .matrix-wrapper {
       overflow-x: auto;
+      overflow-y: auto;
+      max-height: 65vh;
       border-radius: 12px;
       border: 1px solid var(--kuk-border);
       background: #ffffff;
+      position: relative;
     }
 
     .matrix-table {

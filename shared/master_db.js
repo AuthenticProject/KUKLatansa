@@ -467,10 +467,40 @@ const MasterDB = (() => {
       saveStored(STORAGE_KEY_USERS, users);
       return user;
     },
+    saveUserPhoto: (username, photoDataUrl) => {
+      let users = getStored(STORAGE_KEY_USERS) || DEFAULT_USERS;
+      const idx = users.findIndex(u => u.username.toLowerCase() === (username||'').toLowerCase() || u.id === username);
+      if (idx > -1) {
+        users[idx].foto = photoDataUrl;
+        saveStored(STORAGE_KEY_USERS, users);
+      }
+      try {
+        const sessRaw = sessionStorage.getItem('kuk_user');
+        if (sessRaw) {
+          const sess = JSON.parse(sessRaw);
+          if (sess && sess.username && sess.username.toLowerCase() === (username||'').toLowerCase()) {
+            sess.foto = photoDataUrl;
+            sessionStorage.setItem('kuk_user', JSON.stringify(sess));
+          }
+        }
+      } catch(e) {}
+      return photoDataUrl;
+    },
     deleteUser: (id) => {
       let users = getStored(STORAGE_KEY_USERS) || DEFAULT_USERS;
       users = users.filter(u => u.id !== id);
       saveStored(STORAGE_KEY_USERS, users);
+    },
+
+    saveEmployeePhoto: (employeeId, photoDataUrl) => {
+      let emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
+      const idx = emps.findIndex(e => e.id === employeeId || (e.nama && e.nama.toLowerCase() === employeeId.toLowerCase()));
+      if (idx > -1) {
+        emps[idx].foto = photoDataUrl;
+        saveStored(STORAGE_KEY_EMPLOYEES, emps);
+        return photoDataUrl;
+      }
+      return null;
     },
 
     // Vehicles

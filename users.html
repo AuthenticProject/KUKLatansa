@@ -358,6 +358,16 @@
       </div>
 
       <div class="form-group">
+        <label>Foto Profil Staf</label>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div id="staffPhotoPreview" style="width:46px; height:46px; border-radius:12px; background:#f1f5f9; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:700; flex-shrink:0;">
+            📷
+          </div>
+          <input type="file" id="userPhotoInput" accept="image/*" onchange="previewUserPhoto(this)" style="font-size:13px;">
+        </div>
+      </div>
+
+      <div class="form-group">
         <label>Role Akses Sistem</label>
         <select id="roleInput" onchange="handleRolePresetChange()">
           <option value="hr_admin">HR / Administrasi (hr_admin)</option>
@@ -465,6 +475,9 @@
         const roleLabel = roleLabels[roleKey] || roleKey;
         const tokoLabel = u.toko === 'palen' ? 'KUK Palen' : 'KUK Bangunan';
         const initial = (u.username || 'U')[0].toUpperCase();
+        const avatarHTML = u.foto 
+          ? `<img src="${u.foto}" alt="${u.username}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`
+          : initial;
 
         const perms = u.permissions || [];
         const isSuper = u.role === 'super_admin' || perms.includes('*');
@@ -474,7 +487,7 @@
         
         div.innerHTML = `
           <div class="user-main">
-            <div class="user-avatar-badge">${initial}</div>
+            <div class="user-avatar-badge">${avatarHTML}</div>
             <div class="user-info">
               <h3>
                 ${u.namaLengkap || u.username}
@@ -497,8 +510,33 @@
       });
     }
 
+    let currentUploadedPhoto = null;
+
+    function previewUserPhoto(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Ukuran foto maksimal 5 MB!');
+          input.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentUploadedPhoto = e.target.result;
+          const preview = document.getElementById('staffPhotoPreview');
+          preview.innerHTML = `<img src="${currentUploadedPhoto}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function openModal() {
       editingUserId = null;
+      currentUploadedPhoto = null;
+      const photoInput = document.getElementById('userPhotoInput');
+      if (photoInput) photoInput.value = '';
+      document.getElementById('staffPhotoPreview').innerHTML = '📷';
+
       document.getElementById('modalTitle').textContent = 'Tambah Akun Staf Baru';
       document.getElementById('usernameInput').value = '';
       document.getElementById('usernameInput').disabled = false;
@@ -519,6 +557,17 @@
       if (!u) return;
 
       editingUserId = u.id || u.username;
+      currentUploadedPhoto = u.foto || null;
+      const photoInput = document.getElementById('userPhotoInput');
+      if (photoInput) photoInput.value = '';
+
+      const preview = document.getElementById('staffPhotoPreview');
+      if (currentUploadedPhoto) {
+        preview.innerHTML = `<img src="${currentUploadedPhoto}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+      } else {
+        preview.innerHTML = '📷';
+      }
+
       document.getElementById('modalTitle').textContent = 'Edit Akun Staf: ' + (u.namaLengkap || u.username);
       document.getElementById('usernameInput').value = u.username;
       document.getElementById('usernameInput').disabled = true; // username immutable
@@ -541,6 +590,7 @@
     function closeModal() {
       document.getElementById('userModal').classList.remove('show');
       editingUserId = null;
+      currentUploadedPhoto = null;
     }
 
     function handleRolePresetChange() {
@@ -602,6 +652,10 @@
         role: role,
         permissions: permissions
       };
+
+      if (currentUploadedPhoto) {
+        userPayload.foto = currentUploadedPhoto;
+      }
 
       if (!editingUserId) {
         // Create new
