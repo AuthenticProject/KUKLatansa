@@ -241,7 +241,7 @@ const DashboardEngine = (() => {
         title: `Pengajuan Cuti: ${l.employeeName || 'Karyawan'}`,
         description: `${l.leaveType || 'Cuti'} (${l.startDate || '-'} s/d ${l.endDate || '-'}) - Alasan: ${l.reason || '-'}`,
         timestamp: l.submittedAt || l.date,
-        actionUrl: '../cuti.html',
+        actionUrl: '../rekap_cuti.html',
         actionLabel: 'Tinjau Pengajuan',
         data: l
       });

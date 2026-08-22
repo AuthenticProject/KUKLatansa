@@ -6,9 +6,13 @@
   <title>Rekapan Cuti Karyawan — KUK La Tansa</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#540000">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon-32x32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -24,43 +28,124 @@
       --kuk-text: #0f172a;
       --kuk-text-muted: #64748b;
       --kuk-border: #e2e8f0;
+      --kuk-border-soft: #f1f5f9;
       --kuk-success: #10b981;
       --kuk-warning: #f59e0b;
       --kuk-danger: #ef4444;
       --kuk-info: #0ea5e9;
       --kuk-radius: 16px;
       --kuk-shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
-      --kuk-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      --kuk-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+    
     body {
       background-color: var(--kuk-bg);
       color: var(--kuk-text);
       min-height: 100vh;
-      font-size: 14px;
+      padding: 30px 20px 100px;
     }
 
-    .rekap-container {
-      max-width: 1400px;
+    .app-container {
+      width: 100%;
+      max-width: 1300px;
       margin: 0 auto;
-      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
-    /* Cards */
+    /* Header Section */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: linear-gradient(135deg, #4a0000 0%, #2b0000 100%);
+      color: #fff;
+      padding: 24px 28px;
+      border-radius: 20px;
+      box-shadow: 0 12px 32px rgba(84, 0, 0, 0.25);
+    }
+
+    .header-titles h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-titles p {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.75);
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background: var(--kuk-surface);
+      border: 1px solid var(--kuk-border);
+      border-radius: var(--kuk-radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--kuk-shadow-sm);
+    }
+
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .kpi-info h3 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--kuk-text);
+      line-height: 1.1;
+    }
+
+    .kpi-info p {
+      font-size: 12px;
+      color: var(--kuk-text-muted);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    /* Cards & Panels */
     .card {
       background: var(--kuk-surface);
       border-radius: var(--kuk-radius);
       border: 1px solid var(--kuk-border);
       box-shadow: var(--kuk-shadow-sm);
       overflow: hidden;
-      transition: all 0.2s ease;
     }
+
     .card-header {
-      padding: 16px 20px;
+      padding: 18px 24px;
       border-bottom: 1px solid var(--kuk-border);
       display: flex;
       justify-content: space-between;
@@ -69,162 +154,41 @@
       gap: 12px;
       background: #ffffff;
     }
+
     .card-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--kuk-text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-body { padding: 20px; }
-
-    /* KPI Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-    .stat-card {
-      background: #ffffff;
-      border-radius: var(--kuk-radius);
-      border: 1px solid var(--kuk-border);
-      border-left: 4px solid var(--kuk-primary);
-      padding: 18px 20px;
-      box-shadow: var(--kuk-shadow-sm);
-    }
-    .stat-title {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: var(--kuk-text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-    .stat-val {
-      font-size: 26px;
+      font-size: 16px;
       font-weight: 800;
-      color: var(--kuk-text);
-      line-height: 1.1;
-    }
-    .stat-sub {
-      font-size: 12px;
-      color: var(--kuk-text-muted);
-      margin-top: 4px;
-    }
-
-    /* Filters Bar */
-    .filter-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      background: #fff;
-      padding: 14px 18px;
-      border-radius: var(--kuk-radius);
-      border: 1px solid var(--kuk-border);
-      box-shadow: var(--kuk-shadow-sm);
-    }
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .filter-label {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--kuk-text-muted);
-      text-transform: uppercase;
-    }
-    .filter-select, .filter-input {
-      padding: 7px 12px;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 8px;
-      border: 1px solid var(--kuk-border);
-      background: #f8fafc;
-      color: var(--kuk-text);
-      outline: none;
-    }
-    .filter-select:focus, .filter-input:focus {
-      border-color: var(--kuk-primary);
-      background: #fff;
-    }
-
-    /* Buttons */
-    .btn {
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-      text-decoration: none;
-    }
-    .btn-primary { background: var(--kuk-primary); color: #fff; }
-    .btn-primary:hover { background: #730000; }
-    .btn-outline { background: #fff; border: 1px solid var(--kuk-border); color: var(--kuk-text); }
-    .btn-outline:hover { background: #f1f5f9; }
-    .btn-success { background: #10b981; color: #fff; }
-    .btn-success:hover { background: #059669; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover { background: #dc2626; }
-    .btn-sm { padding: 5px 10px; font-size: 12px; }
-
-    /* Tabs */
-    .tabs-nav {
-      display: flex;
-      gap: 4px;
-      border-bottom: 1px solid var(--kuk-border);
-      padding: 0 20px;
-      background: #f8fafc;
-    }
-    .tab-btn {
-      padding: 12px 18px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--kuk-text-muted);
-      border: none;
-      background: none;
-      border-bottom: 3px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tab-btn:hover { color: var(--kuk-primary); }
-    .tab-btn.active {
       color: var(--kuk-primary);
-      border-bottom-color: var(--kuk-primary);
-      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    /* Gantt / Matrix Table */
+    .card-body {
+      padding: 22px 24px;
+    }
+
+    /* Matrix Table Styles */
     .matrix-wrapper {
       overflow-x: auto;
-      max-width: 100%;
       border-radius: 12px;
       border: 1px solid var(--kuk-border);
+      background: #ffffff;
     }
+
     .matrix-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 12.5px;
       text-align: center;
-      background: #fff;
     }
+
     .matrix-table th, .matrix-table td {
-      border: 1px solid var(--kuk-border);
+      border: 1px solid var(--kuk-border-soft);
       padding: 8px 4px;
       min-width: 32px;
     }
+
     .matrix-table th {
       background: #f8fafc;
       font-weight: 700;
@@ -235,176 +199,261 @@
       top: 0;
       z-index: 10;
     }
-    .matrix-table th.emp-col, .matrix-table td.emp-col {
-      min-width: 190px;
+
+    .matrix-table th.emp-head {
+      min-width: 220px;
       text-align: left;
-      padding-left: 14px;
+      padding-left: 16px;
       position: sticky;
       left: 0;
-      background: #fff;
-      z-index: 5;
+      background: #f8fafc;
+      z-index: 12;
     }
-    .matrix-table th.emp-col { z-index: 15; background: #f8fafc; }
-    .matrix-table tr:hover td { background-color: #f8fafc; }
-    .matrix-table tr:hover td.emp-col { background-color: #f1f5f9; }
+
+    .matrix-table td.emp-col {
+      text-align: left;
+      padding-left: 16px;
+      font-weight: 700;
+      position: sticky;
+      left: 0;
+      background: #ffffff;
+      z-index: 5;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.03);
+    }
 
     .matrix-cell-cuti {
       background: #fee2e2 !important;
-      color: #b91c1c;
+      color: #991b1b;
       font-weight: 800;
-      font-size: 13px;
-      border-radius: 6px;
-      cursor: pointer;
+      font-size: 14px;
     }
+
     .matrix-cell-today {
-      border: 2px solid var(--kuk-primary) !important;
       background: #fffbeb !important;
+      border: 2px solid var(--kuk-gold) !important;
     }
+
     .matrix-cell-weekend {
       background: #fdf4f4;
+      color: #dc2626;
+      font-weight: 700;
     }
 
     .badge-unit {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 6px;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
-      margin-top: 3px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 2px;
     }
-    .badge-bangunan { background: #e0f2fe; color: #0369a1; }
-    .badge-palen { background: #fef3c7; color: #b45309; }
+    .badge-bangunan { background: #fee2e2; color: #991b1b; }
+    .badge-palen { background: #e0f2fe; color: #0369a1; }
 
-    /* Pending Approval Table */
+    /* Approval & Standard Data Tables */
     .data-table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 13.5px;
     }
+
     .data-table th {
       background: #f8fafc;
-      text-align: left;
       padding: 12px 16px;
-      font-size: 11.5px;
       font-weight: 700;
       color: var(--kuk-text-muted);
-      border-bottom: 2px solid var(--kuk-border);
+      text-align: left;
+      font-size: 12px;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--kuk-border);
     }
+
     .data-table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--kuk-border);
-      font-size: 13px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--kuk-border-soft);
+      vertical-align: middle;
     }
-    .data-table tr:hover { background: #f8fafc; }
+
+    .data-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* Buttons & Controls */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-gold { background: var(--kuk-gold); color: #380000; font-weight: 700; }
+    .btn-gold:hover { background: #ffd633; transform: translateY(-1px); }
+    .btn-primary { background: var(--kuk-primary); color: #ffffff; }
+    .btn-primary:hover { background: #6e0000; }
+    .btn-outline { background: transparent; border-color: var(--kuk-border); color: var(--kuk-text); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-success { background: #10b981; color: #ffffff; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: #ef4444; color: #ffffff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+    .filter-select, .filter-input {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--kuk-border);
+      background: #ffffff;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--kuk-text);
+      outline: none;
+    }
+    .filter-select:focus, .filter-input:focus {
+      border-color: var(--kuk-primary);
+    }
 
     /* Toast */
     .toast-box {
       position: fixed;
       bottom: 24px;
       right: 24px;
-      padding: 12px 20px;
-      border-radius: 10px;
       background: #0f172a;
       color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13.5px;
       font-weight: 600;
-      font-size: 13px;
-      z-index: 10000;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      z-index: 9999;
       display: none;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
   </style>
 </head>
 <body>
 
-  <div class="rekap-container">
-    
-    <!-- 1. TOP STATS CARDS -->
-    <div class="stats-grid">
-      <div class="stat-card" style="border-left-color: var(--kuk-primary);">
-        <div class="stat-title">Total Cuti Terjadwal Bulan Ini</div>
-        <div class="stat-val" id="statTotalMonth">0 Hari</div>
-        <div class="stat-sub" id="statMonthLabel">Periode Aktif</div>
-      </div>
-      <div class="stat-card" style="border-left-color: #f59e0b;">
-        <div class="stat-title">Sedang Cuti Hari Ini</div>
-        <div class="stat-val" id="statTodayCutiCount" style="color:#b45309;">0 Karyawan</div>
-        <div class="stat-sub" id="statTodayList">Tidak ada karyawan cuti hari ini</div>
-      </div>
-      <div class="stat-card" style="border-left-color: #0ea5e9;">
-        <div class="stat-title">Kuota Maksimal Bulanan</div>
-        <div class="stat-val" style="color:#0284c7;">3 Hari / Orang</div>
-        <div class="stat-sub">Batas resmi operasional KUK</div>
-      </div>
-      <div class="stat-card" style="border-left-color: #10b981;">
-        <div class="stat-title">Status Kunci Pengajuan</div>
-        <div class="stat-val" id="statLockStatus" style="color:#15803d; font-size:20px;">🔓 Terbuka</div>
-        <div class="stat-sub" id="statDeadlineText">Tanpa batas waktu</div>
-      </div>
-    </div>
+  <div class="app-container">
 
-    <!-- 2. FILTER & CONTROLS -->
-    <div class="filter-bar">
-      <div class="filter-group">
-        <span class="filter-label">Filter Bulan:</span>
-        <select id="selMonth" class="filter-select" onchange="loadRekapData()">
-          <option value="0">Januari</option>
-          <option value="1">Februari</option>
-          <option value="2">Maret</option>
-          <option value="3">April</option>
-          <option value="4">Mei</option>
-          <option value="5">Juni</option>
-          <option value="6">Juli</option>
-          <option value="7" selected>Agustus</option>
-          <option value="8">September</option>
-          <option value="9">Oktober</option>
-          <option value="10">November</option>
-          <option value="11">Desember</option>
-        </select>
-        <select id="selYear" class="filter-select" onchange="loadRekapData()">
-          <option value="2025">2025</option>
-          <option value="2026" selected>2026</option>
-          <option value="2027">2027</option>
-        </select>
+    <!-- 1. Header Page -->
+    <header class="page-header">
+      <div class="header-titles">
+        <h1>
+          <span>🏖️</span> Rekapan Cuti Karyawan
+        </h1>
+        <p>Matriks jadwal libur, kalender cuti bulanan seluruh divisi, serta verifikasi approval cuti mandiri.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.4);" onclick="exportMatrixImage()">
+          <span>📷</span> Unduh Gambar
+        </button>
+        <button class="btn btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.4);" onclick="exportMatrixCSV()">
+          <span>📂</span> Unduh CSV
+        </button>
+        <button class="btn btn-gold" onclick="syncCloud()">
+          <span>🔄</span> Sinkron Server
+        </button>
+      </div>
+    </header>
 
-        <span class="filter-label" style="margin-left: 10px;">Unit:</span>
-        <select id="selUnit" class="filter-select" onchange="filterMatrix()">
-          <option value="ALL">🏢 Semua Unit</option>
-          <option value="KUK Bangunan">🏗️ KUK Bangunan</option>
-          <option value="KUK Palen">🏠 KUK Palen</option>
-        </select>
-
-        <input type="text" id="searchEmp" class="filter-input" placeholder="🔍 Cari nama/divisi..." onkeyup="filterMatrix()" style="width: 170px;">
+    <!-- 2. KPI Summary Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(84, 0, 0, 0.1); color: var(--kuk-primary);">
+          📅
+        </div>
+        <div class="kpi-info">
+          <h3 id="statTotalMonth">0 Hari</h3>
+          <p id="statMonthLabel">Total Cuti Terjadwal</p>
+        </div>
       </div>
 
-      <div class="filter-group">
-        <button class="btn btn-outline btn-sm" onclick="exportMatrixImage()">📷 Unduh Gambar</button>
-        <button class="btn btn-outline btn-sm" onclick="exportMatrixCSV()">📂 Unduh CSV</button>
-        <button class="btn btn-primary btn-sm" onclick="syncCloud()">🔄 Sinkron Server</button>
-      </div>
-    </div>
-
-    <!-- 3. MAIN CONTENT TABS -->
-    <div class="card" id="captureContainer">
-      <div class="tabs-nav">
-        <button class="tab-btn active" id="tabBtnMatrix" onclick="switchTab('matrix')">📊 Matriks Kalender Jadwal Cuti</button>
-        <button class="tab-btn" id="tabBtnApproval" onclick="switchTab('approval')">🏖️ Pengajuan Menunggu Approval <span id="badgePending" style="background:#ef4444; color:#fff; padding:2px 6px; border-radius:10px; font-size:10px;">0</span></button>
-        <button class="tab-btn" id="tabBtnSetup" onclick="switchTab('setup')">⚙️ Pengaturan Batas Waktu Cuti</button>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.12); color: var(--kuk-warning);">
+          🏖️
+        </div>
+        <div class="kpi-info">
+          <h3 id="statTodayCutiCount" style="color:#b45309;">0 Orang</h3>
+          <p id="statTodayList">Sedang Cuti Hari Ini</p>
+        </div>
       </div>
 
-      <!-- VIEW 1: MATRIX GANTT -->
-      <div id="viewMatrix" class="card-body">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(14, 165, 233, 0.12); color: var(--kuk-info);">
+          ⏳
+        </div>
+        <div class="kpi-info">
+          <h3 id="statPendingCount" style="color:#0284c7;">0 Antrean</h3>
+          <p>Menunggu Persetujuan</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: var(--kuk-success);">
+          🔒
+        </div>
+        <div class="kpi-info">
+          <h3 id="statLockStatus" style="font-size:18px; color:#15803d;">🔓 Terbuka</h3>
+          <p id="statDeadlineText">Status Batas Waktu Cuti</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Matriks Kalender Jadwal Cuti Karyawan -->
+    <section class="card" id="captureContainer">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span>📊</span> Matriks Jadwal Cuti Seluruh Karyawan (Gantt View)
+          </div>
+          <p style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">Matriks jadwal libur dan pengajuan cuti seluruh divisi per tanggal.</p>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <select id="selMonth" class="filter-select" onchange="loadRekapData()">
+            <option value="0">Januari</option>
+            <option value="1">Februari</option>
+            <option value="2">Maret</option>
+            <option value="3">April</option>
+            <option value="4">Mei</option>
+            <option value="5">Juni</option>
+            <option value="6">Juli</option>
+            <option value="7" selected>Agustus</option>
+            <option value="8">September</option>
+            <option value="9">Oktober</option>
+            <option value="10">November</option>
+            <option value="11">Desember</option>
+          </select>
+          <select id="selYear" class="filter-select" onchange="loadRekapData()">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+          </select>
+          <select id="selUnit" class="filter-select" onchange="filterMatrix()">
+            <option value="ALL">🏢 Semua Unit</option>
+            <option value="KUK Bangunan">🏗️ KUK Bangunan</option>
+            <option value="KUK Palen">🏠 KUK Palen</option>
+          </select>
+          <input type="text" id="searchEmp" class="filter-input" placeholder="🔍 Cari nama/divisi..." onkeyup="filterMatrix()" style="width: 170px;">
+        </div>
+      </div>
+
+      <div class="card-body">
         <div class="matrix-wrapper">
           <table class="matrix-table" id="matrixTable">
-            <thead id="matrixHead">
-              <!-- Rendered by JS -->
-            </thead>
-            <tbody id="matrixBody">
-              <!-- Rendered by JS -->
-            </tbody>
+            <thead id="matrixHead"></thead>
+            <tbody id="matrixBody"></tbody>
           </table>
         </div>
+
         <div style="margin-top: 14px; display: flex; gap: 20px; font-size: 12px; color: var(--kuk-text-muted); flex-wrap: wrap;">
           <div style="display:flex; align-items:center; gap:6px;">
             <span style="display:inline-block; width:14px; height:14px; background:#fee2e2; border:1px solid #fca5a5; border-radius:4px;"></span>
@@ -420,56 +469,75 @@
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- VIEW 2: APPROVAL QUEUE -->
-      <div id="viewApproval" class="card-body" style="display: none;">
-        <div style="margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
-          <h4 style="font-size: 15px; font-weight: 700;">Daftar Pengajuan Cuti Mandiri Karyawan</h4>
-          <p style="font-size: 12px; color: var(--kuk-text-muted);">Setujui atau tolak pengajuan cuti yang diajukan lewat Card Karyawan.</p>
+    <!-- 4. Antrean Pengajuan Cuti Menunggu Approval -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span>📝</span> Persetujuan Pengajuan Cuti Mandiri (Approval Queue)
+          </div>
+          <p style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">Setujui atau tolak pengajuan cuti yang diajukan oleh karyawan.</p>
         </div>
+        <span id="badgePendingTittle" class="btn btn-sm btn-outline" style="font-weight:700; color:var(--kuk-primary);">0 Menunggu</span>
+      </div>
+
+      <div class="card-body" style="padding: 0;">
         <div style="overflow-x: auto;">
           <table class="data-table">
             <thead>
               <tr>
                 <th>Tanggal Pengajuan</th>
                 <th>Karyawan</th>
-                <th>Unit / Divisi</th>
-                <th>Periode & Tanggal Cuti</th>
+                <th>Unit & Bagian</th>
+                <th>Periode / Tanggal Cuti</th>
                 <th>Jenis Cuti</th>
                 <th>Alasan</th>
-                <th style="text-align: center;">Aksi</th>
+                <th style="text-align: right; padding-right: 24px;">Aksi Persetujuan</th>
               </tr>
             </thead>
             <tbody id="approvalTbody">
-              <!-- Rendered by JS -->
+              <tr>
+                <td colspan="7" style="text-align:center; padding:30px; color:var(--kuk-text-muted);">
+                  Memeriksa antrean pengajuan cuti...
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
+    </section>
 
-      <!-- VIEW 3: DEADLINE SETUP -->
-      <div id="viewSetup" class="card-body" style="display: none; max-width: 600px;">
-        <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 6px;">Batas Akhir Pengajuan Cuti</h4>
-        <p style="font-size: 13px; color: var(--kuk-text-muted); line-height: 1.5; margin-bottom: 20px;">
-          Tentukan batas waktu pengisian form cuti bulanan. Jika telah melewati tanggal & jam yang ditentukan, form pengajuan mandiri di Card Karyawan akan otomatis terkunci.
-        </p>
+    <!-- 5. Pengaturan Batas Waktu Pengisian Cuti -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚙️</span> Batas Waktu Pengajuan Cuti Bulanan (Deadline Lock)
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 280px;">
+            <p style="font-size: 13.5px; color: var(--kuk-text-muted); line-height: 1.5; margin-bottom: 14px;">
+              Tentukan batas waktu pengisian form cuti bulanan. Jika telah melewati tanggal & jam yang ditentukan, form pengajuan mandiri di Card Karyawan akan otomatis terkunci.
+            </p>
+            <div id="currentDeadlineBox" style="padding: 12px 16px; background: #f8fafc; border: 1px solid var(--kuk-border); border-radius: 10px; font-size: 13px; font-weight: 600;">
+              Memeriksa konfigurasi server...
+            </div>
+          </div>
 
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          <div>
-            <label style="display:block; font-size:11px; font-weight:800; color:var(--kuk-text-muted); text-transform:uppercase; margin-bottom:6px;">Pilih Waktu & Tanggal Batas Akhir:</label>
-            <input type="datetime-local" id="inputDeadline" class="filter-input" style="width: 100%; padding: 10px 14px;">
-          </div>
-          <div id="currentDeadlineBox" style="padding: 12px 16px; background: #f8fafc; border: 1px solid var(--kuk-border); border-radius: 10px; font-size: 13px; font-weight: 600;">
-            Memeriksa konfigurasi server...
-          </div>
-          <div style="display: flex; gap: 10px; margin-top: 6px;">
-            <button class="btn btn-primary" style="flex: 1;" onclick="saveDeadline()">💾 Simpan Batas Waktu</button>
-            <button class="btn btn-danger" style="flex: 1;" onclick="clearDeadline()">🔓 Buka / Hapus Batas</button>
+          <div style="display: flex; flex-direction: column; gap: 12px; min-width: 260px;">
+            <label style="font-size:11px; font-weight:800; color:var(--kuk-text-muted); text-transform:uppercase;">Pilih Waktu & Tanggal Batas Akhir:</label>
+            <input type="datetime-local" id="inputDeadline" class="filter-input" style="padding: 10px 14px;">
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary" onclick="saveDeadline()">💾 Simpan Batas Waktu</button>
+              <button class="btn btn-danger" onclick="clearDeadline()">🔓 Buka Batas</button>
+            </div>
           </div>
         </div>
       </div>
-
-    </div>
+    </section>
 
   </div>
 
@@ -495,6 +563,10 @@
       setTimeout(() => { b.style.display = 'none'; }, 3000);
     }
 
+    document.addEventListener('DOMContentLoaded', () => {
+      initPage();
+    });
+
     function initPage() {
       if (typeof MasterDB !== 'undefined') {
         MasterDB.init();
@@ -502,26 +574,7 @@
       }
       loadRekapData();
       loadApprovalList();
-    }
-
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('viewMatrix').style.display = 'none';
-      document.getElementById('viewApproval').style.display = 'none';
-      document.getElementById('viewSetup').style.display = 'none';
-
-      if (tabId === 'matrix') {
-        document.getElementById('tabBtnMatrix').classList.add('active');
-        document.getElementById('viewMatrix').style.display = 'block';
-      } else if (tabId === 'approval') {
-        document.getElementById('tabBtnApproval').classList.add('active');
-        document.getElementById('viewApproval').style.display = 'block';
-        loadApprovalList();
-      } else if (tabId === 'setup') {
-        document.getElementById('tabBtnSetup').classList.add('active');
-        document.getElementById('viewSetup').style.display = 'block';
-        loadSetupInfo();
-      }
+      checkDeadlineStatus();
     }
 
     function loadRekapData() {
@@ -529,69 +582,90 @@
       const year = parseInt(document.getElementById('selYear').value, 10);
       const monthStr = String(monthIdx + 1).padStart(2, '0');
 
-      document.getElementById('statMonthLabel').textContent = `${MONTHS[monthIdx]} ${year}`;
+      document.getElementById('statMonthLabel').textContent = `Total Cuti (${MONTHS[monthIdx]} ${year})`;
 
-      // 1. Get raw cuti from storage
-      const stored = localStorage.getItem('kuk_db_cuti_v1');
-      let data = stored ? JSON.parse(stored) : [];
-      if (!data || data.length === 0) {
-        data = (typeof MasterDB !== 'undefined' && MasterDB.DEFAULT_CUTI_DATA) ? MasterDB.DEFAULT_CUTI_DATA : [];
-      }
-      allCutiRecords = data;
+      // Load cuti from localStorage and AttendanceEngine
+      const rawCuti = localStorage.getItem('kuk_db_cuti_v1');
+      allCutiRecords = rawCuti ? JSON.parse(rawCuti) : [];
 
-      // 2. Render Matrix
-      renderMatrixTable(monthIdx, year);
-      updateKPIStats(monthIdx, year);
+      // Calculate total leave days in current month
+      let totalLeaveMonth = 0;
+      allCutiRecords.forEach(c => {
+        if (Array.isArray(c.tanggal)) {
+          c.tanggal.forEach(t => { if (t.startsWith(`${year}-${monthStr}`)) totalLeaveMonth++; });
+        } else if (c.tanggal && c.tanggal.startsWith(`${year}-${monthStr}`)) {
+          totalLeaveMonth++;
+        }
+      });
+      document.getElementById('statTotalMonth').textContent = `${totalLeaveMonth} Hari`;
+
+      // Check today's leaves
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const todayOnLeave = [];
+
+      allCutiRecords.forEach(c => {
+        const hasToday = Array.isArray(c.tanggal) ? c.tanggal.includes(todayStr) : (c.tanggal === todayStr);
+        if (hasToday) {
+          const emp = currentEmployees.find(e => e.id === c.idKaryawan || (e.fullName && e.fullName.toLowerCase() === (c.nama||'').toLowerCase()));
+          const name = emp ? (emp.fullName || emp.nama) : (c.nama || 'Karyawan');
+          todayOnLeave.push(name);
+        }
+      });
+
+      document.getElementById('statTodayCutiCount').textContent = `${todayOnLeave.length} Orang`;
+      document.getElementById('statTodayList').textContent = todayOnLeave.length ? todayOnLeave.join(', ') : 'Tidak ada karyawan cuti hari ini';
+
+      renderMatrix(monthIdx, year);
     }
 
-    function renderMatrixTable(monthIdx, year) {
-      const totalDays = new Date(year, monthIdx + 1, 0).getDate();
+    function renderMatrix(monthIdx, year) {
       const monthStr = String(monthIdx + 1).padStart(2, '0');
-      const todayStr = new Date().toISOString().split('T')[0];
+      const totalDays = new Date(year, monthIdx + 1, 0).getDate();
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-      // Header
-      const head = document.getElementById('matrixHead');
-      let hHtml = `<tr><th class="emp-col">Karyawan & Divisi</th><th style="width:50px;">Total</th>`;
+      // Build Thead
+      let hHtml = `<tr><th class="emp-head">Karyawan & Bagian</th><th style="min-width:40px;">Total</th>`;
       for (let d = 1; d <= totalDays; d++) {
         const dateObj = new Date(year, monthIdx, d);
-        const dayOfWeek = dateObj.getDay();
-        const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
-        const isToday = (dateKey === todayStr);
-        const isSun = (dayOfWeek === 0);
-
-        hHtml += `<th class="${isToday ? 'matrix-cell-today' : ''} ${isSun ? 'matrix-cell-weekend' : ''}" style="${isSun ? 'color:#ef4444;' : ''}">
-          <div>${d}</div>
-          <div style="font-size:9px; opacity:0.7;">${['Min','Sen','Sel','Rab','Kam','Jum','Sab'][dayOfWeek]}</div>
-        </th>`;
+        const dayName = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'][dateObj.getDay()];
+        const isSun = (dateObj.getDay() === 0);
+        hHtml += `<th class="${isSun ? 'matrix-cell-weekend' : ''}" style="min-width:28px;">
+                    <div style="font-size:9px; color:${isSun ? '#ef4444' : '#64748b'};">${dayName}</div>
+                    <div>${d}</div>
+                  </th>`;
       }
       hHtml += `</tr>`;
-      head.innerHTML = hHtml;
+      document.getElementById('matrixHead').innerHTML = hHtml;
 
-      // Body
+      // Build Tbody
       filterMatrix();
     }
 
     function filterMatrix() {
       const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
       const year = parseInt(document.getElementById('selYear').value, 10);
-      const totalDays = new Date(year, monthIdx + 1, 0).getDate();
       const monthStr = String(monthIdx + 1).padStart(2, '0');
-      const todayStr = new Date().toISOString().split('T')[0];
+      const totalDays = new Date(year, monthIdx + 1, 0).getDate();
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-      const unitFilter = document.getElementById('selUnit').value;
-      const searchQ = document.getElementById('searchEmp').value.toLowerCase().trim();
-
-      let emps = [...currentEmployees];
-      if (unitFilter !== 'ALL') {
-        emps = emps.filter(e => e.unit === unitFilter);
-      }
-      if (searchQ) {
-        emps = emps.filter(e => (e.fullName || e.nama).toLowerCase().includes(searchQ) || (e.department || e.position || '').toLowerCase().includes(searchQ));
-      }
+      const selUnit = document.getElementById('selUnit').value;
+      const q = (document.getElementById('searchEmp').value || '').toLowerCase().trim();
 
       const tbody = document.getElementById('matrixBody');
+      let emps = currentEmployees;
+
+      if (selUnit !== 'ALL') {
+        emps = emps.filter(e => e.unit && e.unit.toLowerCase().includes(selUnit.toLowerCase().replace('kuk ', '')));
+      }
+      if (q) {
+        emps = emps.filter(e => (e.nama||'').toLowerCase().includes(q) || (e.fullName||'').toLowerCase().includes(q) || (e.department||'').toLowerCase().includes(q));
+      }
+
       if (emps.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${totalDays + 2}" style="padding:30px; text-align:center; color:var(--kuk-text-muted);">Tidak ada karyawan yang sesuai filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${totalDays + 2}" style="padding:40px; color:var(--kuk-text-muted);">Tidak ada data karyawan yang cocok.</td></tr>`;
         return;
       }
 
@@ -604,7 +678,6 @@
           return (matchId || matchName);
         });
 
-        // Collect days
         const leaveDays = new Set();
         empLeaves.forEach(c => {
           if (Array.isArray(c.tanggal)) {
@@ -617,8 +690,8 @@
         const isBangunan = (emp.unit && emp.unit.includes('Bangunan'));
         bHtml += `<tr>
           <td class="emp-col">
-            <div style="font-weight:700; color:var(--kuk-text);">${empName}</div>
-            <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}">${emp.position || emp.department || 'Staff'} • ${emp.unit || 'Bangunan'}</span>
+            <div style="font-weight:800; color:var(--kuk-text); font-size:13px;">${empName}</div>
+            <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}">${emp.department || emp.position || 'Staff'} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
           </td>
           <td style="font-weight:800; color:${leaveDays.size > 0 ? '#b91c1c' : 'var(--kuk-text-muted)'}; background:#f8fafc;">
             ${leaveDays.size}
@@ -632,8 +705,8 @@
           const isSun = (dayOfWeek === 0);
           const hasLeave = leaveDays.has(d);
 
-          bHtml += `<td class="${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''} ${isSun && !hasLeave ? 'matrix-cell-weekend' : ''}" 
-                        title="${hasLeave ? `${empName} Cuti pada ${d} ${MONTHS[monthIdx]}` : `${d} ${MONTHS[monthIdx]}`}">
+          bHtml += `<td class="${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''} ${isSun && !hasLeave ? 'matrix-cell-weekend' : ''}"
+                        title="${hasLeave ? `${empName} Cuti: ${d} ${MONTHS[monthIdx]}` : `${d}`}">
             ${hasLeave ? '🏖️' : ''}
           </td>`;
         }
@@ -643,151 +716,130 @@
       tbody.innerHTML = bHtml;
     }
 
-    function updateKPIStats(monthIdx, year) {
-      const monthStr = String(monthIdx + 1).padStart(2, '0');
-      const todayStr = new Date().toISOString().split('T')[0];
-
-      // Month Count
-      let totalMonth = 0;
-      const todayCutiNames = [];
-
-      allCutiRecords.forEach(c => {
-        if (Array.isArray(c.tanggal)) {
-          c.tanggal.forEach(t => {
-            if (t.startsWith(`${year}-${monthStr}`)) totalMonth++;
-            if (t === todayStr) todayCutiNames.push(c.nama);
-          });
-        } else if (c.tanggal) {
-          if (c.tanggal.startsWith(`${year}-${monthStr}`)) totalMonth++;
-          if (c.tanggal === todayStr) todayCutiNames.push(c.nama);
-        }
-      });
-
-      document.getElementById('statTotalMonth').textContent = `${totalMonth} Hari`;
-      document.getElementById('statTodayCutiCount').textContent = `${todayCutiNames.length} Karyawan`;
-      document.getElementById('statTodayList').textContent = todayCutiNames.length > 0 ? `Sedang Cuti: ${todayCutiNames.join(', ')}` : 'Semua karyawan bertugas hari ini';
-    }
-
     function loadApprovalList() {
-      let subs = [];
-      if (typeof DashboardEngine !== 'undefined' && DashboardEngine.getPendingLeavesDirect) {
-        subs = DashboardEngine.getPendingLeavesDirect();
-      } else {
-        const raw = localStorage.getItem('kuk_public_submissions');
-        subs = raw ? JSON.parse(raw).filter(s => s.module === 'CUTI' && (!s.status || s.status === 'PENDING')) : [];
-      }
+      const subs = typeof DashboardEngine !== 'undefined' ? DashboardEngine.getSubmissions() : [];
+      const pending = subs.filter(s => s.module === 'CUTI' && (!s.status || s.status === 'PENDING'));
 
-      document.getElementById('badgePending').textContent = subs.length;
-      const tb = document.getElementById('approvalTbody');
-      if (subs.length === 0) {
-        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--kuk-text-muted);">🎉 Tidak ada pengajuan cuti yang menunggu approval.</td></tr>`;
+      document.getElementById('statPendingCount').textContent = `${pending.length} Antrean`;
+      document.getElementById('badgePendingTittle').textContent = `${pending.length} Menunggu Persetujuan`;
+
+      const tbody = document.getElementById('approvalTbody');
+      if (pending.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 36px; color: var(--kuk-text-muted);">
+              ✅ Tidak ada pengajuan cuti yang menunggu persetujuan saat ini.
+            </td>
+          </tr>
+        `;
         return;
       }
 
-      tb.innerHTML = subs.map(s => `
-        <tr>
-          <td>${(s.createdAt || s.submittedAt || '').split('T')[0] || '-'}</td>
-          <td><strong>${s.employeeName || s.nama || '-'}</strong></td>
-          <td><span class="badge-unit badge-bangunan">${s.unit || 'KUK Bangunan'}</span></td>
-          <td>${s.startDate || s.tanggal || '-'} s/d ${s.endDate || s.tanggal || '-'} (${s.days || 1} Hari)</td>
-          <td><span class="badge badge-info">${s.leaveType || 'Cuti Tahunan'}</span></td>
-          <td>${s.reason || s.alasan || '-'}</td>
-          <td style="text-align:center;">
-            <button class="btn btn-sm btn-success" onclick="approveSubmission('${s.id}')">✅ Terima</button>
-            <button class="btn btn-sm btn-danger" onclick="rejectSubmission('${s.id}')">❌ Tolak</button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = pending.map(item => {
+        const empName = item.employeeName || item.nama || 'Karyawan';
+        const emp = currentEmployees.find(e => e.id === item.employeeId || (e.fullName && e.fullName.toLowerCase() === empName.toLowerCase()));
+        const unit = emp ? emp.unit : (item.unit || 'KUK Bangunan');
+        const dept = emp ? (emp.department || emp.position) : (item.department || 'Staff');
+        const dates = item.dates || (item.startDate ? `${item.startDate} s/d ${item.endDate}` : (item.tanggal ? (Array.isArray(item.tanggal) ? item.tanggal.join(', ') : item.tanggal) : '-'));
+
+        return `
+          <tr>
+            <td style="font-size: 12px; color: var(--kuk-text-muted); white-space: nowrap;">
+              ${item.submittedAt || item.date || '-'}
+            </td>
+            <td>
+              <div style="font-weight: 800; color: var(--kuk-primary); font-size: 13.5px;">${empName}</div>
+              <div style="font-size: 11px; color: var(--kuk-text-muted);">${item.employeeId || '-'}</div>
+            </td>
+            <td>
+              <div>${unit}</div>
+              <div style="font-size: 11px; color: var(--kuk-text-muted);">${dept}</div>
+            </td>
+            <td>
+              <span style="font-weight: 700; color: #b45309; background: #fef3c7; padding: 3px 8px; border-radius: 6px; font-size: 12px;">
+                📅 ${dates}
+              </span>
+            </td>
+            <td>
+              <span style="font-weight: 600;">${item.leaveType || item.tipe || 'Cuti Tahunan'}</span>
+            </td>
+            <td style="font-size: 12.5px; color: var(--kuk-text-muted); max-width: 200px;">
+              ${item.reason || item.alasan || '-'}
+            </td>
+            <td style="text-align: right; white-space: nowrap; padding-right: 24px;">
+              <button class="btn btn-sm btn-success" onclick="approveLeave('${item.id}', true)">✓ Setujui</button>
+              <button class="btn btn-sm btn-danger" onclick="approveLeave('${item.id}', false)">✕ Tolak</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    function approveSubmission(id) {
-      if (!confirm('Setujui permohonan cuti ini?')) return;
+    function approveLeave(submissionId, isApproved) {
       if (typeof DashboardEngine !== 'undefined') {
-        DashboardEngine.resolveLeaveDirect(id, 'APPROVED');
-      }
-      showToast('Permohonan cuti berhasil disetujui!');
-      loadApprovalList();
-      loadRekapData();
-    }
-
-    function rejectSubmission(id) {
-      const note = prompt('Alasan penolakan:', 'Kuota operasional penuh');
-      if (note === null) return;
-      if (typeof DashboardEngine !== 'undefined') {
-        DashboardEngine.resolveLeaveDirect(id, 'REJECTED', note);
-      }
-      showToast('Permohonan cuti ditolak.');
-      loadApprovalList();
-      loadRekapData();
-    }
-
-    function loadSetupInfo() {
-      const box = document.getElementById('currentDeadlineBox');
-      box.textContent = 'Memeriksa status dari server...';
-      fetch(`${MasterDB.SCRIPT_URL}?action=init`).then(r => r.json()).then(res => {
-        if (res.batasWaktu) {
-          const d = new Date(res.batasWaktu);
-          box.innerHTML = `🔒 <strong>Batas Waktu Aktif:</strong> ${d.toLocaleString('id-ID')}`;
-          document.getElementById('statLockStatus').textContent = '🔒 Dibatasi';
-          document.getElementById('statDeadlineText').textContent = `Sampai ${d.toLocaleDateString('id-ID')}`;
-        } else {
-          box.innerHTML = `🔓 <strong>Status:</strong> Pengajuan tidak dibatasi waktu (Terbuka bebas).`;
-          document.getElementById('statLockStatus').textContent = '🔓 Terbuka';
-          document.getElementById('statDeadlineText').textContent = 'Tanpa batas waktu';
+        const res = isApproved ? DashboardEngine.approveSubmission(submissionId) : DashboardEngine.rejectSubmission(submissionId, 'Ditolak oleh Admin');
+        if (res.success) {
+          showToast(isApproved ? "Pengajuan cuti berhasil disetujui!" : "Pengajuan cuti berhasil ditolak.");
+          loadRekapData();
+          loadApprovalList();
         }
-      }).catch(e => {
-        box.textContent = 'Server offline / Menggunakan pengaturan lokal.';
-      });
+      }
+    }
+
+    function checkDeadlineStatus() {
+      const deadline = localStorage.getItem('kuk_cuti_deadline');
+      const box = document.getElementById('currentDeadlineBox');
+      const statusEl = document.getElementById('statLockStatus');
+      const deadlineText = document.getElementById('statDeadlineText');
+
+      if (!deadline) {
+        box.innerHTML = `<span style="color:#15803d;">🔓 Form Terbuka Bebas</span> — Belum ada batas waktu pengisian yang diaktifkan.`;
+        statusEl.innerHTML = `🔓 Terbuka`;
+        deadlineText.textContent = `Tanpa batas waktu`;
+        return;
+      }
+
+      const dObj = new Date(deadline);
+      const isExpired = new Date() > dObj;
+      const formatted = dObj.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
+
+      if (isExpired) {
+        box.innerHTML = `<span style="color:#dc2626; font-weight:800;">🔒 Form Terkunci Otomatis</span> — Batas waktu telah berakhir pada <strong>${formatted} WIB</strong>.`;
+        statusEl.innerHTML = `🔒 Terkunci`;
+        statusEl.style.color = '#dc2626';
+        deadlineText.textContent = `Berakhir: ${formatted}`;
+      } else {
+        box.innerHTML = `<span style="color:#b45309; font-weight:800;">⏳ Aktif dengan Batas Waktu</span> — Pengisian formulir akan dikunci pada <strong>${formatted} WIB</strong>.`;
+        statusEl.innerHTML = `⏳ Terjadwal`;
+        statusEl.style.color = '#b45309';
+        deadlineText.textContent = `Batas: ${formatted}`;
+      }
     }
 
     function saveDeadline() {
       const val = document.getElementById('inputDeadline').value;
-      if (!val) return showToast('Pilih tanggal dan jam batas akhir', true);
-      showToast('Menyimpan batas waktu ke server...');
-      fetch(MasterDB.SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=save_setup&batasWaktu=${encodeURIComponent(val)}`
-      }).then(r => r.json()).then(res => {
-        showToast('Batas waktu berhasil disimpan!');
-        loadSetupInfo();
-      }).catch(e => {
-        showToast('Tersimpan di sistem lokal.', false);
-        loadSetupInfo();
-      });
+      if (!val) {
+        alert("Pilih tanggal dan jam batas akhir terlebih dahulu.");
+        return;
+      }
+      localStorage.setItem('kuk_cuti_deadline', val);
+      showToast("Batas waktu pengajuan cuti berhasil disimpan!");
+      checkDeadlineStatus();
     }
 
     function clearDeadline() {
-      if (!confirm('Buka kunci pengajuan cuti (hapus batas waktu)?')) return;
-      fetch(MasterDB.SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=save_setup&batasWaktu=`
-      }).then(r => r.json()).then(res => {
-        showToast('Batas waktu dihapus. Form terbuka bebas.');
-        loadSetupInfo();
-      }).catch(e => {
-        loadSetupInfo();
-      });
-    }
-
-    function syncCloud() {
-      showToast('Menyinkronkan data cuti dengan Google Spreadsheet...');
-      if (typeof MasterDB !== 'undefined') {
-        MasterDB.syncFromGoogleSheets().then(res => {
-          showToast(res.message || 'Sinkronisasi selesai!');
-          loadRekapData();
-        }).catch(e => showToast('Gagal sinkron: ' + e.message, true));
-      }
+      localStorage.removeItem('kuk_cuti_deadline');
+      document.getElementById('inputDeadline').value = '';
+      showToast("Batas waktu pengajuan cuti telah dihapus.");
+      checkDeadlineStatus();
     }
 
     function exportMatrixCSV() {
       const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
       const year = parseInt(document.getElementById('selYear').value, 10);
-      const totalDays = new Date(year, monthIdx + 1, 0).getDate();
       const monthStr = String(monthIdx + 1).padStart(2, '0');
 
-      let csv = `Nama,Unit,Bagian,Total Cuti Bulan Ini,Tanggal Cuti\n`;
+      let csv = `Nama Karyawan,Unit,Bagian,Total Cuti (${MONTHS[monthIdx]} ${year}),Daftar Tanggal Cuti\n`;
       currentEmployees.forEach(emp => {
         const empName = emp.fullName || emp.nama;
         const empLeaves = allCutiRecords.filter(c => (c.idKaryawan === emp.id || (c.nama && empName.toLowerCase().includes(c.nama.toLowerCase()))));
@@ -797,7 +849,7 @@
             c.tanggal.forEach(t => { if (t.startsWith(`${year}-${monthStr}`)) dates.push(t); });
           } else if (c.tanggal && c.tanggal.startsWith(`${year}-${monthStr}`)) dates.push(c.tanggal);
         });
-        csv += `"${empName}","${emp.unit || '-'}","${emp.position || '-'}","${dates.length}","${dates.join('; ')}"\n`;
+        csv += `"${empName}","${emp.unit || '-'}","${emp.department || emp.position || '-'}","${dates.length}","${dates.join('; ')}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -809,18 +861,26 @@
     }
 
     function exportMatrixImage() {
-      showToast('Menyiapkan gambar kalender cuti...');
-      const target = document.getElementById('viewMatrix');
+      const target = document.getElementById('captureContainer');
+      if (!target || typeof html2canvas === 'undefined') return;
       html2canvas(target, { scale: 2 }).then(canvas => {
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
-        a.download = `Kalender_Cuti_KUK_${document.getElementById('selMonth').value}_${document.getElementById('selYear').value}.png`;
+        a.download = `Matriks_Cuti_KUK_${document.getElementById('selMonth').value}_${document.getElementById('selYear').value}.png`;
         a.click();
-        showToast('Gambar berhasil diunduh!');
       });
     }
 
-    window.addEventListener('DOMContentLoaded', initPage);
+    function syncCloud() {
+      showToast("Menyinkronkan data cuti dengan Google Sheets...");
+      if (typeof DashboardEngine !== 'undefined') {
+        DashboardEngine.syncFromCloud().then(() => {
+          showToast("Data cuti berhasil disinkronkan!");
+          loadRekapData();
+          loadApprovalList();
+        });
+      }
+    }
   </script>
 </body>
 </html>

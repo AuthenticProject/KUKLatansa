@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -883,34 +883,56 @@
       renderCalendar();
     }
 
-    function checkDateRestriction(key) {
-      if (!activeUser || !leavesMap || !leavesMap[key]) return null;
+    function checkDateRestriction(key, dateObj) {
+      if (!activeUser) return null;
+
+      const empName = String(activeUser.nama || activeUser.fullName || '').toLowerCase();
+      const empId = String(activeUser.id || '');
+      const isIrvan = empName.includes('irvan') || empId === 'K-011' || empId === 'KRY-009' || empId === '11';
+
+      // Rule 3: Irvan hanya bisa cuti hari Minggu
+      if (isIrvan && dateObj && dateObj.getDay() !== 0) {
+        return { type: 'irvan_rule', message: 'Irvan hanya dapat mengambil cuti pada hari Minggu.' };
+      }
+
+      if (!leavesMap || !leavesMap[key]) return null;
       const others = leavesMap[key];
-      const bgLower = String(activeUser.bagian || '').trim().toLowerCase();
+      const bgLower = String(activeUser.bagian || activeUser.department || activeUser.position || '').trim().toLowerCase();
 
-      // 1. Kepala Toko & Admin
-      const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
-      if (isMgrRole) {
-        const conflictMgr = others.find(o => {
-          const oBg = String(o.bagian || '').trim().toLowerCase();
-          return (oBg === 'kepala toko' || oBg === 'admin');
+      // Rule 1: Bagian yang sama tidak boleh cuti bareng
+      const sameDeptConflict = others.find(o => {
+        if (!o) return false;
+        const oBg = String(o.bagian || o.department || o.position || '').trim().toLowerCase();
+        return oBg && oBg === bgLower && (o.id !== activeUser.id && o.nama !== activeUser.nama);
+      });
+      if (sameDeptConflict) {
+        return { type: 'dept_conflict', message: `Bentrok: ${sameDeptConflict.nama} (${sameDeptConflict.bagian}) dari bagian yang sama sudah mengambil cuti pada tanggal ini.` };
+      }
+
+      // Rule 2: Kepala Toko tidak boleh bareng dengan Admin
+      const isKepalaToko = bgLower.includes('kepala toko');
+      const isAdmin = bgLower.includes('admin');
+
+      if (isKepalaToko) {
+        const adminConflict = others.find(o => {
+          const oBg = String(o.bagian || o.department || o.position || '').trim().toLowerCase();
+          return oBg.includes('admin');
         });
-        if (conflictMgr) {
-          return { type: 'role_conflict', message: `Bentrok: ${conflictMgr.nama} (${conflictMgr.bagian}) sudah cuti` };
+        if (adminConflict) {
+          return { type: 'role_conflict', message: `Bentrok Operasional: Kepala Toko tidak boleh cuti bersamaan dengan Admin (${adminConflict.nama}).` };
         }
       }
 
-      // 3. Pengiriman & Kepala Pengiriman
-      const isDeliveryRole = (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman');
-      if (isDeliveryRole) {
-        const conflictDel = others.find(o => {
-          const oBg = String(o.bagian || '').trim().toLowerCase();
-          return (oBg === 'pengiriman' || oBg === 'kepala pengiriman');
+      if (isAdmin) {
+        const ktConflict = others.find(o => {
+          const oBg = String(o.bagian || o.department || o.position || '').trim().toLowerCase();
+          return oBg.includes('kepala toko');
         });
-        if (conflictDel) {
-          return { type: 'role_conflict', message: `Bentrok: ${conflictDel.nama} (${conflictDel.bagian}) sudah cuti` };
+        if (ktConflict) {
+          return { type: 'role_conflict', message: `Bentrok Operasional: Admin tidak boleh cuti bersamaan dengan Kepala Toko (${ktConflict.nama}).` };
         }
       }
+
       return null;
     }
 
@@ -948,18 +970,16 @@
           el.classList.add('booked');
           el.onclick = () => showToast(`Diambil rekan di divisi ${activeUser?.bagian}`, 'error');
         } else {
-          // Check new restrictions
-          const restriction = checkDateRestriction(key);
-          // Irvan (KRY-009) hanya boleh cuti hari Minggu
-          const isIrvan = activeUser && String(activeUser.id) === 'KRY-009';
-          const isSunday = dateObj.getDay() === 0;
+          // Check operational and individual restrictions
+          const restriction = checkDateRestriction(key, dateObj);
           if (restriction) {
-            el.classList.add('booked');
+            if (restriction.type === 'irvan_rule') {
+              el.classList.add('locked');
+              el.style.opacity = '0.4';
+            } else {
+              el.classList.add('booked');
+            }
             el.onclick = () => showToast(restriction.message, 'error');
-          } else if (isIrvan && !isSunday) {
-            el.classList.add('locked');
-            el.style.opacity = '0.4';
-            el.onclick = () => showToast('Irvan hanya bisa cuti hari Minggu.', 'error');
           } else {
             if (dateObj.getTime() === today.getTime()) el.classList.add('today');
             if (selectedDates.includes(key)) el.classList.add('selected');
