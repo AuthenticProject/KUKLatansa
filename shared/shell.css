@@ -645,8 +645,20 @@ body.kuk-sidebar-expanded .kuk-topbar {
   text-transform: uppercase;
   border: 2px solid var(--kuk-border);
   cursor: pointer;
+  overflow: hidden;
+  position: relative;
   transition: border-color var(--kuk-transition);
 }
+.kuk-topbar-avatar img,
+.kuk-user-menu-avatar img,
+.kuk-sidebar-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: inherit !important;
+}
+
 .kuk-user-menu-btn { border: none; background: transparent; padding: 2px; border-radius: var(--kuk-radius-sm); cursor: pointer; }
 .kuk-user-menu-btn:hover .kuk-topbar-avatar { border-color: var(--kuk-primary); }
 
@@ -685,6 +697,8 @@ body.kuk-sidebar-expanded .kuk-topbar {
   font-family: var(--kuk-font);
   text-transform: uppercase;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 .kuk-user-menu-name {

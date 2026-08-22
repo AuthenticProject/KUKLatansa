@@ -468,8 +468,14 @@ const MasterDB = (() => {
       return user;
     },
     saveUserPhoto: (username, photoDataUrl) => {
+      if (!username) return photoDataUrl;
+      const cleanUsername = username.toLowerCase();
+      try {
+        localStorage.setItem('kuk_user_photo_' + cleanUsername, photoDataUrl);
+      } catch(e) {}
+
       let users = getStored(STORAGE_KEY_USERS) || DEFAULT_USERS;
-      const idx = users.findIndex(u => u.username.toLowerCase() === (username||'').toLowerCase() || u.id === username);
+      const idx = users.findIndex(u => u.username.toLowerCase() === cleanUsername || u.id === username);
       if (idx > -1) {
         users[idx].foto = photoDataUrl;
         saveStored(STORAGE_KEY_USERS, users);
@@ -478,7 +484,7 @@ const MasterDB = (() => {
         const sessRaw = sessionStorage.getItem('kuk_user');
         if (sessRaw) {
           const sess = JSON.parse(sessRaw);
-          if (sess && sess.username && sess.username.toLowerCase() === (username||'').toLowerCase()) {
+          if (sess && sess.username && sess.username.toLowerCase() === cleanUsername) {
             sess.foto = photoDataUrl;
             sessionStorage.setItem('kuk_user', JSON.stringify(sess));
           }

@@ -25,7 +25,7 @@
 
   /* ── Storage keys ─────────────────────────────────────────────────── */
   const KEY_USER     = 'kuk_user';
-  const KEY_USERS_DB = 'kuk_users_db';
+  const KEY_USERS_DB = 'kuk_master_users';
   const KEY_UNIT     = 'kuk_selected_unit';
 
   /* ── Default users (fallback when localStorage not yet populated) ─── */
@@ -279,11 +279,35 @@
   }
 
   function getAvatarHTML(username) {
+    if (!username) return 'U';
+    const cleanUsername = username.toLowerCase();
+    
+    // 1. Direct photo in sessionStorage
+    try {
+      const sessRaw = sessionStorage.getItem('kuk_user');
+      if (sessRaw) {
+        const sess = JSON.parse(sessRaw);
+        if (sess && sess.foto && (sess.username||'').toLowerCase() === cleanUsername) {
+          return '<img src="' + sess.foto + '" alt="' + username + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">';
+        }
+      }
+    } catch(e) {}
+
+    // 2. Direct photo key in localStorage
+    try {
+      const directKey = localStorage.getItem('kuk_user_photo_' + cleanUsername);
+      if (directKey) {
+        return '<img src="' + directKey + '" alt="' + username + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">';
+      }
+    } catch(e) {}
+
+    // 3. User record in MasterDB / UsersDB
     const user = getUserRecord(username);
-    const initial = username ? username[0].toUpperCase() : 'U';
     if (user && user.foto) {
-      return '<img src="' + user.foto + '" alt="' + username + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">';
+      return '<img src="' + user.foto + '" alt="' + username + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">';
     }
+
+    const initial = username ? username[0].toUpperCase() : 'U';
     return initial;
   }
 
