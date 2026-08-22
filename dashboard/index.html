@@ -1432,9 +1432,8 @@
         const dayOfWeek = dateObj.getDay();
         const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
         const isToday = (dateKey === todayStr);
-        const isSun = (dayOfWeek === 0);
 
-        hHtml += `<th class="${isToday ? 'matrix-cell-today' : ''} ${isSun ? 'matrix-cell-weekend' : ''}" style="${isSun ? 'color:#ef4444;' : ''}">
+        hHtml += `<th class="${isToday ? 'matrix-cell-today' : ''}">
           <div>${d}</div>
           <div style="font-size:8.5px; opacity:0.7;">${['Min','Sen','Sel','Rab','Kam','Jum','Sab'][dayOfWeek]}</div>
         </th>`;
@@ -1452,6 +1451,7 @@
       let bHtml = '';
       emps.forEach(emp => {
         const empName = emp.fullName || emp.nama;
+        const safeName = empName.replace(/'/g, "\\'");
         const empLeaves = allCuti.filter(c => {
           const matchId = (c.idKaryawan && (c.idKaryawan === emp.id || c.idKaryawan === emp.fingerprintId));
           const matchName = (c.nama && empName.toLowerCase().includes(c.nama.toLowerCase()));
@@ -1478,15 +1478,14 @@
           </td>`;
 
         for (let d = 1; d <= totalDays; d++) {
-          const dateObj = new Date(year, monthIdx, d);
-          const dayOfWeek = dateObj.getDay();
           const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
           const isToday = (dateKey === todayStr);
-          const isSun = (dayOfWeek === 0);
           const hasLeave = leaveDays.has(d);
 
-          bHtml += `<td class="${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''} ${isSun && !hasLeave ? 'matrix-cell-weekend' : ''}"
-                        title="${hasLeave ? `${empName} Cuti: ${d} ${['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][monthIdx]}` : `${d}`}">
+          bHtml += `<td class="matrix-cell-day ${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''}"
+                        onclick="toggleDashboardCutiDate('${emp.id}', '${safeName}', ${year}, ${monthIdx}, ${d})"
+                        style="cursor:pointer;"
+                        title="${hasLeave ? `Klik untuk membatalkan cuti: ${d} ${['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][monthIdx]}` : `Klik untuk menambah cuti: ${d}`}">
             ${hasLeave ? '🏖️' : ''}
           </td>`;
         }
@@ -1494,6 +1493,47 @@
       });
 
       tbody.innerHTML = bHtml;
+    }
+
+    function toggleDashboardCutiDate(empId, empName, year, monthIdx, day) {
+      const monthStr = String(monthIdx + 1).padStart(2, '0');
+      const dayStr = String(day).padStart(2, '0');
+      const dateKey = `${year}-${monthStr}-${dayStr}`;
+
+      const stored = localStorage.getItem('kuk_db_cuti_v1');
+      let allCuti = stored ? JSON.parse(stored) : [];
+
+      const emp = typeof MasterDB !== 'undefined' ? MasterDB.getEmployees().find(e => e.id === empId || (e.fullName && e.fullName.toLowerCase() === empName.toLowerCase())) : null;
+      const realId = emp ? emp.id : empId;
+      const realName = emp ? (emp.fullName || emp.nama) : empName;
+
+      let record = allCuti.find(c => {
+        const matchId = (c.idKaryawan && (c.idKaryawan === realId || (emp && c.idKaryawan === emp.fingerprintId)));
+        const matchName = (c.nama && realName.toLowerCase().includes(c.nama.toLowerCase()));
+        return (matchId || matchName);
+      });
+
+      if (record) {
+        if (!Array.isArray(record.tanggal)) record.tanggal = record.tanggal ? [record.tanggal] : [];
+        const idx = record.tanggal.indexOf(dateKey);
+        if (idx > -1) {
+          record.tanggal.splice(idx, 1);
+        } else {
+          record.tanggal.push(dateKey);
+        }
+      } else {
+        allCuti.push({
+          id: `CUTI-${Date.now()}`,
+          idKaryawan: realId,
+          nama: realName,
+          tanggal: [dateKey],
+          status: 'APPROVED',
+          submittedAt: new Date().toISOString()
+        });
+      }
+
+      localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(allCuti));
+      renderDashboardCutiMatrix();
     }
 
     function exportDashboardCutiCSV() {

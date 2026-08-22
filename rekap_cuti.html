@@ -343,6 +343,24 @@
 
   <div class="app-container">
 
+    <!-- Navigation Bar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: -4px;">
+      <a href="index.html" style="display:inline-flex; align-items:center; gap:6px; color:#64748b; font-size:14px; font-weight:600; text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Kembali ke Portal
+      </a>
+    </div>
+    <div style="display:flex; gap:8px; background:#e2e8f0; padding:4px; border-radius:12px; max-width:440px; margin-bottom:4px;">
+      <a href="cuti.html" style="flex:1; text-align:center; padding:9px 14px; font-size:13.5px; font-weight:700; color:var(--kuk-text-muted); border-radius:9px; text-decoration:none;">
+        📝 Form Pengajuan ↗
+      </a>
+      <a href="rekap_cuti.html" style="flex:1; text-align:center; padding:9px 14px; font-size:13.5px; font-weight:700; background:#fff; color:var(--kuk-primary); border-radius:9px; text-decoration:none; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+        🗓️ Matriks Rekap Cuti
+      </a>
+    </div>
+
     <!-- 1. Header Page -->
     <header class="page-header">
       <div class="header-titles">
@@ -414,7 +432,7 @@
           <div class="card-title">
             <span>📊</span> Matriks Jadwal Cuti Seluruh Karyawan (Gantt View)
           </div>
-          <p style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">Matriks jadwal libur dan pengajuan cuti seluruh divisi per tanggal.</p>
+          <p style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">Matriks jadwal libur dan pengajuan cuti seluruh divisi per tanggal. Klik tanggal untuk toggle cuti.</p>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -452,21 +470,6 @@
             <thead id="matrixHead"></thead>
             <tbody id="matrixBody"></tbody>
           </table>
-        </div>
-
-        <div style="margin-top: 14px; display: flex; gap: 20px; font-size: 12px; color: var(--kuk-text-muted); flex-wrap: wrap;">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="display:inline-block; width:14px; height:14px; background:#fee2e2; border:1px solid #fca5a5; border-radius:4px;"></span>
-            <span>Jadwal Cuti Karyawan</span>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="display:inline-block; width:14px; height:14px; background:#fffbeb; border:2px solid var(--kuk-primary); border-radius:4px;"></span>
-            <span>Hari Ini</span>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="display:inline-block; width:14px; height:14px; background:#fdf4f4; border:1px solid #fecaca; border-radius:4px;"></span>
-            <span>Hari Minggu / Libur</span>
-          </div>
         </div>
       </div>
     </section>
@@ -541,6 +544,50 @@
 
   </div>
 
+  <!-- MODAL EDIT CUTI KARYAWAN -->
+  <div id="editCutiModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; justify-content:center; align-items:center; padding:16px;">
+    <div style="background:#fff; border-radius:20px; width:100%; max-width:540px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.3); border:1px solid var(--kuk-border);">
+      <div style="padding:20px 24px; border-bottom:1px solid var(--kuk-border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, #540000 0%, #2b0000 100%); color:#fff; border-top-left-radius:20px; border-top-right-radius:20px;">
+        <div>
+          <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;" id="modalEmpName">Edit Cuti Karyawan</h2>
+          <p style="font-size:12px; opacity:0.85; margin-top:2px;" id="modalEmpMeta">KUK Bangunan</p>
+        </div>
+        <button onclick="closeEditCutiModal()" style="background:rgba(255,255,255,0.2); border:none; color:#fff; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; font-weight:800;">✕</button>
+      </div>
+
+      <div style="padding:20px 24px; display:flex; flex-direction:column; gap:20px;">
+        <!-- Section 1: Daftar Tanggal Terdaftar -->
+        <div>
+          <div style="font-size:12px; font-weight:800; text-transform:uppercase; color:var(--kuk-text-muted); margin-bottom:10px;">
+            📌 Daftar Tanggal Cuti Terdaftar:
+          </div>
+          <div id="modalDatesList"></div>
+        </div>
+
+        <!-- Section 2: Grid Pemilih Tanggal -->
+        <div>
+          <div style="font-size:12px; font-weight:800; text-transform:uppercase; color:var(--kuk-text-muted); margin-bottom:10px;">
+            🗓️ Sentuh Tanggal Kalender (Toggle Tambah / Hapus):
+          </div>
+          <div id="modalDayPickerGrid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px;"></div>
+        </div>
+
+        <!-- Section 3: Input Tanggal Khusus -->
+        <div style="padding:14px; background:#f8fafc; border:1px solid var(--kuk-border); border-radius:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <div style="flex:1; min-width:180px;">
+            <label style="font-size:11px; font-weight:700; color:var(--kuk-text-muted); display:block; margin-bottom:4px;">PILIH TANGGAL KHUSUS:</label>
+            <input type="date" id="modalAddCustomDateInput" class="filter-input" style="width:100%; padding:8px 12px; font-size:13px;">
+          </div>
+          <button class="btn btn-primary" onclick="addCustomDateFromModal()" style="margin-top:16px; padding:10px 16px;">➕ Tambah Tanggal</button>
+        </div>
+      </div>
+
+      <div style="padding:16px 24px; border-top:1px solid var(--kuk-border); background:#f8fafc; display:flex; justify-content:flex-end; border-bottom-left-radius:20px; border-bottom-right-radius:20px;">
+        <button class="btn btn-primary" onclick="closeEditCutiModal()" style="padding:10px 24px; font-size:14px;">✅ Selesai & Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toastBox" class="toast-box"></div>
 
   <!-- SCRIPTS -->
@@ -554,6 +601,8 @@
     const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     let allCutiRecords = [];
     let currentEmployees = [];
+    let currentEditEmpId = null;
+    let currentEditEmpName = '';
 
     function showToast(msg, isErr = false) {
       const b = document.getElementById('toastBox');
@@ -622,17 +671,14 @@
     function renderMatrix(monthIdx, year) {
       const monthStr = String(monthIdx + 1).padStart(2, '0');
       const totalDays = new Date(year, monthIdx + 1, 0).getDate();
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
       // Build Thead
       let hHtml = `<tr><th class="emp-head">Karyawan & Bagian</th><th style="min-width:40px;">Total</th>`;
       for (let d = 1; d <= totalDays; d++) {
         const dateObj = new Date(year, monthIdx, d);
         const dayName = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'][dateObj.getDay()];
-        const isSun = (dateObj.getDay() === 0);
-        hHtml += `<th class="${isSun ? 'matrix-cell-weekend' : ''}" style="min-width:28px;">
-                    <div style="font-size:9px; color:${isSun ? '#ef4444' : '#64748b'};">${dayName}</div>
+        hHtml += `<th style="min-width:28px;">
+                    <div style="font-size:9px; color:#64748b;">${dayName}</div>
                     <div>${d}</div>
                   </th>`;
       }
@@ -672,6 +718,7 @@
       let bHtml = '';
       emps.forEach(emp => {
         const empName = emp.fullName || emp.nama;
+        const safeName = empName.replace(/'/g, "\\'");
         const empLeaves = allCutiRecords.filter(c => {
           const matchId = (c.idKaryawan && (c.idKaryawan === emp.id || c.idKaryawan === emp.fingerprintId));
           const matchName = (c.nama && empName.toLowerCase().includes(c.nama.toLowerCase()));
@@ -689,24 +736,27 @@
 
         const isBangunan = (emp.unit && emp.unit.includes('Bangunan'));
         bHtml += `<tr>
-          <td class="emp-col">
-            <div style="font-weight:800; color:var(--kuk-text); font-size:13px;">${empName}</div>
-            <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}">${emp.department || emp.position || 'Staff'} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
+          <td class="emp-col" style="cursor:pointer;" onclick="openEditCutiModal('${emp.id}', '${safeName}')" title="Klik untuk melihat/mengedit cuti ${empName}">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <div style="font-weight:800; color:var(--kuk-text); font-size:13px;">${empName}</div>
+                <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}">${emp.department || emp.position || 'Staff'} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
+              </div>
+              <span style="font-size:11px; padding:3px 7px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; color:#475569; font-weight:600;">✏️ Edit</span>
+            </div>
           </td>
-          <td style="font-weight:800; color:${leaveDays.size > 0 ? '#b91c1c' : 'var(--kuk-text-muted)'}; background:#f8fafc;">
+          <td style="font-weight:800; color:${leaveDays.size > 0 ? '#b91c1c' : 'var(--kuk-text-muted)'}; background:#f8fafc; cursor:pointer;" onclick="openEditCutiModal('${emp.id}', '${safeName}')" title="Klik untuk mengedit cuti ${empName}">
             ${leaveDays.size}
           </td>`;
 
         for (let d = 1; d <= totalDays; d++) {
-          const dateObj = new Date(year, monthIdx, d);
-          const dayOfWeek = dateObj.getDay();
           const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
           const isToday = (dateKey === todayStr);
-          const isSun = (dayOfWeek === 0);
           const hasLeave = leaveDays.has(d);
 
-          bHtml += `<td class="${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''} ${isSun && !hasLeave ? 'matrix-cell-weekend' : ''}"
-                        title="${hasLeave ? `${empName} Cuti: ${d} ${MONTHS[monthIdx]}` : `${d}`}">
+          bHtml += `<td class="matrix-cell-day ${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''}"
+                        onclick="toggleCutiDate('${emp.id}', '${safeName}', ${year}, ${monthIdx}, ${d})"
+                        title="${hasLeave ? `Klik untuk membatalkan cuti ${empName}: ${d} ${MONTHS[monthIdx]}` : `Klik untuk menambahkan cuti ${empName}: ${d} ${MONTHS[monthIdx]}`}">
             ${hasLeave ? '🏖️' : ''}
           </td>`;
         }
@@ -714,6 +764,245 @@
       });
 
       tbody.innerHTML = bHtml;
+    }
+
+    function toggleCutiDate(empId, empName, year, monthIdx, day) {
+      const monthStr = String(monthIdx + 1).padStart(2, '0');
+      const dayStr = String(day).padStart(2, '0');
+      const dateKey = `${year}-${monthStr}-${dayStr}`;
+
+      const rawCuti = localStorage.getItem('kuk_db_cuti_v1');
+      allCutiRecords = rawCuti ? JSON.parse(rawCuti) : [];
+
+      const emp = currentEmployees.find(e => e.id === empId || (e.fullName && e.fullName.toLowerCase() === empName.toLowerCase()));
+      const realId = emp ? emp.id : empId;
+      const realName = emp ? (emp.fullName || emp.nama) : empName;
+
+      let record = allCutiRecords.find(c => {
+        const matchId = (c.idKaryawan && (c.idKaryawan === realId || (emp && c.idKaryawan === emp.fingerprintId)));
+        const matchName = (c.nama && realName.toLowerCase().includes(c.nama.toLowerCase()));
+        return (matchId || matchName);
+      });
+
+      if (record) {
+        if (!Array.isArray(record.tanggal)) record.tanggal = record.tanggal ? [record.tanggal] : [];
+        const idx = record.tanggal.indexOf(dateKey);
+        if (idx > -1) {
+          record.tanggal.splice(idx, 1);
+          showToast(`Cuti ${realName} tgl ${day} dibatalkan.`);
+        } else {
+          record.tanggal.push(dateKey);
+          record.tanggal.sort();
+          showToast(`Cuti ${realName} tgl ${day} ditambahkan!`);
+        }
+        record.totalHari = record.tanggal.length;
+      } else {
+        allCutiRecords.push({
+          id: `CUTI-${year}-${monthStr}-${Date.now()}`,
+          idKaryawan: realId,
+          nama: realName,
+          bagian: emp ? (emp.department || emp.position || 'Staff') : 'Staff',
+          unit: emp ? (emp.unit || 'KUK Bangunan') : 'KUK Bangunan',
+          tanggal: [dateKey],
+          totalHari: 1,
+          tipe: 'Cuti Tahunan',
+          alasan: 'Cuti Bulanan Reguler (Diatur Staf)',
+          status: 'APPROVED',
+          submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        });
+        showToast(`Cuti ${realName} tgl ${day} ditambahkan!`);
+      }
+
+      localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(allCutiRecords));
+      loadRekapData();
+    }
+
+    // --- MODAL POPUP EDIT CUTI KARYAWAN ---
+    function openEditCutiModal(empId, empName) {
+      const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
+      const year = parseInt(document.getElementById('selYear').value, 10);
+
+      const emp = currentEmployees.find(e => e.id === empId || (e.fullName && e.fullName.toLowerCase() === empName.toLowerCase()));
+      const realId = emp ? emp.id : empId;
+      const realName = emp ? (emp.fullName || emp.nama) : empName;
+
+      currentEditEmpId = realId;
+      currentEditEmpName = realName;
+
+      document.getElementById('modalEmpName').textContent = `🏖️ Edit Cuti: ${realName}`;
+      document.getElementById('modalEmpMeta').textContent = `${emp ? (emp.department || emp.position || 'Staff') : 'Staff'} • ${emp ? emp.unit : 'KUK'} — Periode ${MONTHS[monthIdx]} ${year}`;
+
+      renderModalCutiDates();
+      document.getElementById('editCutiModal').style.display = 'flex';
+    }
+
+    function closeEditCutiModal() {
+      document.getElementById('editCutiModal').style.display = 'none';
+    }
+
+    function renderModalCutiDates() {
+      const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
+      const year = parseInt(document.getElementById('selYear').value, 10);
+      const monthStr = String(monthIdx + 1).padStart(2, '0');
+      const totalDaysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+
+      const rawCuti = localStorage.getItem('kuk_db_cuti_v1');
+      allCutiRecords = rawCuti ? JSON.parse(rawCuti) : [];
+
+      const emp = currentEmployees.find(e => e.id === currentEditEmpId || (e.fullName && e.fullName.toLowerCase() === currentEditEmpName.toLowerCase()));
+      const realId = emp ? emp.id : currentEditEmpId;
+
+      let record = allCutiRecords.find(c => {
+        const matchId = (c.idKaryawan && (c.idKaryawan === realId || (emp && c.idKaryawan === emp.fingerprintId)));
+        const matchName = (c.nama && currentEditEmpName.toLowerCase().includes(c.nama.toLowerCase()));
+        return (matchId || matchName);
+      });
+
+      const dates = [];
+      if (record && record.tanggal) {
+        const arr = Array.isArray(record.tanggal) ? record.tanggal : [record.tanggal];
+        arr.forEach(t => {
+          if (t.startsWith(`${year}-${monthStr}`)) dates.push(t);
+        });
+      }
+      dates.sort();
+
+      // 1. List of active leave dates
+      const listEl = document.getElementById('modalDatesList');
+      if (dates.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center; padding:16px; color:var(--kuk-text-muted); background:#f8fafc; border-radius:10px; font-size:13px;">Belum ada tanggal cuti terdaftar pada bulan ${MONTHS[monthIdx]} ${year}.</div>`;
+      } else {
+        listEl.innerHTML = dates.map(dStr => {
+          const dNum = parseInt(dStr.split('-')[2], 10);
+          const dObj = new Date(year, monthIdx, dNum);
+          const dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][dObj.getDay()];
+          return `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#fff; border:1px solid var(--kuk-border); border-radius:10px; margin-bottom:8px;">
+              <div>
+                <span style="font-weight:700; color:var(--kuk-primary); font-size:13.5px;">📅 ${dayName}, ${dNum} ${MONTHS[monthIdx]} ${year}</span>
+                <span style="font-size:11px; color:#15803d; background:#dcfce7; padding:2px 6px; border-radius:4px; margin-left:8px; font-weight:600;">Resmi</span>
+              </div>
+              <button class="btn btn-sm btn-danger" onclick="removeCutiDateFromModal('${dStr}')" style="padding:4px 10px; font-size:12px;">🗑️ Hapus</button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. Day picker grid 1-31
+      const gridEl = document.getElementById('modalDayPickerGrid');
+      let gridHtml = '';
+      const activeDaysSet = new Set(dates.map(dStr => parseInt(dStr.split('-')[2], 10)));
+
+      for (let d = 1; d <= totalDaysInMonth; d++) {
+        const dObj = new Date(year, monthIdx, d);
+        const dayName = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'][dObj.getDay()];
+        const isActive = activeDaysSet.has(d);
+
+        gridHtml += `
+          <button onclick="toggleCutiDayFromModal(${d})"
+                  style="padding:8px 4px; border-radius:8px; border:1px solid ${isActive ? '#b91c1c' : '#cbd5e1'};
+                         background:${isActive ? '#fee2e2' : '#f8fafc'}; color:${isActive ? '#991b1b' : '#334155'};
+                         font-weight:${isActive ? '800' : '600'}; font-size:12px; cursor:pointer; transition:all 0.15s ease;">
+            <div style="font-size:9px; opacity:0.75;">${dayName}</div>
+            <div style="font-size:13px;">${d}</div>
+            <div style="font-size:10px; height:12px;">${isActive ? '🏖️' : ''}</div>
+          </button>
+        `;
+      }
+      gridEl.innerHTML = gridHtml;
+    }
+
+    function removeCutiDateFromModal(dateKey) {
+      const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
+
+      const rawCuti = localStorage.getItem('kuk_db_cuti_v1');
+      allCutiRecords = rawCuti ? JSON.parse(rawCuti) : [];
+
+      const emp = currentEmployees.find(e => e.id === currentEditEmpId || (e.fullName && e.fullName.toLowerCase() === currentEditEmpName.toLowerCase()));
+      const realId = emp ? emp.id : currentEditEmpId;
+
+      let record = allCutiRecords.find(c => {
+        const matchId = (c.idKaryawan && (c.idKaryawan === realId || (emp && c.idKaryawan === emp.fingerprintId)));
+        const matchName = (c.nama && currentEditEmpName.toLowerCase().includes(c.nama.toLowerCase()));
+        return (matchId || matchName);
+      });
+
+      if (record && Array.isArray(record.tanggal)) {
+        const idx = record.tanggal.indexOf(dateKey);
+        if (idx > -1) {
+          record.tanggal.splice(idx, 1);
+          record.totalHari = record.tanggal.length;
+          localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(allCutiRecords));
+          showToast(`Tanggal ${dateKey.split('-')[2]} ${MONTHS[monthIdx]} dihapus dari cuti ${currentEditEmpName}.`);
+          renderModalCutiDates();
+          loadRekapData();
+        }
+      }
+    }
+
+    function toggleCutiDayFromModal(day) {
+      const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
+      const year = parseInt(document.getElementById('selYear').value, 10);
+      const monthStr = String(monthIdx + 1).padStart(2, '0');
+      const dateKey = `${year}-${monthStr}-${String(day).padStart(2, '0')}`;
+
+      const rawCuti = localStorage.getItem('kuk_db_cuti_v1');
+      allCutiRecords = rawCuti ? JSON.parse(rawCuti) : [];
+
+      const emp = currentEmployees.find(e => e.id === currentEditEmpId || (e.fullName && e.fullName.toLowerCase() === currentEditEmpName.toLowerCase()));
+      const realId = emp ? emp.id : currentEditEmpId;
+      const realName = emp ? (emp.fullName || emp.nama) : currentEditEmpName;
+
+      let record = allCutiRecords.find(c => {
+        const matchId = (c.idKaryawan && (c.idKaryawan === realId || (emp && c.idKaryawan === emp.fingerprintId)));
+        const matchName = (c.nama && realName.toLowerCase().includes(c.nama.toLowerCase()));
+        return (matchId || matchName);
+      });
+
+      if (record) {
+        if (!Array.isArray(record.tanggal)) record.tanggal = record.tanggal ? [record.tanggal] : [];
+        const idx = record.tanggal.indexOf(dateKey);
+        if (idx > -1) {
+          record.tanggal.splice(idx, 1);
+          showToast(`Cuti ${realName} tanggal ${day} dihapus.`);
+        } else {
+          record.tanggal.push(dateKey);
+          record.tanggal.sort();
+          showToast(`Cuti ${realName} tanggal ${day} ditambahkan!`);
+        }
+        record.totalHari = record.tanggal.length;
+      } else {
+        allCutiRecords.push({
+          id: `CUTI-${year}-${monthStr}-${Date.now()}`,
+          idKaryawan: realId,
+          nama: realName,
+          bagian: emp ? (emp.department || emp.position || 'Staff') : 'Staff',
+          unit: emp ? (emp.unit || 'KUK Bangunan') : 'KUK Bangunan',
+          tanggal: [dateKey],
+          totalHari: 1,
+          tipe: 'Cuti Tahunan',
+          alasan: 'Cuti Bulanan Reguler (Diatur Staf)',
+          status: 'APPROVED',
+          submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        });
+        showToast(`Cuti ${realName} tanggal ${day} ditambahkan!`);
+      }
+
+      localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(allCutiRecords));
+      renderModalCutiDates();
+      loadRekapData();
+    }
+
+    function addCustomDateFromModal() {
+      const input = document.getElementById('modalAddCustomDateInput');
+      if (!input || !input.value) {
+        alert("Pilih tanggal terlebih dahulu.");
+        return;
+      }
+      const dateVal = input.value; // YYYY-MM-DD
+      const day = parseInt(dateVal.split('-')[2], 10);
+      toggleCutiDayFromModal(day);
+      input.value = '';
     }
 
     function loadApprovalList() {
