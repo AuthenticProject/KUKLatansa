@@ -58,6 +58,42 @@ const MasterDB = (() => {
     { id: 'KND-FORKLIFT', name: 'Forklift', plate: 'Forklift', type: 'Alat Berat Operasional Gudang', status: 'Tersedia' }
   ];
 
+  const DEFAULT_CUTI_DATA = [
+    { idKaryawan: 'K-002', nama: 'Wiba', bagian: 'Admin', tanggal: '2026-08-02', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-002', nama: 'Wiba', bagian: 'Admin', tanggal: '2026-08-09', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-002', nama: 'Wiba', bagian: 'Admin', tanggal: '2026-08-16', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-003', nama: 'Ulin', bagian: 'Kepala Toko', tanggal: '2026-08-08', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-003', nama: 'Ulin', bagian: 'Kepala Toko', tanggal: '2026-08-17', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-003', nama: 'Ulin', bagian: 'Kepala Toko', tanggal: '2026-08-29', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-004', nama: 'Kahfi', bagian: 'Admin', tanggal: '2026-08-01', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-004', nama: 'Kahfi', bagian: 'Admin', tanggal: '2026-08-10', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-004', nama: 'Kahfi', bagian: 'Admin', tanggal: '2026-08-20', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-005', nama: 'Nur', bagian: 'Kepala Gudang', tanggal: '2026-08-02', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-005', nama: 'Nur', bagian: 'Kepala Gudang', tanggal: '2026-08-16', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-005', nama: 'Nur', bagian: 'Kepala Gudang', tanggal: '2026-08-30', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', tanggal: '2026-08-05', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', tanggal: '2026-08-16', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', tanggal: '2026-08-17', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-008', nama: 'Riyan', bagian: 'Frontliner', tanggal: '2026-08-04', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-008', nama: 'Riyan', bagian: 'Frontliner', tanggal: '2026-08-15', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-008', nama: 'Riyan', bagian: 'Frontliner', tanggal: '2026-08-28', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-009', nama: 'Hiba', bagian: 'Frontliner', tanggal: '2026-08-06', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-009', nama: 'Hiba', bagian: 'Frontliner', tanggal: '2026-08-18', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-009', nama: 'Hiba', bagian: 'Frontliner', tanggal: '2026-08-29', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-010', nama: 'Rohman', bagian: 'Frontliner', tanggal: '2026-08-03', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-010', nama: 'Rohman', bagian: 'Frontliner', tanggal: '2026-08-16', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-010', nama: 'Rohman', bagian: 'Frontliner', tanggal: '2026-08-23', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-011', nama: 'irfan', bagian: 'Admin', tanggal: '2026-08-05', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-011', nama: 'irfan', bagian: 'Admin', tanggal: '2026-08-15', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-011', nama: 'irfan', bagian: 'Admin', tanggal: '2026-08-23', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-012', nama: 'Nukul', bagian: 'Palen', tanggal: '2026-08-04', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-012', nama: 'Nukul', bagian: 'Palen', tanggal: '2026-08-05', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-012', nama: 'Nukul', bagian: 'Palen', tanggal: '2026-08-06', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-013', nama: 'Miftah', bagian: 'Palen', tanggal: '2026-08-10', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-013', nama: 'Miftah', bagian: 'Palen', tanggal: '2026-08-15', bulan: '08', tahun: '2026' },
+    { idKaryawan: 'K-013', nama: 'Miftah', bagian: 'Palen', tanggal: '2026-08-18', bulan: '08', tahun: '2026' }
+  ];
+
   let dbInitialized = false;
 
   function getStored(key) {
@@ -96,6 +132,11 @@ const MasterDB = (() => {
     if (!vehicles || vehicles.length === 0) {
       vehicles = DEFAULT_VEHICLES;
       saveStored(STORAGE_KEY_VEHICLES, vehicles);
+    }
+
+    let cutiData = getStored('kuk_db_cuti_v1');
+    if (!cutiData || cutiData.length === 0) {
+      saveStored('kuk_db_cuti_v1', DEFAULT_CUTI_DATA);
     }
 
     dbInitialized = true;
