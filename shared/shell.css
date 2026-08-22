@@ -298,22 +298,20 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 
 .kuk-topbar {
   position: fixed;
-  top: 0;
+  top: 0; right: 0;
   left: var(--kuk-sidebar-w);
-  right: 0;
   height: var(--kuk-topbar-h);
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border-bottom: 1px solid var(--kuk-border);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--kuk-border-soft);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px 0 20px;
+  padding: 0 28px;
   z-index: 90;
-  gap: 16px;
-  box-shadow: 0 1px 0 rgba(35,24,24,0.04);
   transition: left var(--kuk-transition-slow);
+  box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.03);
 }
 
 .kuk-topbar-left {
@@ -327,7 +325,7 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 .kuk-topbar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -336,7 +334,7 @@ body.kuk-has-shell .top-nav                          { display: none !important;
   display: none; /* hidden on desktop */
   align-items: center;
   justify-content: center;
-  width: 36px; height: 36px;
+  width: 38px; height: 38px;
   border: none;
   background: transparent;
   border-radius: var(--kuk-radius-md);
@@ -353,7 +351,7 @@ body.kuk-has-shell .top-nav                          { display: none !important;
 
 /* ── Page Title ────────────────────────────────────────────────────── */
 .kuk-page-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
   color: var(--kuk-text);
   letter-spacing: -0.03em;

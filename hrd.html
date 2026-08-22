@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -607,6 +607,10 @@
         <button class="btn btn-gold" onclick="openAddModal()">
           <span>➕</span>
           <span>Tambah Karyawan Baru</span>
+        </button>
+        <button class="btn btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.4);" onclick="syncCloudHRD()">
+          <span>🔄</span>
+          <span>Sinkron Spreadsheet</span>
         </button>
         <button class="btn btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.3);" onclick="exportEmployeesCSV()">
           <span>📥 Export CSV</span>
@@ -1250,6 +1254,17 @@
       link.click();
       document.body.removeChild(link);
       showToast('Data database karyawan berhasil diexport ke CSV!', 'success');
+    }
+
+    async function syncCloudHRD() {
+      showToast('Menyinkronkan data dengan Google Spreadsheet...', 'info');
+      try {
+        const res = await MasterDB.syncFromGoogleSheets();
+        loadEmployees();
+        showToast(res.message || 'Sinkronisasi database berhasil!', 'success');
+      } catch (err) {
+        showToast('Gagal sinkron: ' + err.message, 'error');
+      }
     }
   </script>
 </body>

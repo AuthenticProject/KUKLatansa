@@ -19,8 +19,73 @@
 
   <link rel="stylesheet" href="../shared/design-tokens.css">
   <link rel="stylesheet" href="../shared/shell.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
+    /* Matrix / Calendar Gantt */
+    .matrix-wrapper {
+      overflow-x: auto;
+      max-width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--kuk-border);
+    }
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: center;
+      background: #fff;
+    }
+    .matrix-table th, .matrix-table td {
+      border: 1px solid var(--kuk-border-soft);
+      padding: 7px 3px;
+      min-width: 30px;
+    }
+    .matrix-table th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--kuk-text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .matrix-table th.emp-col, .matrix-table td.emp-col {
+      min-width: 180px;
+      text-align: left;
+      padding-left: 12px;
+      position: sticky;
+      left: 0;
+      background: #fff;
+      z-index: 5;
+    }
+    .matrix-table th.emp-col { z-index: 15; background: #f8fafc; }
+    .matrix-table tr:hover td { background-color: #f8fafc; }
+    .matrix-table tr:hover td.emp-col { background-color: #f1f5f9; }
+    .matrix-cell-cuti {
+      background: #fee2e2 !important;
+      color: #b91c1c;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .matrix-cell-today {
+      border: 2px solid var(--kuk-primary) !important;
+      background: #fffbeb !important;
+    }
+    .matrix-cell-weekend {
+      background: #fdf4f4;
+    }
+    .badge-unit-matrix {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .badge-bangunan-m { background: #e0f2fe; color: #0369a1; }
+    .badge-palen-m { background: #fef3c7; color: #b45309; }
     /* ============================================================
        DASHBOARD COMMAND CENTER STYLES
     ============================================================ */
@@ -201,6 +266,100 @@
     }
     .btn-danger-sm:hover {
       background: #fecaca;
+    }
+
+    /* Hero Welcome Banner */
+    .hero-welcome-banner {
+      background: linear-gradient(135deg, #400000 0%, #200000 100%);
+      border-radius: var(--kuk-radius-xl);
+      padding: 24px 30px;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -5px rgba(84, 0, 0, 0.4);
+      border: 1px solid rgba(255, 204, 0, 0.18);
+    }
+    .hero-welcome-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 204, 0, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--kuk-gold);
+      margin-bottom: 8px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulseGreen 1.8s infinite;
+    }
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .hero-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #FFD700 0%, #FF9900 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 4px;
+      max-width: 600px;
+    }
+    .hero-clock-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 14px 22px;
+      border-radius: 16px;
+      text-align: right;
+      backdrop-filter: blur(10px);
+    }
+    .hero-date {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .hero-time {
+      font-size: 26px;
+      font-weight: 900;
+      font-family: var(--kuk-font-mono, monospace);
+      letter-spacing: 1px;
+      color: #ffffff;
+      margin-top: 2px;
     }
 
     /* Action Center Banner */
@@ -405,6 +564,21 @@
 <body>
 
   <div class="dashboard-container">
+
+    <!-- 0. HERO WELCOME & LIVE STATUS -->
+    <div class="hero-welcome-banner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span> Live Sync Server Aktif
+        </div>
+        <h1 class="hero-title">Executive Command Center <span class="gold-gradient-text">v2.0</span></h1>
+        <p class="hero-sub">Pusat kendali operasional, pemantauan presensi real-time, armada, dan evaluasi performa KUK La Tansa.</p>
+      </div>
+      <div class="hero-clock-box">
+        <div class="hero-date" id="heroCurrentDate">Memuat tanggal...</div>
+        <div class="hero-time" id="heroCurrentTime">--:--:-- <span style="font-size:13px; font-weight:600; color:var(--kuk-gold);">WIB</span></div>
+      </div>
+    </div>
 
     <!-- 1. EXECUTIVE FILTER BAR -->
     <div class="filter-card">
@@ -667,6 +841,59 @@
               <!-- Injected via JS -->
             </tbody>
           </table>
+    <!-- 6.5. REKAPAN MATRIKS JADWAL CUTI KARYAWAN (EMBEDDED GANTT) -->
+    <div class="card" id="sectionRekapCuti">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span>🏖️</span> Rekapan Jadwal Cuti Seluruh Karyawan
+          </div>
+          <p style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">Matriks jadwal libur dan pengajuan cuti seluruh divisi per tanggal.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <select id="dbCutiMonth" class="filter-select" onchange="renderDashboardCutiMatrix()">
+            <option value="0">Januari</option>
+            <option value="1">Februari</option>
+            <option value="2">Maret</option>
+            <option value="3">April</option>
+            <option value="4">Mei</option>
+            <option value="5">Juni</option>
+            <option value="6">Juli</option>
+            <option value="7" selected>Agustus</option>
+            <option value="8">September</option>
+            <option value="9">Oktober</option>
+            <option value="10">November</option>
+            <option value="11">Desember</option>
+          </select>
+          <select id="dbCutiYear" class="filter-select" onchange="renderDashboardCutiMatrix()">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="exportDashboardCutiImage()">📷 Unduh Gambar</button>
+          <button class="btn btn-outline btn-sm" onclick="exportDashboardCutiCSV()">📂 Unduh CSV</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="matrix-wrapper" style="overflow-x:auto; border-radius:10px; border:1px solid var(--kuk-border-soft);">
+          <table class="matrix-table" id="dbCutiMatrixTable" style="width:100%; border-collapse:collapse; font-size:12px; text-align:center; background:#fff;">
+            <thead id="dbCutiMatrixHead"></thead>
+            <tbody id="dbCutiMatrixBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:16px; font-size:11.5px; color:var(--kuk-text-muted); flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:12px; height:12px; background:#fee2e2; border:1px solid #fca5a5; border-radius:3px;"></span>
+            <span>Jadwal Cuti Karyawan</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:12px; height:12px; background:#fffbeb; border:1.5px solid var(--kuk-primary); border-radius:3px;"></span>
+            <span>Hari Ini</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:12px; height:12px; background:#fdf4f4; border:1px solid #fecaca; border-radius:3px;"></span>
+            <span>Hari Libur (Minggu)</span>
+          </div>
         </div>
       </div>
     </div>
@@ -795,7 +1022,36 @@
         localStorage.setItem('kuk_emp_migrated_v2', '1');
       }
 
+      // Live Clock Ticker
+      function updateLiveClock() {
+        const now = new Date();
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        
+        const dateEl = document.getElementById('heroCurrentDate');
+        const timeEl = document.getElementById('heroCurrentTime');
+        
+        if (dateEl) {
+          dateEl.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        }
+        if (timeEl) {
+          const h = String(now.getHours()).padStart(2, '0');
+          const m = String(now.getMinutes()).padStart(2, '0');
+          const s = String(now.getSeconds()).padStart(2, '0');
+          timeEl.innerHTML = `${h}:${m}:${s} <span style="font-size:13px; font-weight:600; color:var(--kuk-gold);">WIB</span>`;
+        }
+      }
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+
       renderDashboard();
+
+      if (window.location.hash === '#sectionRekapCuti') {
+        setTimeout(() => {
+          const el = document.getElementById('sectionRekapCuti');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      }
     });
 
     function handleRangePresetChange() {
@@ -871,9 +1127,10 @@
       // 9. Violation Trend & Leaderboard
       renderViolationTrendAndLeaderboard();
 
-      // 10. Actionable Tables
+      // 10. Actionable Tables & Cuti Matrix
       renderPendingLeavesTable();
       renderPendingViolationsTable();
+      renderDashboardCutiMatrix();
     }
 
     function renderActionCenter() {
@@ -1133,6 +1390,145 @@
         if (btn) btn.textContent = '🔄 Sinkron Cloud';
         alert('Gagal sinkron: ' + err.message);
       }
+    }
+
+    // --- REKAPAN JADWAL CUTI MATRIX (EMBEDDED GANTT) ---
+    function renderDashboardCutiMatrix() {
+      const monthSel = document.getElementById('dbCutiMonth');
+      const yearSel = document.getElementById('dbCutiYear');
+      if (!monthSel || !yearSel) return;
+
+      const monthIdx = parseInt(monthSel.value, 10);
+      const year = parseInt(yearSel.value, 10);
+      const totalDays = new Date(year, monthIdx + 1, 0).getDate();
+      const monthStr = String(monthIdx + 1).padStart(2, '0');
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // 1. Get raw cuti data
+      const stored = localStorage.getItem('kuk_db_cuti_v1');
+      let allCuti = stored ? JSON.parse(stored) : [];
+      if (!allCuti || allCuti.length === 0) {
+        allCuti = (typeof MasterDB !== 'undefined' && MasterDB.DEFAULT_CUTI_DATA) ? MasterDB.DEFAULT_CUTI_DATA : [];
+      }
+
+      // 2. Filter employees by currentFilters.unit
+      let emps = typeof MasterDB !== 'undefined' ? MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif') : [];
+      if (currentFilters.unit && currentFilters.unit !== 'ALL') {
+        emps = emps.filter(e => e.unit === currentFilters.unit);
+      }
+
+      // 3. Render Header
+      const head = document.getElementById('dbCutiMatrixHead');
+      let hHtml = `<tr><th class="emp-col">Karyawan & Divisi</th><th style="width:45px;">Total</th>`;
+      for (let d = 1; d <= totalDays; d++) {
+        const dateObj = new Date(year, monthIdx, d);
+        const dayOfWeek = dateObj.getDay();
+        const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
+        const isToday = (dateKey === todayStr);
+        const isSun = (dayOfWeek === 0);
+
+        hHtml += `<th class="${isToday ? 'matrix-cell-today' : ''} ${isSun ? 'matrix-cell-weekend' : ''}" style="${isSun ? 'color:#ef4444;' : ''}">
+          <div>${d}</div>
+          <div style="font-size:8.5px; opacity:0.7;">${['Min','Sen','Sel','Rab','Kam','Jum','Sab'][dayOfWeek]}</div>
+        </th>`;
+      }
+      hHtml += `</tr>`;
+      head.innerHTML = hHtml;
+
+      // 4. Render Body
+      const tbody = document.getElementById('dbCutiMatrixBody');
+      if (emps.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${totalDays + 2}" style="padding:24px; text-align:center; color:var(--kuk-text-muted);">Tidak ada data karyawan.</td></tr>`;
+        return;
+      }
+
+      let bHtml = '';
+      emps.forEach(emp => {
+        const empName = emp.fullName || emp.nama;
+        const empLeaves = allCuti.filter(c => {
+          const matchId = (c.idKaryawan && (c.idKaryawan === emp.id || c.idKaryawan === emp.fingerprintId));
+          const matchName = (c.nama && empName.toLowerCase().includes(c.nama.toLowerCase()));
+          return (matchId || matchName);
+        });
+
+        const leaveDays = new Set();
+        empLeaves.forEach(c => {
+          if (Array.isArray(c.tanggal)) {
+            c.tanggal.forEach(t => { if (t.startsWith(`${year}-${monthStr}`)) leaveDays.add(parseInt(t.split('-')[2], 10)); });
+          } else if (c.tanggal && c.tanggal.startsWith(`${year}-${monthStr}`)) {
+            leaveDays.add(parseInt(c.tanggal.split('-')[2], 10));
+          }
+        });
+
+        const isBangunan = (emp.unit && emp.unit.includes('Bangunan'));
+        bHtml += `<tr>
+          <td class="emp-col">
+            <div style="font-weight:700; color:var(--kuk-text);">${empName}</div>
+            <span class="badge-unit-matrix ${isBangunan ? 'badge-bangunan-m' : 'badge-palen-m'}">${emp.position || emp.department || 'Staff'} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
+          </td>
+          <td style="font-weight:800; color:${leaveDays.size > 0 ? '#b91c1c' : 'var(--kuk-text-muted)'}; background:#f8fafc;">
+            ${leaveDays.size}
+          </td>`;
+
+        for (let d = 1; d <= totalDays; d++) {
+          const dateObj = new Date(year, monthIdx, d);
+          const dayOfWeek = dateObj.getDay();
+          const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
+          const isToday = (dateKey === todayStr);
+          const isSun = (dayOfWeek === 0);
+          const hasLeave = leaveDays.has(d);
+
+          bHtml += `<td class="${hasLeave ? 'matrix-cell-cuti' : ''} ${isToday ? 'matrix-cell-today' : ''} ${isSun && !hasLeave ? 'matrix-cell-weekend' : ''}"
+                        title="${hasLeave ? `${empName} Cuti: ${d} ${['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][monthIdx]}` : `${d}`}">
+            ${hasLeave ? '🏖️' : ''}
+          </td>`;
+        }
+        bHtml += `</tr>`;
+      });
+
+      tbody.innerHTML = bHtml;
+    }
+
+    function exportDashboardCutiCSV() {
+      const monthIdx = parseInt(document.getElementById('dbCutiMonth').value, 10);
+      const year = parseInt(document.getElementById('dbCutiYear').value, 10);
+      const monthStr = String(monthIdx + 1).padStart(2, '0');
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+      const stored = localStorage.getItem('kuk_db_cuti_v1');
+      const allCuti = stored ? JSON.parse(stored) : [];
+      const emps = typeof MasterDB !== 'undefined' ? MasterDB.getEmployees() : [];
+
+      let csv = `Nama,Unit,Bagian,Total Cuti (${months[monthIdx]} ${year}),Tanggal Cuti\n`;
+      emps.forEach(emp => {
+        const empName = emp.fullName || emp.nama;
+        const empLeaves = allCuti.filter(c => (c.idKaryawan === emp.id || (c.nama && empName.toLowerCase().includes(c.nama.toLowerCase()))));
+        const dates = [];
+        empLeaves.forEach(c => {
+          if (Array.isArray(c.tanggal)) {
+            c.tanggal.forEach(t => { if (t.startsWith(`${year}-${monthStr}`)) dates.push(t); });
+          } else if (c.tanggal && c.tanggal.startsWith(`${year}-${monthStr}`)) dates.push(c.tanggal);
+        });
+        csv += `"${empName}","${emp.unit || '-'}","${emp.position || '-'}","${dates.length}","${dates.join('; ')}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Rekap_Cuti_KUK_${months[monthIdx]}_${year}.csv`;
+      a.click();
+    }
+
+    function exportDashboardCutiImage() {
+      const target = document.getElementById('sectionRekapCuti');
+      if (!target || typeof html2canvas === 'undefined') return;
+      html2canvas(target, { scale: 2 }).then(canvas => {
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `Matriks_Cuti_KUK_${document.getElementById('dbCutiMonth').value}_${document.getElementById('dbCutiYear').value}.png`;
+        a.click();
+      });
     }
   </script>
 </body>
