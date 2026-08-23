@@ -799,8 +799,89 @@
       wrap.appendChild(sel);
     }
 
+    // --- JENDELA WAKTU PENGAJUAN CUTI BULANAN ---
+    // Pengajuan cuti bulan M hanya dibuka dari tanggal terakhir bulan (M-1) s/d tanggal 2 bulan M.
+    // Misal: Cuti Agustus dibuka 31 Juli - 2 Agustus; Cuti September dibuka 31 Agustus - 2 September
+    function getCutiWindowRange(targetYear, targetMonth) {
+      // Tanggal mulai: Tanggal terakhir bulan sebelum targetMonth (misal 31 Juli untuk Agustus)
+      const startDate = new Date(targetYear, targetMonth, 0);
+      startDate.setHours(0, 0, 0, 0);
+
+      // Tanggal selesai: Tanggal 2 bulan targetMonth (misal 2 Agustus untuk Agustus)
+      const endDate = new Date(targetYear, targetMonth, 2);
+      endDate.setHours(23, 59, 59, 999);
+
+      return { startDate, endDate };
+    }
+
+    function isCutiWindowOpenForMonth(targetYear, targetMonth, currentDate = today) {
+      const { startDate, endDate } = getCutiWindowRange(targetYear, targetMonth);
+      const curr = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+      return curr >= startDate && curr <= endDate;
+    }
+
+    function checkCutiLockState(batasWaktuCloud = null) {
+      const alertEl = document.getElementById('deadlineAlert');
+      const windowOpen = isCutiWindowOpenForMonth(viewYear, viewMonth, today);
+      const { startDate, endDate } = getCutiWindowRange(viewYear, viewMonth);
+
+      const prevMonthName = MONTHS[(viewMonth - 1 + 12) % 12];
+      const targetMonthName = MONTHS[viewMonth];
+      const startDay = startDate.getDate();
+      const endDay = endDate.getDate();
+
+      const rangeLabel = `${startDay} ${prevMonthName} s/d ${endDay} ${targetMonthName}`;
+
+      if (!windowOpen) {
+        isLocked = true;
+        if (alertEl) {
+          alertEl.style.display = 'flex';
+          alertEl.className = 'alert danger';
+          alertEl.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <div><strong>🔒 Pengajuan Cuti ${targetMonthName} ${viewYear} Dikunci (Mode Rekapan)</strong><br>Pengajuan cuti bulan ${targetMonthName} hanya dibuka pada <strong>${rangeLabel}</strong>. Saat ini halaman menampilkan rekapan cuti yang tidak dapat diubah.</div>
+          `;
+        }
+      } else if (batasWaktuCloud && new Date() > new Date(batasWaktuCloud)) {
+        isLocked = true;
+        if (alertEl) {
+          alertEl.style.display = 'flex';
+          alertEl.className = 'alert danger';
+          alertEl.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <div><strong>Batas Waktu Berakhir</strong><br>Penginputan/Perubahan data cuti telah dikunci oleh admin.</div>
+          `;
+        }
+      } else {
+        isLocked = false;
+        if (alertEl) {
+          alertEl.style.display = 'flex';
+          alertEl.className = 'alert success';
+          alertEl.style.background = '#e6f4ea';
+          alertEl.style.color = '#137333';
+          alertEl.style.borderColor = '#ceead6';
+          alertEl.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <div><strong>🟢 Periode Pengajuan Cuti ${targetMonthName} ${viewYear} Terbuka</strong><br>Pengajuan cuti bulan ${targetMonthName} dibuka pada tanggal <strong>${rangeLabel}</strong>.</div>
+          `;
+        }
+      }
+    }
+
     // --- INIT ---
     function init() {
+      checkCutiLockState();
+
       // 1. Instan fallback dari MasterDB lokal
       if (typeof MasterDB !== 'undefined' && MasterDB.getEmployees) {
         const localEmps = MasterDB.getEmployees()
@@ -818,10 +899,7 @@
           renderSelectDropdown();
         }
 
-        if (res.batasWaktu && new Date() > new Date(res.batasWaktu)) {
-          isLocked = true;
-          document.getElementById('deadlineAlert').style.display = 'flex';
-        }
+        checkCutiLockState(res ? res.batasWaktu : null);
 
         renderCalendar();
       }).catch(e => {
@@ -880,7 +958,9 @@
       viewMonth += dir;
       if (viewMonth > 11) { viewMonth = 0; viewYear++; }
       else if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+      checkCutiLockState();
       renderCalendar();
+      updateUI();
     }
 
     function checkDateRestriction(key, dateObj) {
@@ -951,21 +1031,14 @@
         const d = document.createElement('div'); d.className = 'day empty'; grid.appendChild(d);
       }
 
-      for (let i = 1; i <= totalDays; i++) {
-        const key = toKey(viewYear, viewMonth, i);
-        const dateObj = new Date(viewYear, viewMonth, i);
-        const el = document.createElement('div');
-        el.className = 'day';
-        el.textContent = i;
-
         if (isLocked) {
           el.classList.add('locked');
-          if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.7'; }
-          el.onclick = () => showToast('Data dikunci. Batas waktu telah berakhir.', 'error');
+          if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.75'; }
+          el.onclick = () => showToast('Form dikunci (Mode Rekapan). Pengajuan cuti hanya dibuka pada akhir bulan & 2 hari pertama bulan.', 'warning');
         } else if (dateObj < today) {
           el.classList.add('locked');
           if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.7'; }
-          el.onclick = () => showToast('Tidak dapat memilih waktu di masa lalu.');
+          el.onclick = () => showToast('Tidak dapat memilih waktu di masa lalu.', 'error');
         } else if (bookedDates.includes(key)) {
           el.classList.add('booked');
           el.onclick = () => showToast(`Diambil rekan di divisi ${activeUser?.bagian}`, 'error');
@@ -1027,6 +1100,12 @@
         summary.style.display = 'none';
       } else {
         summary.style.display = 'block';
+        const cardTitleEl = summary.querySelector('.summary-title');
+        if (cardTitleEl) {
+          cardTitleEl.innerHTML = isLocked
+            ? `Rekapan Cuti Bulan Ini (<span id="totalSelected">${selectedDates.length}</span> Hari)`
+            : `Ringkasan Pilihan Anda (<span id="totalSelected">${selectedDates.length}</span> Hari)`;
+        }
         chips.innerHTML = selectedDates.slice().sort().map(k => `
           <div class="chip">
             ${formatLabel(k)}
@@ -1040,7 +1119,7 @@
       if (!activeUser) {
         btn.disabled = true; btnText.textContent = 'Pilih Karyawan Dahulu';
       } else if (isLocked) {
-        btn.disabled = true; btnText.textContent = 'Akses Dikunci';
+        btn.disabled = true; btnText.textContent = '🔒 Form Dikunci (Hanya Rekapan Cuti)';
       } else {
         btn.disabled = false;
         btnText.textContent = `Simpan Jadwal (${selectedDates.length} Hari)`;

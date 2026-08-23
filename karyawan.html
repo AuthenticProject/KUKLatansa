@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -2916,10 +2916,84 @@
 
     function closeMasterModal() { document.getElementById('masterModal').classList.remove('show'); }
 
+    let current360Emp = null;
+
+    function renderE360CutiRecap(emp) {
+      const container = document.getElementById('e360-leave');
+      if (!container || !emp) return;
+
+      const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const now = new Date();
+      const targetMonth = now.getMonth();
+      const targetYear = now.getFullYear();
+      const prevMonthName = MONTHS[(targetMonth - 1 + 12) % 12];
+      const targetMonthName = MONTHS[targetMonth];
+
+      const startDate = new Date(targetYear, targetMonth, 0);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(targetYear, targetMonth, 2);
+      endDate.setHours(23, 59, 59, 999);
+
+      const currToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const isWindowOpen = (currToday >= startDate && currToday <= endDate);
+      const rangeLabel = `${startDate.getDate()} ${prevMonthName} s/d ${endDate.getDate()} ${targetMonthName}`;
+
+      let userCutiDates = [];
+      try {
+        const raw = localStorage.getItem('kuk_db_cuti_v1');
+        if (raw) {
+          const list = JSON.parse(raw);
+          const empIdStr = String(emp.id || '').toLowerCase().trim();
+          const empNameStr = String(emp.fullName || '').toLowerCase().trim();
+          const found = list.find(x => 
+            (x.idKaryawan && String(x.idKaryawan).toLowerCase().trim() === empIdStr) ||
+            (x.nama && String(x.nama).toLowerCase().trim() === empNameStr)
+          );
+          if (found && Array.isArray(found.tanggal)) {
+            userCutiDates = found.tanggal;
+          }
+        }
+      } catch(e){}
+
+      const statusBadge = isWindowOpen
+        ? `<span style="display:inline-flex; align-items:center; gap:6px; background:#e6f4ea; color:#137333; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; margin-bottom:12px;">🟢 Periode Pengajuan Terbuka (${rangeLabel})</span>`
+        : `<span style="display:inline-flex; align-items:center; gap:6px; background:#feefc3; color:#b06000; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; margin-bottom:12px;">🔒 Form Dikunci (Hanya Rekapan Cuti)</span>`;
+
+      const infoNotice = isWindowOpen
+        ? `<p style="font-size:12px; color:var(--kuk-text-muted); margin-bottom:16px;">Pengajuan cuti bulan ${targetMonthName} dibuka pada tanggal <strong>${rangeLabel}</strong>.</p>`
+        : `<p style="font-size:12px; color:var(--kuk-text-muted); margin-bottom:16px;">Pengajuan cuti bulan ${targetMonthName} hanya dibuka pada <strong>${rangeLabel}</strong>. Di luar rentang tanggal tersebut, bagian ini hanya berisi rekapan cuti yang tidak dapat diubah.</p>`;
+
+      let listHtml = '';
+      if (userCutiDates.length === 0) {
+        listHtml = `<div style="text-align:center; padding:20px; background:#f8fafc; border-radius:8px; color:var(--kuk-text-muted); font-size:13px;">Belum ada jadwal cuti terdaftar untuk karyawan ini pada bulan ${monthName} ${year}.</div>`;
+      } else {
+        listHtml = `
+          <div style="background:white; border:1px solid var(--kuk-border); border-radius:10px; padding:16px;">
+            <div style="font-weight:600; font-size:14px; margin-bottom:10px; color:var(--kuk-text);">Daftar Rekapan Cuti Bulan ${monthName} (${userCutiDates.length} Hari):</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              ${userCutiDates.map(dKey => {
+                const parts = dKey.split('-');
+                const formatted = parts.length === 3 ? `${Number(parts[2])} ${MONTHS[Number(parts[1])-1]} ${parts[0]}` : dKey;
+                return `<span style="background:#e8f0fe; color:#1a73e8; border:1px solid #d2e3fc; padding:4px 10px; border-radius:16px; font-size:13px; font-weight:500;">📅 ${formatted}</span>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <h3 style="color: var(--kuk-primary); margin-bottom:8px;">Rekapan Cuti & Izin (${monthName} ${year})</h3>
+        ${statusBadge}
+        ${infoNotice}
+        ${listHtml}
+      `;
+    }
+
     // --- 360 PROFILE LOGIC ---
     function openEmployee360(id) {
       const e = MasterDB.getEmployee(id);
       if(!e) return;
+      current360Emp = e;
       
       document.getElementById('e360Name').textContent = e.fullName;
       document.getElementById('e360Subtitle').textContent = `${e.position} | ${e.unit}`;
@@ -2929,6 +3003,7 @@
       document.getElementById('e360-hp').textContent = e.contactNumber || '-';
       document.getElementById('e360-hire').textContent = e.hireDate || '-';
       
+      renderE360CutiRecap(e);
       switchE360Tab('overview');
       document.getElementById('employee360Panel').classList.add('show');
     }
@@ -2942,7 +3017,9 @@
       document.getElementById('e360-' + tabId).style.display = 'block';
       
       document.querySelectorAll('.e360-tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      if (event && event.currentTarget && event.currentTarget.classList) {
+        event.currentTarget.classList.add('active');
+      }
     }
 
     // Auto load on init if MasterDB is ready
