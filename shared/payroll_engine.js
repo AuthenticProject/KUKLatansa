@@ -88,25 +88,74 @@ const PayrollEngine = (() => {
       return true;
     });
 
-    // Check tip kaca for Bangunan employees
+    // Check tip kaca - baca dari localStorage DAN MasterDB.DEFAULT_TIP_DATA sebagai fallback
     let glassTips = [];
     try {
-      glassTips = JSON.parse(localStorage.getItem('kuk_db_tip_v1') || '[]');
-    } catch (e) {}
+      // Prioritas: localStorage (data live) → MasterDB default (data historis)
+      const raw1 = localStorage.getItem('kuk_db_tip_v1');
+      const raw2 = localStorage.getItem('kuk_tip_db_v1');
+      let lsData = [];
+      if (raw1) { try { const p = JSON.parse(raw1); if (Array.isArray(p) && p.length > 0) lsData = p; } catch(e){} }
+      if (lsData.length === 0 && raw2) { try { const p = JSON.parse(raw2); if (Array.isArray(p) && p.length > 0) lsData = p; } catch(e){} }
+
+      if (lsData.length > 0) {
+        glassTips = lsData;
+      } else if (typeof MasterDB !== 'undefined' && MasterDB.DEFAULT_TIP_DATA) {
+        glassTips = MasterDB.DEFAULT_TIP_DATA;
+      }
+    } catch (e) {
+      if (typeof MasterDB !== 'undefined' && MasterDB.DEFAULT_TIP_DATA) {
+        glassTips = MasterDB.DEFAULT_TIP_DATA;
+      }
+    }
+
+    /**
+     * Cocokkan nama karyawan di data tip (bisa nama pendek) ke karyawan master.
+     * Strategi (berurutan, stop saat match):
+     *   1. idKaryawan / id cocok dengan emp.id
+     *   2. Nama di tip == fullName karyawan (exact)
+     *   3. fullName karyawan diawali dengan nama di tip (prefix)
+     *   4. Kata pertama nama di tip ada di fullName (first-word)
+     */
+    function tipMatchesEmployee(t, emp) {
+      const tId    = (t.idKaryawan || t.id_karyawan || '').trim();
+      const tName  = (t.namaKaryawan || t.karyawan || t.nama || t.name || '').trim().toLowerCase();
+      const fName  = (emp.fullName || '').trim().toLowerCase();
+      const nName  = (emp.nama || '').trim().toLowerCase();   // nama panggilan (mis: 'Ulin')
+      const eId    = (emp.id || '').trim();
+
+      if (tId && eId && tId === eId) return true;               // 1. ID match
+      if (tName && fName && tName === fName) return true;        // 2. Exact fullName
+      if (tName && nName && tName === nName) return true;        // 3. Exact nickname
+      if (tName && fName && fName.startsWith(tName)) return true; // 4. Prefix of fullName
+      if (tName) {
+        const firstWord = tName.split(' ')[0];
+        if (firstWord.length >= 3) {
+          if (fName.split(' ').some(w => w === firstWord)) return true; // 5. First-word in fullName
+          if (nName.split(' ').some(w => w === firstWord)) return true; // 6. First-word in nickname
+        }
+      }
+      return false;
+    }
+
+
 
     // Initialize employees
     activeEmps.forEach(emp => {
-      // Calculate tip kaca for Bangunan employees within the period
+      // Calculate tip kaca for Bangunan employees — HANYA dalam periode payroll ini
       let tipKacaNominal = 0;
       if (emp.unit && emp.unit.toLowerCase().includes('bangunan')) {
         const empTips = glassTips.filter(t => {
-          const tName = t.namaKaryawan || t.karyawan || '';
           const tDate = t.tanggal || t.tgl || '';
-          return (tName.toLowerCase() === emp.fullName.toLowerCase() || tName === emp.id) &&
-                 (tDate >= startStr && tDate <= endStr);
+          // Wajib ada tanggal DAN harus masuk dalam rentang periode (strict)
+          // tip Agustus TIDAK akan masuk ke payroll September, dst.
+          const inPeriod = tDate && tDate >= startStr && tDate <= endStr;
+          return inPeriod && tipMatchesEmployee(t, emp);
         });
         tipKacaNominal = empTips.reduce((acc, t) => acc + (parseFloat(t.nominalTip || t.tip || 0) || 0), 0);
       }
+
+
 
       const isPalen = emp.unit && emp.unit.toLowerCase().includes('palen');
       const defaultBase = isPalen ? RULES.default_base_salary_palen : RULES.default_base_salary_bangunan;
