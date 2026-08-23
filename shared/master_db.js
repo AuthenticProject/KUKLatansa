@@ -177,18 +177,18 @@ const MasterDB = (() => {
     }
   ];
 
-  // 11 Karyawan Cuti Resmi Periode Agustus 2026 (Maks 3 Hari / Orang per Bulan Sesuai SOP KUK)
+  // 11 Karyawan Cuti Resmi Periode Agustus 2026 (Maks 3 Hari / Orang per Bulan Sesuai SOP KUK - Sesuai CSV Rekapan Resmi)
   const DEFAULT_CUTI_DATA = [
-    { id: 'CUTI-2026-08-001', idKaryawan: 'K-001', nama: 'Miftah', bagian: 'Kepala Gudang', unit: 'KUK Palen', tanggal: ['2026-08-10', '2026-08-17', '2026-08-18'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:00:00' },
+    { id: 'CUTI-2026-08-001', idKaryawan: 'K-001', nama: 'Miftah', bagian: 'Kepala Gudang', unit: 'KUK Palen', tanggal: ['2026-08-10', '2026-08-15', '2026-08-18'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:00:00' },
     { id: 'CUTI-2026-08-002', idKaryawan: 'K-002', nama: 'Nukul', bagian: 'Kepala Toko', unit: 'KUK Palen', tanggal: ['2026-08-04', '2026-08-05', '2026-08-06'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:15:00' },
     { id: 'CUTI-2026-08-003', idKaryawan: 'K-003', nama: 'Wiba', bagian: 'Admin 2', unit: 'KUK Bangunan', tanggal: ['2026-08-02', '2026-08-09', '2026-08-16'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:30:00' },
     { id: 'CUTI-2026-08-004', idKaryawan: 'K-004', nama: 'Ulin', bagian: 'Kepala Toko', unit: 'KUK Bangunan', tanggal: ['2026-08-08', '2026-08-17', '2026-08-29'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:45:00' },
     { id: 'CUTI-2026-08-005', idKaryawan: 'K-005', nama: 'Kahfi', bagian: 'Kasir', unit: 'KUK Bangunan', tanggal: ['2026-08-01', '2026-08-10', '2026-08-20'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:00:00' },
     { id: 'CUTI-2026-08-006', idKaryawan: 'K-006', nama: 'Nur', bagian: 'Kepala Gudang', unit: 'KUK Bangunan', tanggal: ['2026-08-02', '2026-08-16', '2026-08-30'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:15:00' },
-    { id: 'CUTI-2026-08-007', idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', unit: 'KUK Bangunan', tanggal: ['2026-08-05', '2026-08-16', '2026-08-31'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:30:00' },
+    { id: 'CUTI-2026-08-007', idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', unit: 'KUK Bangunan', tanggal: ['2026-08-05', '2026-08-15', '2026-08-16'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:30:00' },
     { id: 'CUTI-2026-08-008', idKaryawan: 'K-008', nama: 'Riyan', bagian: 'Frontliner', unit: 'KUK Bangunan', tanggal: ['2026-08-04', '2026-08-15', '2026-08-28'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:45:00' },
     { id: 'CUTI-2026-08-009', idKaryawan: 'K-009', nama: 'Hiba', bagian: 'Frontliner', unit: 'KUK Bangunan', tanggal: ['2026-08-06', '2026-08-18', '2026-08-29'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:00:00' },
-    { id: 'CUTI-2026-08-010', idKaryawan: 'K-010', nama: 'Rohman', bagian: 'Frontliner', unit: 'KUK Bangunan', tanggal: ['2026-08-01', '2026-08-16', '2026-08-23'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:15:00' },
+    { id: 'CUTI-2026-08-010', idKaryawan: 'K-010', nama: 'Rohman', bagian: 'Frontliner', unit: 'KUK Bangunan', tanggal: ['2026-08-03', '2026-08-16', '2026-08-23'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:15:00' },
     { id: 'CUTI-2026-08-011', idKaryawan: 'K-011', nama: 'Irvan', bagian: 'Admin 3', unit: 'KUK Bangunan', tanggal: ['2026-08-05', '2026-08-15', '2026-08-23'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:30:00' }
   ];
 
