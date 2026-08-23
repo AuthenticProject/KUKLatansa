@@ -1181,6 +1181,101 @@
       }
     }
 
+    
+    function checkDateRestriction(dateObj) {
+      if (!activeUser) {
+        showToast('Pilih nama karyawan terlebih dahulu!', 'error');
+        return false;
+      }
+      const empBagian = String(activeUser.bagian || activeUser.department || activeUser.position || '').toLowerCase();
+      const empName = String(activeUser.nama || activeUser.fullName || '').toLowerCase();
+      const empId = String(activeUser.id || '').toUpperCase();
+      const isAdmin3 = empBagian.includes('admin 3') || empName.includes('irvan') || empId === 'K-011';
+
+      if (isAdmin3 && dateObj.getDay() !== 0) {
+        showToast('Aturan Khusus Admin 3 (Irvan): Pengajuan cuti HANYA diperbolehkan pada hari MINGGU.', 'error');
+        return false;
+      }
+      return true;
+    }
+
+    function toggleDate(key) {
+      if (isLocked) {
+        showToast('Form pengajuan cuti sedang terkunci.', 'error');
+        return;
+      }
+      if (!activeUser) {
+        showToast('Pilih nama karyawan terlebih dahulu!', 'error');
+        return;
+      }
+
+      const [y, m, d] = key.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+
+      if (selectedDates.includes(key)) {
+        selectedDates = selectedDates.filter(k => k !== key);
+      } else {
+        if (!checkDateRestriction(dateObj)) return;
+
+        if (selectedDates.length >= 3) {
+          showToast('Batas maksimal pengajuan cuti adalah 3 hari per bulan!', 'error');
+          return;
+        }
+
+        if (bookedDates.includes(key)) {
+          showToast('Tanggal ini sudah diambil oleh rekan satu bagian/divisi!', 'error');
+          return;
+        }
+
+        selectedDates.push(key);
+      }
+
+      renderCalendar();
+      updateUI();
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calGrid');
+      const title = document.getElementById('calMonthTitle');
+      if (title) title.textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+      if (!grid) return;
+
+      grid.innerHTML = '';
+
+      const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+      const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell empty';
+        grid.appendChild(cell);
+      }
+
+      for (let d = 1; d <= totalDays; d++) {
+        const key = toKey(viewYear, viewMonth, d);
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+        cell.textContent = d;
+
+        const dateObj = new Date(viewYear, viewMonth, d);
+        const isSunday = dateObj.getDay() === 0;
+        const isSelected = selectedDates.includes(key);
+        const isBooked = bookedDates.includes(key);
+
+        if (isSunday) cell.classList.add('sunday');
+
+        if (isSelected) {
+          cell.classList.add('selected');
+        } else if (isBooked) {
+          cell.classList.add('disabled', 'booked');
+          cell.title = 'Sudah diambil oleh rekan satu bagian/divisi';
+        }
+
+        cell.onclick = () => toggleDate(key);
+        grid.appendChild(cell);
+      }
+    }
+
     function renderMatrixRecapTable() {
       const container = document.getElementById('matrixRecapContainer');
       if (!container) return;
@@ -1490,11 +1585,20 @@
         });
     }
 
+    function getKaryawanList() {
+      if (typeof MasterDB !== 'undefined') {
+        const emps = typeof MasterDB.getEmployees === 'function' ? MasterDB.getEmployees() : (typeof MasterDB.getKaryawan === 'function' ? MasterDB.getKaryawan() : []);
+        if (Array.isArray(emps) && emps.length > 0) return emps;
+      }
+      return DEFAULT_CSV_EMPLOYEES.map(e => ({ id: e.idKaryawan, nama: e.nama, fullName: e.nama, bagian: e.bagian, unit: e.unit }));
+    }
+
     function init() {
       if (typeof MasterDB !== 'undefined') {
-        MasterDB.init();
-        dbKaryawan = filterDataByRole(MasterDB.getKaryawan());
+        try { MasterDB.init(); } catch(e){}
       }
+      const rawEmps = getKaryawanList();
+      dbKaryawan = filterDataByRole(rawEmps);
       
       // Auto seed default CSV cuti data if missing or empty in localStorage
       try {

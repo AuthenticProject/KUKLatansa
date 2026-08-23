@@ -423,6 +423,7 @@ const MasterDB = (() => {
 
     // Employees (Workforce)
     getEmployees: () => getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES,
+    getKaryawan: () => getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES,
     getPublicEmployeeList: () => {
       const emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
       return emps

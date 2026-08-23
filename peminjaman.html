@@ -718,29 +718,47 @@
 
     function loadUserData() {
       const user = sessionStorage.getItem('kuk_user');
-      if (user) {
-        document.getElementById('inNama').value = user.toUpperCase();
+      const elNama = document.getElementById('inNama');
+      if (user && elNama) {
+        try {
+          const parsed = JSON.parse(user);
+          elNama.value = (parsed && parsed.namaLengkap) ? parsed.namaLengkap : (parsed && parsed.username ? parsed.username : user);
+        } catch(e) {
+          elNama.value = String(user);
+        }
       }
       const now = new Date();
       const offset = now.getTimezoneOffset() * 60000;
       const localNow = new Date(now - offset).toISOString().slice(0, 16);
-      document.getElementById('inMulai').value = localNow;
+      const elMulai = document.getElementById('inMulai') || document.getElementById('inWaktuMulai');
+      if (elMulai) elMulai.value = localNow;
 
       const returnTime = new Date(now.getTime() + 4 * 3600 * 1000);
       const localReturn = new Date(returnTime - offset).toISOString().slice(0, 16);
-      document.getElementById('inKembali').value = localReturn;
+      const elKembali = document.getElementById('inKembali') || document.getElementById('inWaktuKembali');
+      if (elKembali) elKembali.value = localReturn;
     }
 
     // Render dropdown kendaraan (L300, Engkel, Viar, Forklift)
     // Jika sedang dipinjam, diberi keterangan & tidak bisa dipilih
     function renderKendaraanDropdown() {
-      const list = PeminjamanDB.getKendaraanList();
+      const list = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanList) 
+        ? PeminjamanDB.getKendaraanList() 
+        : [
+            { id: 'KND-L300', nama: 'Mitsubishi L300' },
+            { id: 'KND-ENGKEL', nama: 'Truk Engkel' },
+            { id: 'KND-VIAR', nama: 'Viar Roda Tiga' },
+            { id: 'KND-FORKLIFT', nama: 'Forklift' }
+          ];
       const select = document.getElementById('inKendaraan');
+      if (!select) return;
 
       select.innerHTML = '<option value="" disabled selected>-- Pilih Kendaraan --</option>';
 
       list.forEach(item => {
-        const sedangDipinjam = PeminjamanDB.isKendaraanDipinjam(item.id);
+        const sedangDipinjam = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.isKendaraanDipinjam) 
+          ? PeminjamanDB.isKendaraanDipinjam(item.id) 
+          : false;
 
         const opt = document.createElement('option');
         opt.value = item.id;
@@ -802,7 +820,9 @@
       const select = document.getElementById('inKendaraan');
       if (!select) return;
       const val = String(select.value || '').toUpperCase();
-      const optText = select.selectedIndex >= 0 ? String(select.options[select.selectedIndex].text || '').toUpperCase() : '';
+      const options = select.options || [];
+      const selectedOpt = (options && select.selectedIndex >= 0 && options[select.selectedIndex]) ? options[select.selectedIndex] : null;
+      const optText = selectedOpt ? String(selectedOpt.text || selectedOpt.textContent || '').toUpperCase() : '';
 
       const isL300OrEngkel = val.includes('L300') || val.includes('ENGKEL') || optText.includes('L300') || optText.includes('ENGKEL');
 
