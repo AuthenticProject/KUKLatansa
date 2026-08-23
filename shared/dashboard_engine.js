@@ -106,13 +106,13 @@ const DashboardEngine = (() => {
     const totalHeadcount = activeEmployees.length;
 
     // Headcount by Unit
-    let allEmps = typeof MasterDB !== 'undefined' && MasterDB.getEmployees ? MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif') : [];
+    let allEmps = typeof MasterDB !== 'undefined' && MasterDB && MasterDB.getEmployees ? MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif') : [];
     const headcountBangunan = allEmps.filter(e => e.unit && e.unit.toLowerCase().includes('bangunan')).length;
     const headcountPalen = allEmps.filter(e => e.unit && e.unit.toLowerCase().includes('palen')).length;
 
     // Attendance calculation for today
     let dailyAtt = [];
-    if (typeof AttendanceEngine !== 'undefined' && AttendanceEngine.getDailyAttendance) {
+    if (typeof AttendanceEngine !== 'undefined' && AttendanceEngine && AttendanceEngine.getDailyAttendance) {
       dailyAtt = AttendanceEngine.getDailyAttendance(todayStr);
       // Filter by active employee selection
       const empIds = new Set(activeEmployees.map(e => e.id));
@@ -147,7 +147,7 @@ const DashboardEngine = (() => {
 
     // Violations
     let allViolations = [];
-    if (typeof ViolationEngine !== 'undefined' && ViolationEngine.getViolations) {
+    if (typeof ViolationEngine !== 'undefined' && ViolationEngine && ViolationEngine.getViolations) {
       allViolations = ViolationEngine.getViolations();
     }
     const pendingViolations = allViolations.filter(v => v.status === 'AUTO GENERATED' || v.status === 'REVIEW');
@@ -157,7 +157,7 @@ const DashboardEngine = (() => {
 
     // Vehicles / Armada Status
     let vehicles = [];
-    if (typeof MasterDB !== 'undefined' && MasterDB.getVehicles) {
+    if (typeof MasterDB !== 'undefined' && MasterDB && MasterDB.getVehicles) {
       vehicles = MasterDB.getVehicles();
     }
     const activeLoans = getVehicleLoans().filter(l => l.status === 'Dipinjam' || l.status === 'Aktif');
@@ -167,7 +167,7 @@ const DashboardEngine = (() => {
 
     // Payroll Summary
     let payrollRuns = [];
-    if (typeof PayrollEngine !== 'undefined' && PayrollEngine.getPayrolls) {
+    if (typeof PayrollEngine !== 'undefined' && PayrollEngine && PayrollEngine.getPayrolls) {
       payrollRuns = PayrollEngine.getPayrolls();
     }
     const latestPayroll = payrollRuns.length > 0 ? payrollRuns[payrollRuns.length - 1] : null;
@@ -249,7 +249,7 @@ const DashboardEngine = (() => {
 
     // 2. Pending Auto Violations
     let violations = [];
-    if (typeof ViolationEngine !== 'undefined' && ViolationEngine.getViolations) {
+    if (typeof ViolationEngine !== 'undefined' && ViolationEngine && ViolationEngine.getViolations) {
       violations = ViolationEngine.getViolations().filter(v => v.status === 'AUTO GENERATED' || v.status === 'REVIEW');
     }
     violations.forEach(v => {
@@ -269,7 +269,7 @@ const DashboardEngine = (() => {
     });
 
     // 3. Pending Payroll Approvals
-    if (typeof PayrollEngine !== 'undefined' && PayrollEngine.getPayrolls) {
+    if (typeof PayrollEngine !== 'undefined' && PayrollEngine && PayrollEngine.getPayrolls) {
       const runs = PayrollEngine.getPayrolls().filter(r => r.status === 'REVIEW' || r.status === 'CALCULATED');
       runs.forEach(r => {
         items.push({
@@ -298,7 +298,7 @@ const DashboardEngine = (() => {
    */
   function getUnitComparison(dateStr) {
     dateStr = dateStr || getTodayStr();
-    const allEmps = typeof MasterDB !== 'undefined' && MasterDB.getEmployees ? MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif') : [];
+    const allEmps = typeof MasterDB !== 'undefined' && MasterDB && MasterDB.getEmployees ? MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif') : [];
 
     const bEmps = allEmps.filter(e => e.unit && e.unit.toLowerCase().includes('bangunan'));
     const pEmps = allEmps.filter(e => e.unit && e.unit.toLowerCase().includes('palen'));
@@ -306,7 +306,7 @@ const DashboardEngine = (() => {
     let bAtt = { present: 0, late: 0, absent: 0, rate: 0 };
     let pAtt = { present: 0, late: 0, absent: 0, rate: 0 };
 
-    if (typeof AttendanceEngine !== 'undefined' && AttendanceEngine.getDailyAttendance) {
+    if (typeof AttendanceEngine !== 'undefined' && AttendanceEngine && AttendanceEngine.getDailyAttendance) {
       const daily = AttendanceEngine.getDailyAttendance(dateStr);
       
       const bIds = new Set(bEmps.map(e => e.id));
@@ -335,7 +335,7 @@ const DashboardEngine = (() => {
     // Violations by Unit
     let bViolations = 0;
     let pViolations = 0;
-    if (typeof ViolationEngine !== 'undefined' && ViolationEngine.getViolations) {
+    if (typeof ViolationEngine !== 'undefined' && ViolationEngine && ViolationEngine.getViolations) {
       const vList = ViolationEngine.getViolations();
       const bIds = new Set(bEmps.map(e => e.id));
       const pIds = new Set(pEmps.map(e => e.id));
@@ -348,24 +348,81 @@ const DashboardEngine = (() => {
       });
     }
 
+    // Active Leaves by Unit
+    let bLeaves = 0;
+    let pLeaves = 0;
+    try {
+      const rawCuti = localStorage.getItem('kuk_db_cuti_v1');
+      if (rawCuti) {
+        const cutiList = JSON.parse(rawCuti);
+        const bNames = new Set(bEmps.map(e => (e.nama || e.fullName || '').toLowerCase().trim()));
+        const pNames = new Set(pEmps.map(e => (e.nama || e.fullName || '').toLowerCase().trim()));
+        const bIds = new Set(bEmps.map(e => String(e.id).toLowerCase().trim()));
+        const pIds = new Set(pEmps.map(e => String(e.id).toLowerCase().trim()));
+
+        cutiList.forEach(c => {
+          const empId = String(c.idKaryawan || c.id || '').toLowerCase().trim();
+          const empName = String(c.nama || c.fullName || '').toLowerCase().trim();
+          const isB = bIds.has(empId) || bNames.has(empName) || (c.unit && c.unit.toLowerCase().includes('bangunan'));
+          const isP = pIds.has(empId) || pNames.has(empName) || (c.unit && c.unit.toLowerCase().includes('palen'));
+          const dates = Array.isArray(c.tanggal) ? c.tanggal : (c.tanggal ? [c.tanggal] : []);
+          const hasTodayOrActive = dates.some(d => d === dateStr || d.startsWith(dateStr.slice(0, 7)));
+          if (hasTodayOrActive) {
+            if (isB) bLeaves++;
+            if (isP) pLeaves++;
+          }
+        });
+      }
+    } catch(e){}
+
+    // Active Loans by Unit
+    let bLoans = 0;
+    let pLoans = 0;
+    try {
+      const rawLoans = localStorage.getItem('peminjaman_data') || localStorage.getItem('kuk_peminjaman_data');
+      if (rawLoans) {
+        const loanList = JSON.parse(rawLoans);
+        const pNames = new Set(pEmps.map(e => (e.nama || e.fullName || '').toLowerCase().trim()));
+
+        loanList.forEach(l => {
+          if (l.status === 'Aktif/Dipinjam' || l.status === 'Approved' || l.status === 'Dipinjam') {
+            const borrower = String(l.nama || l.peminjam || '').toLowerCase().trim();
+            if (pNames.has(borrower) || (l.unit && l.unit.toLowerCase().includes('palen'))) {
+              pLoans++;
+            } else {
+              bLoans++;
+            }
+          }
+        });
+      }
+    } catch(e){}
+
     return {
       bangunan: {
         name: 'KUK Bangunan',
         headcount: bEmps.length,
         attendanceRate: bAtt.rate,
+        workingCount: bAtt.present + bAtt.late,
         present: bAtt.present,
         late: bAtt.late,
         absent: bAtt.absent,
-        violations: bViolations
+        leavesCount: bLeaves,
+        violationsCount: bViolations,
+        violations: bViolations,
+        vehicleLoansCount: bLoans
       },
       palen: {
         name: 'KUK Palen',
         headcount: pEmps.length,
         attendanceRate: pAtt.rate,
+        workingCount: pAtt.present + pAtt.late,
         present: pAtt.present,
         late: pAtt.late,
         absent: pAtt.absent,
-        violations: pViolations
+        leavesCount: pLeaves,
+        violationsCount: pViolations,
+        violations: pViolations,
+        vehicleLoansCount: pLoans
       }
     };
   }
@@ -387,7 +444,7 @@ const DashboardEngine = (() => {
       const dayLabel = d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' });
 
       let present = 0, late = 0, absent = 0, other = 0;
-      if (typeof AttendanceEngine !== 'undefined' && AttendanceEngine.getDailyAttendance) {
+      if (typeof AttendanceEngine !== 'undefined' && AttendanceEngine && AttendanceEngine.getDailyAttendance) {
         const list = AttendanceEngine.getDailyAttendance(dateStr);
         list.forEach(a => {
           if (unit !== 'ALL' && unit !== 'semua' && a.unit && !a.unit.toLowerCase().includes(unit.toLowerCase().replace('kuk ', ''))) {
@@ -425,7 +482,7 @@ const DashboardEngine = (() => {
       'OTHER': { label: 'Lain-lain', count: 0, color: '#6b7280' }
     };
 
-    if (typeof ViolationEngine !== 'undefined' && ViolationEngine.getViolations) {
+    if (typeof ViolationEngine !== 'undefined' && ViolationEngine && ViolationEngine.getViolations) {
       const vList = ViolationEngine.getViolations();
       vList.forEach(v => {
         if (v.status === 'REJECTED') return;
@@ -479,7 +536,7 @@ const DashboardEngine = (() => {
     } catch (e) {}
 
     // 3. Violation state changes
-    if (typeof ViolationEngine !== 'undefined' && ViolationEngine.getViolations) {
+    if (typeof ViolationEngine !== 'undefined' && ViolationEngine && ViolationEngine.getViolations) {
       const vList = ViolationEngine.getViolations();
       vList.forEach(v => {
         activities.push({
@@ -496,7 +553,7 @@ const DashboardEngine = (() => {
     }
 
     // 4. Payroll Runs
-    if (typeof PayrollEngine !== 'undefined' && PayrollEngine.getPayrolls) {
+    if (typeof PayrollEngine !== 'undefined' && PayrollEngine && PayrollEngine.getPayrolls) {
       const pList = PayrollEngine.getPayrolls();
       pList.forEach(p => {
         activities.push({
@@ -588,7 +645,7 @@ const DashboardEngine = (() => {
     });
 
     let leaderboard = [];
-    if (typeof ViolationEngine !== 'undefined' && ViolationEngine.getViolations) {
+    if (typeof ViolationEngine !== 'undefined' && ViolationEngine && ViolationEngine.getViolations) {
       const vList = ViolationEngine.getViolations().filter(v => v.status !== 'REJECTED');
       const empMap = {};
       vList.forEach(v => {
