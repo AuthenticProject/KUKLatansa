@@ -5,6 +5,20 @@
     const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const today = new Date(); today.setHours(0, 0, 0, 0);
 
+    const DEFAULT_CSV_EMPLOYEES = [
+      { idKaryawan: 'K-003', nama: 'Wiba', bagian: 'Admin 2', unit: 'KUK Bangunan', defaultDates: ['2026-08-02', '2026-08-09', '2026-08-16'] },
+      { idKaryawan: 'K-004', nama: 'Ulin', bagian: 'Kepala Toko', unit: 'KUK Bangunan', defaultDates: ['2026-08-08', '2026-08-17', '2026-08-29'] },
+      { idKaryawan: 'K-005', nama: 'Kahfi', bagian: 'Kasir', unit: 'KUK Bangunan', defaultDates: ['2026-08-01', '2026-08-10', '2026-08-20'] },
+      { idKaryawan: 'K-006', nama: 'Nur', bagian: 'Kepala Gudang', unit: 'KUK Bangunan', defaultDates: ['2026-08-02', '2026-08-16', '2026-08-30'] },
+      { idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', unit: 'KUK Bangunan', defaultDates: ['2026-08-05', '2026-08-15', '2026-08-16'] },
+      { idKaryawan: 'K-008', nama: 'Riyan', bagian: 'Frontliner', unit: 'KUK Bangunan', defaultDates: ['2026-08-04', '2026-08-15', '2026-08-28'] },
+      { idKaryawan: 'K-009', nama: 'Hiba', bagian: 'Frontliner', unit: 'KUK Bangunan', defaultDates: ['2026-08-06', '2026-08-18', '2026-08-29'] },
+      { idKaryawan: 'K-010', nama: 'Rohman', bagian: 'Frontliner', unit: 'KUK Bangunan', defaultDates: ['2026-08-03', '2026-08-16', '2026-08-23'] },
+      { idKaryawan: 'K-011', nama: 'Irvan', bagian: 'Admin 3', unit: 'KUK Bangunan', defaultDates: ['2026-08-05', '2026-08-15', '2026-08-23'] },
+      { idKaryawan: 'K-002', nama: 'Nukul', bagian: 'Kepala Toko', unit: 'KUK Palen', defaultDates: ['2026-08-04', '2026-08-05', '2026-08-06'] },
+      { idKaryawan: 'K-001', nama: 'Miftah', bagian: 'Kepala Gudang', unit: 'KUK Palen', defaultDates: ['2026-08-10', '2026-08-15', '2026-08-18'] }
+    ];
+
     let viewYear = today.getFullYear();
     let viewMonth = today.getMonth();
 
@@ -259,6 +273,35 @@
           `;
         }
         renderMatrixRecapTable();
+        renderAllCutiRecapTable();
+      } else {
+        isLocked = false;
+        // SEDANG WAKTU PENGAJUAN: Tampilkan HANYA Form Pengajuan Cuti (Pilih Karyawan & Kalender)
+        if (userSelectCard) userSelectCard.style.display = 'block';
+        if (calCard) calCard.style.display = 'block';
+        if (bottomBar) bottomBar.style.display = 'flex';
+
+        if (matrixWrap) matrixWrap.style.display = 'none';
+        if (rekapListCard) rekapListCard.style.display = 'none';
+
+        if (pageTitle) pageTitle.textContent = `📅 Form Pengajuan Cuti ${targetMonthName} ${viewYear}`;
+        if (pageSubtitle) pageSubtitle.textContent = `Pilih jadwal libur Anda. Maksimal 3 hari per bulan.`;
+
+        if (alertEl) {
+          alertEl.style.display = 'flex';
+          alertEl.className = 'alert success';
+          alertEl.style.background = '#e6f4ea';
+          alertEl.style.color = '#137333';
+          alertEl.style.borderColor = '#ceead6';
+          alertEl.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <div><strong>🟢 Periode Pengajuan Cuti ${targetMonthName} ${viewYear} Terbuka</strong><br>Pengajuan cuti bulan ${targetMonthName} dibuka pada tanggal <strong>${rangeLabel}</strong>.</div>
+          `;
+        }
+      }
     }
 
     function renderMatrixRecapTable() {
@@ -392,34 +435,6 @@
       if (!container) return;
 
       const targetMonthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
-      const targetMonthName = MONTHS[viewMonth];
-
-      let allCuti = [];
-      try {
-        const raw = localStorage.getItem('kuk_db_cuti_v1');
-        if (raw) allCuti = JSON.parse(raw);
-      } catch(e){}
-
-      const monthlyList = allCuti.filter(c => {
-        if (!Array.isArray(c.tanggal)) return false;
-        return c.tanggal.some(t => t.startsWith(targetMonthPrefix));
-      });
-
-      if (badgeEl) {
-        badgeEl.textContent = `${monthlyList.length} Karyawan Cuti`;
-      }
-
-      if (monthlyList.length === 0) {
-        container.innerHTML = `
-          <div style="text-align:center; padding:20px 16px; color:#64748b; background:#f8fafc; border-radius:12px; font-size:13px; border:1px dashed #cbd5e1;">
-            🏖️ Belum ada jadwal cuti terdaftar pada bulan <strong>${targetMonthName} ${viewYear}</strong>.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = `
-        <div style="display:flex; flex-direction:column; gap:10px;">
           ${monthlyList.map(item => {
             const datesThisMonth = item.tanggal
               .filter(t => t.startsWith(targetMonthPrefix))
@@ -568,6 +583,39 @@
           renderCalendar();
           updateUI();
         });
+    }
+
+    function init() {
+      if (typeof MasterDB !== 'undefined') {
+        MasterDB.init();
+        dbKaryawan = filterDataByRole(MasterDB.getKaryawan());
+      }
+      
+      // Auto seed default CSV cuti data if missing or empty in localStorage
+      try {
+        const raw = localStorage.getItem('kuk_db_cuti_v1');
+        if (!raw || JSON.parse(raw).length === 0) {
+          const defaultRecords = DEFAULT_CSV_EMPLOYEES.map((emp, idx) => ({
+            id: `CUTI-2026-08-${String(idx+1).padStart(3,'0')}`,
+            idKaryawan: emp.idKaryawan,
+            nama: emp.nama,
+            bagian: emp.bagian,
+            unit: emp.unit,
+            tanggal: emp.defaultDates,
+            totalHari: emp.defaultDates.length,
+            tipe: 'Cuti Tahunan',
+            status: 'APPROVED',
+            submittedAt: '2026-07-28 09:00:00'
+          }));
+          localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(defaultRecords));
+        }
+      } catch(e){}
+
+      checkCutiLockState();
+      renderSelectDropdown();
+      autoSelectLoggedUser();
+      renderCalendar();
+      updateUI();
     }
 
     init();
