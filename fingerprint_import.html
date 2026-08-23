@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -277,7 +277,7 @@
         </div>
         <div class="rule-item">
           <span class="rule-icon">☕</span>
-          <div><strong>Istirahat:</strong> Normal 12.00-14.00 (Maks <strong>60 mnt</strong>) • Jumat 10.30-13.30 (Maks <strong>180 mnt</strong>).</div>
+          <div><strong>Istirahat:</strong> Normal 12.00-14.00 (Maks <strong>65 mnt</strong>: 60m + 5m toleransi) • Jumat 10.30-13.30 (Maks <strong>180 mnt</strong>).</div>
         </div>
         <div class="rule-item">
           <span class="rule-icon">🌴</span>
@@ -340,7 +340,7 @@
         </div>
         <div class="stat-card" style="border-color: #8b5cf6;">
           <h3 id="stTotalOverBreak" style="color: #8b5cf6;">0</h3>
-          <p>Over-Break (>60m)</p>
+          <p>Over-Break (>65m)</p>
         </div>
       </div>
 
@@ -355,7 +355,7 @@
           </select>
         </div>
         <div style="font-size:13px; color:var(--kuk-text-muted);">
-          * Potongan: Alpa <strong>Rp 28.500/hari</strong> • Terlambat (>07:05) <strong>Rp 2.000/hari</strong>.
+          * Potongan: Alpa <strong>Rp 28.500/hari</strong> • Terlambat (>07:05) <strong>Rp 2.000/hari</strong>. Istirahat <strong>65 mnt</strong>.
         </div>
       </div>
 
@@ -373,7 +373,7 @@
               <th style="text-align:center;">Cuti</th>
               <th style="text-align:center;">Alpa</th>
               <th style="text-align:center;">Telat (>07:05)</th>
-              <th style="text-align:center;">Over-Break (>60m)</th>
+              <th style="text-align:center;">Over-Break (>65m)</th>
               <th style="text-align:right;">Total Potongan</th>
               <th style="text-align:center;">Aksi</th>
             </tr>
@@ -433,7 +433,7 @@
 
   <!-- Modal Detail Harian Karyawan -->
   <div class="modal-overlay" id="dailyModal">
-    <div class="modal-box">
+    <div class="modal-box" style="max-width: 920px;">
       <div class="modal-header">
         <div>
           <h3 id="modalEmpName" style="color:var(--kuk-primary); margin-bottom:2px;">Detail Log Harian</h3>
@@ -441,17 +441,29 @@
         </div>
         <button class="btn btn-outline" onclick="closeDailyModal()" style="padding:4px 10px;">✕ Tutup</button>
       </div>
-      <div class="modal-body">
+
+      <!-- Quick Batch Actions Toolbar -->
+      <div style="background:#f8fafc; border-bottom:1px solid var(--kuk-border); padding:10px 22px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:space-between;">
+        <div style="font-size:12.5px; font-weight:700; color:var(--kuk-primary);">
+          ⚡ Aksi Cepat / Pengaturan Disiplin:
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-outline" style="padding:4px 10px; font-size:12px; border-color:#10b981; color:#065f46;" onclick="forgiveAllBreaksForCurrentEmp()">✨ Maafkan Semua Over-break</button>
+          <button class="btn btn-outline" style="padding:4px 10px; font-size:12px; border-color:#0284c7; color:#075985;" onclick="convertAllAlpaToPresent()">🔄 Ubah Semua Alpa jadi Hadir (Lupa Scan)</button>
+        </div>
+      </div>
+
+      <div class="modal-body" style="max-height: 55vh; overflow-y:auto;">
         <div class="table-container">
           <table>
             <thead>
               <tr>
-                <th>Tanggal</th>
-                <th>Status</th>
+                <th style="width: 100px;">Tanggal</th>
+                <th style="min-width: 180px;">Status Kehadiran (Editable)</th>
                 <th>Masuk (07.00)</th>
-                <th>Istirahat (Maks 60m)</th>
+                <th style="min-width: 170px;">Istirahat (Maks 65m)</th>
                 <th>Pulang (16.00)</th>
-                <th>Catatan Disiplin</th>
+                <th>Catatan / Alasan</th>
               </tr>
             </thead>
             <tbody id="modalDailyBody">
@@ -460,18 +472,21 @@
           </table>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeDailyModal()">Tutup</button>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div id="modalFooterSummary" style="font-size:13px; font-weight:700; color:var(--kuk-primary);"></div>
+        <button class="btn btn-primary" onclick="closeDailyModal()">💾 Selesai & Simpan Perubahan</button>
       </div>
     </div>
   </div>
 
   <script src="shared/master_db.js?v=1787284704"></script>
+  <script src="shared/attendance_engine.js?v=1787284704"></script>
   <script src="shared/fingerprint_engine.js?v=1787284704"></script>
   <script src="shared/violation_engine.js?v=1787284704"></script>
   <script src="shared/security.js?v=1787284704"></script>
   <script>
     let currentAnalysis = null;
+    let activeModalPin = null;
 
     function setStep(step) {
       document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
@@ -489,6 +504,7 @@
       document.getElementById('uploadError').style.display = 'none';
       document.getElementById('uploadLoading').style.display = 'none';
       currentAnalysis = null;
+      activeModalPin = null;
       setStep(1);
       renderRawTable();
     }
@@ -507,22 +523,7 @@
         // Render Step 2
         document.getElementById('periodSubtitle').textContent = `Periode Absensi: ${result.monthPeriod || 'Bulan Berjalan'}`;
         
-        let sumHadir = 0, sumCuti = 0, sumAlpa = 0, sumTelat = 0, sumOverBreak = 0;
-
-        (result.employeeReports || []).forEach(emp => {
-          sumHadir += emp.totalHadir;
-          sumCuti += emp.totalCuti;
-          sumAlpa += emp.totalAlpa;
-          sumTelat += emp.totalTelat;
-          sumOverBreak += emp.totalKelebihanIstirahat;
-        });
-
-        document.getElementById('stTotalEmp').textContent = (result.employeeReports || []).length;
-        document.getElementById('stTotalHadir').textContent = sumHadir;
-        document.getElementById('stTotalCuti').textContent = sumCuti;
-        document.getElementById('stTotalAlpa').textContent = sumAlpa;
-        document.getElementById('stTotalTelat').textContent = sumTelat;
-        document.getElementById('stTotalOverBreak').textContent = sumOverBreak;
+        recalcGlobalStats();
 
         if (result.skippedInactiveCount > 0) {
           const names = result.skippedInactiveEmployees.map(s => `${s.machineName || s.pin}`).join(', ');
@@ -547,6 +548,55 @@
 
     function formatRupiah(num) {
       return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+    }
+
+    function recalcEmployee(emp) {
+      if (!emp) return;
+      let hadir = 0, cuti = 0, alpa = 0, telat = 0, overBreak = 0, overBreakMinutes = 0;
+      (emp.dailyLogs || []).forEach(log => {
+        if (log.status === 'PRESENT' || log.status === 'INCOMPLETE' || log.status === 'PERMISSION' || log.status === 'SICK') {
+          hadir++;
+        } else if (log.status === 'LATE') {
+          hadir++;
+          telat++;
+        } else if (log.status === 'LEAVE') {
+          cuti++;
+        } else if (log.status === 'ABSENT') {
+          alpa++;
+        }
+        if (log.isBreakExcess && !log.isBreakForgiven) {
+          overBreak++;
+          overBreakMinutes += (log.breakExcessMinutes || 0);
+        }
+      });
+      emp.totalHadir = hadir;
+      emp.totalCuti = cuti;
+      emp.totalAlpa = alpa;
+      emp.totalTelat = telat;
+      emp.totalKelebihanIstirahat = overBreak;
+      emp.totalMenitKelebihanIstirahat = overBreakMinutes;
+      emp.alpaDeductionTotal = alpa * 28500;
+      emp.lateDeductionTotal = telat * 2000;
+      emp.totalPotongan = emp.alpaDeductionTotal + emp.lateDeductionTotal;
+    }
+
+    function recalcGlobalStats() {
+      if (!currentAnalysis || !currentAnalysis.employeeReports) return;
+      let sumHadir = 0, sumCuti = 0, sumAlpa = 0, sumTelat = 0, sumOverBreak = 0;
+      currentAnalysis.employeeReports.forEach(emp => {
+        sumHadir += emp.totalHadir;
+        sumCuti += emp.totalCuti;
+        sumAlpa += emp.totalAlpa;
+        sumTelat += emp.totalTelat;
+        sumOverBreak += emp.totalKelebihanIstirahat;
+      });
+
+      document.getElementById('stTotalEmp').textContent = currentAnalysis.employeeReports.length;
+      document.getElementById('stTotalHadir').textContent = sumHadir;
+      document.getElementById('stTotalCuti').textContent = sumCuti;
+      document.getElementById('stTotalAlpa').textContent = sumAlpa;
+      document.getElementById('stTotalTelat').textContent = sumTelat;
+      document.getElementById('stTotalOverBreak').textContent = sumOverBreak;
     }
 
     function renderAnalysisTable() {
@@ -600,11 +650,18 @@
 
     function openDailyModal(pin) {
       if (!currentAnalysis || !currentAnalysis.employeeReports) return;
+      activeModalPin = pin;
       const emp = currentAnalysis.employeeReports.find(e => e.pin === pin);
       if (!emp) return;
 
-      document.getElementById('modalEmpName').textContent = `${emp.employeeName} (PIN: ${emp.pin})`;
-      document.getElementById('modalEmpUnit').textContent = `${emp.unit} • Total Hadir: ${emp.totalHadir} Hari | Cuti: ${emp.totalCuti} Hari | Alpa: ${emp.totalAlpa} Hari`;
+      renderDailyModalContent(emp);
+      document.getElementById('dailyModal').classList.add('active');
+    }
+
+    function renderDailyModalContent(emp) {
+      document.getElementById('modalEmpName').textContent = `${emp.employeeName} (PIN: ${emp.pin} • ID: ${emp.employeeId})`;
+      document.getElementById('modalEmpUnit').textContent = `${emp.unit} • Hadir: ${emp.totalHadir} Hari | Cuti: ${emp.totalCuti} Hari | Alpa: ${emp.totalAlpa} Hari | Telat: ${emp.totalTelat}x | Over-Break: ${emp.totalKelebihanIstirahat}x`;
+      document.getElementById('modalFooterSummary').textContent = `Total Potongan Disiplin: ${formatRupiah(emp.totalPotongan)} (Alpa: ${formatRupiah(emp.alpaDeductionTotal)} + Telat: ${formatRupiah(emp.lateDeductionTotal)})`;
 
       const tbody = document.getElementById('modalDailyBody');
       tbody.innerHTML = '';
@@ -612,62 +669,167 @@
       (emp.dailyLogs || []).forEach(log => {
         const tr = document.createElement('tr');
 
-        let statusBadge = '';
-        if (log.status === 'LEAVE') statusBadge = '<span class="badge badge-blue">CUTI RESMI</span>';
-        else if (log.status === 'OFF') statusBadge = '<span class="badge badge-gray">LIBUR</span>';
-        else if (log.status === 'ABSENT') statusBadge = '<span class="badge badge-red">ALPA / MANGKIR</span>';
-        else if (log.status === 'LATE') statusBadge = '<span class="badge badge-yellow">TERLAMBAT</span>';
-        else if (log.status === 'INCOMPLETE') statusBadge = '<span class="badge badge-yellow">1 SCAN</span>';
-        else statusBadge = '<span class="badge badge-green">HADIR TEPAT</span>';
+        // Dropdown status editable
+        const statusSelectHtml = `
+          <select class="form-control" style="font-size:12px; font-weight:700; padding:4px 8px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; cursor:pointer;" onchange="changeDailyStatus('${emp.pin}', '${log.date}', this.value)">
+            <option value="PRESENT" ${log.status === 'PRESENT' ? 'selected' : ''}>🟢 Hadir Tepat</option>
+            <option value="LATE" ${log.status === 'LATE' ? 'selected' : ''}>🟡 Terlambat (>07:05)</option>
+            <option value="LEAVE" ${log.status === 'LEAVE' ? 'selected' : ''}>🔵 Cuti Resmi (Rp 0)</option>
+            <option value="PERMISSION" ${log.status === 'PERMISSION' ? 'selected' : ''}>🟣 Izin / Dispensasi (Rp 0)</option>
+            <option value="SICK" ${log.status === 'SICK' ? 'selected' : ''}>🏥 Sakit (Rp 0)</option>
+            <option value="ABSENT" ${log.status === 'ABSENT' ? 'selected' : ''}>🔴 Alpa (Potong 28.5rb)</option>
+            <option value="OFF" ${log.status === 'OFF' ? 'selected' : ''}>⚪ Libur / Minggu</option>
+          </select>
+        `;
 
-        let breakInfo = '-';
+        let breakInfo = '<span style="color:#94a3b8;">-</span>';
         if (log.breakOutTime && log.breakInTime) {
-          breakInfo = `${log.breakOutTime} - ${log.breakInTime} (${log.breakDuration} mnt)`;
+          const durationStr = `${log.breakOutTime} - ${log.breakInTime} (${log.breakDuration}m)`;
           if (log.isBreakExcess) {
-            breakInfo += ` <span class="badge badge-red">+${log.breakExcessMinutes}m</span>`;
+            if (log.isBreakForgiven) {
+              breakInfo = `
+                <div>${durationStr}</div>
+                <div style="margin-top:2px; display:flex; gap:4px; align-items:center;">
+                  <span class="badge badge-green" style="font-size:10px;">✅ Dimaafkan</span>
+                  <button class="btn btn-outline" style="padding:1px 5px; font-size:10px;" onclick="toggleBreakForgiven('${emp.pin}', '${log.date}', false)" title="Kembalikan sanksi">⚖️ Sanksi</button>
+                </div>
+              `;
+            } else {
+              breakInfo = `
+                <div>${durationStr} <span class="badge badge-red">+${log.breakExcessMinutes}m</span></div>
+                <div style="margin-top:2px;">
+                  <button class="btn btn-success" style="padding:1px 6px; font-size:10px;" onclick="toggleBreakForgiven('${emp.pin}', '${log.date}', true)" title="Maafkan kelebihan istirahat hari ini">✨ Maafkan</button>
+                </div>
+              `;
+            }
+          } else {
+            breakInfo = durationStr;
           }
         }
 
-        let notes = [];
-        if (log.isLate) notes.push(`Telat ${log.lateMinutes} menit`);
-        if (log.isBreakExcess) notes.push(`Over-break ${log.breakExcessMinutes} menit`);
-        if (log.isEarlyLeave) notes.push(`Pulang awal (${log.outTime})`);
-        if (log.status === 'ABSENT') notes.push(`Potong Rp 28.500`);
-        if (log.status === 'LEAVE') notes.push(`Hak Cuti (Tanpa Potongan)`);
+        let noteText = log.note || '-';
+        if (log.isLate) noteText = `Telat ${log.lateMinutes}m; ` + noteText;
+        if (log.isBreakExcess && log.isBreakForgiven) noteText = `[Over-break dimaafkan]; ` + noteText;
 
         tr.innerHTML = `
-          <td style="font-weight:600;">${log.date}</td>
-          <td>${statusBadge}</td>
-          <td>${log.inTime || '-'}</td>
-          <td>${breakInfo}</td>
-          <td>${log.outTime || '-'}</td>
-          <td style="font-size:12px; color:var(--kuk-text-muted);">${notes.join('; ') || '-'}</td>
+          <td style="font-weight:600; font-size:12.5px;">${log.date}</td>
+          <td>${statusSelectHtml}</td>
+          <td style="font-size:12.5px;">${log.inTime || '-'}</td>
+          <td style="font-size:12px;">${breakInfo}</td>
+          <td style="font-size:12.5px;">${log.outTime || '-'}</td>
+          <td style="font-size:11.5px; color:var(--kuk-text-muted);">${noteText}</td>
         `;
         tbody.appendChild(tr);
       });
+    }
 
-      document.getElementById('dailyModal').classList.add('active');
+    function changeDailyStatus(pin, dateStr, newStatus) {
+      if (!currentAnalysis || !currentAnalysis.employeeReports) return;
+      const emp = currentAnalysis.employeeReports.find(e => e.pin === pin);
+      if (!emp) return;
+
+      const log = (emp.dailyLogs || []).find(l => l.date === dateStr);
+      if (!log) return;
+
+      log.status = newStatus;
+      log.isModified = true;
+      if (newStatus === 'PRESENT') log.note = 'Koreksi Hadir (Lupa Scan/Salah Input)';
+      else if (newStatus === 'LEAVE') log.note = 'Cuti Resmi Disetujui';
+      else if (newStatus === 'PERMISSION') log.note = 'Izin / Dispensasi Tugas Luar';
+      else if (newStatus === 'SICK') log.note = 'Sakit (Surat Dokter)';
+      else if (newStatus === 'ABSENT') log.note = 'Alpa / Mangkir (Potong Rp 28.500)';
+
+      recalcEmployee(emp);
+      recalcGlobalStats();
+      renderAnalysisTable();
+      renderDailyModalContent(emp);
+    }
+
+    function toggleBreakForgiven(pin, dateStr, isForgiven) {
+      if (!currentAnalysis || !currentAnalysis.employeeReports) return;
+      const emp = currentAnalysis.employeeReports.find(e => e.pin === pin);
+      if (!emp) return;
+
+      const log = (emp.dailyLogs || []).find(l => l.date === dateStr);
+      if (!log) return;
+
+      log.isBreakForgiven = isForgiven;
+      log.isModified = true;
+
+      recalcEmployee(emp);
+      recalcGlobalStats();
+      renderAnalysisTable();
+      renderDailyModalContent(emp);
+    }
+
+    function forgiveAllBreaksForCurrentEmp() {
+      if (!currentAnalysis || !activeModalPin) return;
+      const emp = currentAnalysis.employeeReports.find(e => e.pin === activeModalPin);
+      if (!emp) return;
+
+      (emp.dailyLogs || []).forEach(log => {
+        if (log.isBreakExcess) {
+          log.isBreakForgiven = true;
+          log.isModified = true;
+        }
+      });
+
+      recalcEmployee(emp);
+      recalcGlobalStats();
+      renderAnalysisTable();
+      renderDailyModalContent(emp);
+    }
+
+    function convertAllAlpaToPresent() {
+      if (!currentAnalysis || !activeModalPin) return;
+      const emp = currentAnalysis.employeeReports.find(e => e.pin === activeModalPin);
+      if (!emp) return;
+
+      if (!confirm(`Ubah semua status Alpa untuk "${emp.employeeName}" menjadi Hadir (karena lupa scan / salah input)?`)) return;
+
+      (emp.dailyLogs || []).forEach(log => {
+        if (log.status === 'ABSENT') {
+          log.status = 'PRESENT';
+          log.note = 'Koreksi Hadir (Lupa Scan/Salah Input)';
+          log.isModified = true;
+        }
+      });
+
+      recalcEmployee(emp);
+      recalcGlobalStats();
+      renderAnalysisTable();
+      renderDailyModalContent(emp);
     }
 
     function closeDailyModal() {
+      activeModalPin = null;
       document.getElementById('dailyModal').classList.remove('active');
     }
 
     function confirmImport() {
-      if (!currentAnalysis || !currentAnalysis.processedRows || currentAnalysis.processedRows.length === 0) {
+      if (!currentAnalysis || !currentAnalysis.employeeReports) {
         alert("Tidak ada data baru yang dapat disimpan.");
         return;
       }
 
       try {
-        const savedCount = FingerprintEngine.commitImport(currentAnalysis.processedRows);
+        // 1. Commit raw scans if any
+        if (currentAnalysis.processedRows && currentAnalysis.processedRows.length > 0) {
+          FingerprintEngine.commitImport(currentAnalysis.processedRows);
+        }
         
-        // Auto trigger ViolationEngine for each employee report
-        if (typeof ViolationEngine !== 'undefined' && currentAnalysis.employeeReports) {
+        // 2. Sync all attendance daily statuses into AttendanceEngine so Payroll and Attendance Review take immediate effect
+        if (typeof AttendanceEngine !== 'undefined' && AttendanceEngine.adjustStatus) {
           currentAnalysis.employeeReports.forEach(emp => {
             (emp.dailyLogs || []).forEach(log => {
-              if (log.isLate || log.isBreakExcess || log.status === 'ABSENT' || log.status === 'INCOMPLETE') {
-                // Auto tickets generated
+              if (emp.employeeId && log.date && log.status) {
+                AttendanceEngine.adjustStatus(
+                  emp.employeeId,
+                  log.date,
+                  log.status,
+                  log.note || 'Sinkronisasi Fingerprint Import',
+                  'HRD / Admin'
+                );
               }
             });
           });
@@ -716,3 +878,4 @@
   <script src="shared/shell.js?v=1787284704" data-base="."></script>
 </body>
 </html>
+

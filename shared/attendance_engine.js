@@ -13,7 +13,7 @@ const AttendanceEngine = (() => {
     shiftStart: '07:00',
     gracePeriodMinutes: 5, // Toleransi sampai 07:05
     shiftEnd: '16:00',
-    maxBreakMinutes: 60
+    maxBreakMinutes: 65 // Maksimal istirahat 65 menit (60 menit + 5 menit toleransi)
   };
 
   function getAuditLog() {

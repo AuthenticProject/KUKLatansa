@@ -23,7 +23,7 @@ const FingerprintEngine = (() => {
     lateToleranceMinutes: 5, // Toleransi sampai 07:05
     shiftEnd: '16:00',
     earlyLeaveTolerance: '15:55',
-    maxBreakMinutes: 60,     // Maksimal istirahat 60 menit
+    maxBreakMinutes: 65,     // Maksimal istirahat 65 menit (60 menit + 5 menit toleransi)
     lateDeductionRate: 2000, // Rp 2.000 / hari terlambat
     absenceDeductionRate: 28500 // Rp 28.500 / hari tidak masuk
   };
@@ -41,48 +41,75 @@ const FingerprintEngine = (() => {
     'masnurhadi': 'Nur',
     'nurhad': 'Nur',
     'paknur': 'Nur',
+    'nurbangunan': 'Nur',
+    '5': 'Nur',
 
     // 2. Syirojul Kahfi (ID: K-005, Nama: Kahfi, PIN: 4)
     'kahfi': 'Kahfi',
     'syirojulkahfi': 'Kahfi',
     'syirojul': 'Kahfi',
     'kahf': 'Kahfi',
+    'kahfibangunan': 'Kahfi',
+    '4': 'Kahfi',
 
     // 3. Alip Rejeki (ID: K-007, Nama: Alip, PIN: 7)
     'alif': 'Alip',
     'alip': 'Alip',
     'aliprejeki': 'Alip',
     'alifrejeki': 'Alip',
+    'alipbangunan': 'Alip',
+    '7': 'Alip',
 
     // 4. Nukul (ID: K-002, Nama: Nukul, PIN: 12)
     'nukul': 'Nukul',
+    'nukulhidayat': 'Nukul',
+    'nukulpalen': 'Nukul',
+    'nukultoko': 'Nukul',
+    '12': 'Nukul',
 
     // 5. Irfan Ulinnuha (ID: K-004, Nama: Ulin, PIN: 3)
     'ulin': 'Ulin',
     'irfanulinnuha': 'Ulin',
     'irfanulin': 'Ulin',
     'ulinnuha': 'Ulin',
+    'irfan': 'Ulin',
+    'ulinbangunan': 'Ulin',
+    '3': 'Ulin',
 
     // 6. Miftah (ID: K-001, Nama: Miftah, PIN: 13)
     'miftah': 'Miftah',
     'miftahul': 'Miftah',
     'miftahgudang': 'Miftah',
+    'miftahulhuda': 'Miftah',
+    'miftahpalen': 'Miftah',
+    'miftahudin': 'Miftah',
+    '13': 'Miftah',
 
     // 7. Lailurrohman (ID: K-010, Nama: Rohman, PIN: 10)
     'rohman': 'Rohman',
     'lailurrohman': 'Rohman',
     'lailur': 'Rohman',
+    'lailur rohman': 'Rohman',
+    'lailurrohman': 'Rohman',
+    'mrohman': 'Rohman',
+    'muhammadrohman': 'Rohman',
+    'rohmanbangunan': 'Rohman',
+    '10': 'Rohman',
 
     // 8. Muhammad Irvan (ID: K-011, Nama: Irvan, PIN: 11)
     'irvan': 'Irvan',
     'irvan~': 'Irvan',
     'muhammadirvan': 'Irvan',
     'mirvan': 'Irvan',
+    'irvanbangunan': 'Irvan',
+    '11': 'Irvan',
 
     // 9. Wiba Sepdioko (ID: K-003, Nama: Wiba, PIN: 2)
     'wiba': 'Wiba',
     'wibasepdioko': 'Wiba',
     'sepdioko': 'Wiba',
+    'wibabangunan': 'Wiba',
+    '2': 'Wiba',
 
     // 10. Arriyan Muhammad (ID: K-008, Nama: Riyan, PIN: 8)
     'arian': 'Riyan',
@@ -92,11 +119,15 @@ const FingerprintEngine = (() => {
     'arriyanmuhammad': 'Riyan',
     'mriyan': 'Riyan',
     'marriyan': 'Riyan',
+    'riyanbangunan': 'Riyan',
+    '8': 'Riyan',
 
     // 11. Muhammad Hiba (ID: K-009, Nama: Hiba, PIN: 9)
     'hiba': 'Hiba',
     'muhammadhiba': 'Hiba',
-    'mhiba': 'Hiba'
+    'mhiba': 'Hiba',
+    'hibabangunan': 'Hiba',
+    '9': 'Hiba'
   };
 
   /**
@@ -461,6 +492,7 @@ const FingerprintEngine = (() => {
             breakDuration: breakDuration,
             isBreakExcess: isBreakExcess,
             breakExcessMinutes: breakExcessMinutes,
+            isBreakForgiven: false,
             isEarlyLeave: isEarlyLeave
           });
 
@@ -484,9 +516,11 @@ const FingerprintEngine = (() => {
           });
         }
 
-        // FILTER: JIKA TOTAL HADIR == 0 (KOSONG FULL SEBULAN), MAKA SUDAH BUKAN KARYAWAN AKTIF (DIABAIKAN)
-        if (totalHadir === 0) {
-          skippedInactiveEmployees.push({ pin, machineName, reason: 'Kehadiran 0 hari sepanjang bulan' });
+        // FILTER: HANYA ABAIKAN JIKA BUKAN KARYAWAN AKTIF DI MASTER DB
+        // Karyawan aktif di MasterDB (misal: Lailurrohman, Nukul, Miftah) TETAP DITAMPILKAN agar HR dapat meninjau/mengedit alasan (lupa scan/salah input)
+        const isActiveMasterEmp = matchedEmp && (matchedEmp.status === 'Active' || matchedEmp.status === 'Aktif');
+        if (totalHadir === 0 && !isActiveMasterEmp) {
+          skippedInactiveEmployees.push({ pin, machineName, reason: 'Kehadiran 0 hari sepanjang bulan / bukan staf aktif' });
           continue;
         }
 
@@ -542,6 +576,58 @@ const FingerprintEngine = (() => {
         }
       }
     }
+
+    // PASTIKAN SEMUA 11 KARYAWAN AKTIF MASTER DB MUNCUL DI HASIL ANALISIS
+    employees.forEach(emp => {
+      if (emp.status === 'Active' || emp.status === 'Aktif') {
+        const alreadyIn = employeeReports.some(r => r.employeeId === emp.id);
+        if (!alreadyIn) {
+          let totalCuti = 0;
+          let totalAlpa = 0;
+          const dailyLogs = [];
+          for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${yearMonthPrefix}-${String(day).padStart(2, '0')}`;
+            const dayOfWeek = new Date(dateStr).getDay();
+            const isSunday = dayOfWeek === 0;
+            const isLeave = isDateCoveredByCuti(emp, dateStr);
+            if (isLeave) {
+              totalCuti++;
+              dailyLogs.push({ date: dateStr, status: 'LEAVE', punches: [], isBreakForgiven: false, note: 'Cuti Resmi' });
+            } else if (isSunday) {
+              dailyLogs.push({ date: dateStr, status: 'OFF', punches: [], isBreakForgiven: false, note: 'Hari Libur / Minggu' });
+            } else {
+              totalAlpa++;
+              dailyLogs.push({ date: dateStr, status: 'ABSENT', punches: [], isBreakForgiven: false, note: 'Tidak Masuk / Alpa (Potong Rp 28.500)' });
+            }
+          }
+          const alpaDeductionTotal = totalAlpa * RULES.absenceDeductionRate;
+          employeeReports.push({
+            pin: emp.fingerprintId || '-',
+            machineName: emp.fullName || emp.nama,
+            employeeId: emp.id,
+            employeeName: emp.fullName || emp.nama,
+            unit: emp.unit || 'KUK Bangunan',
+            isMatched: true,
+            totalHadir: 0,
+            totalCuti,
+            totalAlpa,
+            totalTelat: 0,
+            totalKelebihanIstirahat: 0,
+            totalMenitKelebihanIstirahat: 0,
+            totalPulangAwal: 0,
+            totalIncomplete: 0,
+            alpaDeductionTotal,
+            lateDeductionTotal: 0,
+            totalPotongan: alpaDeductionTotal,
+            dailyLogs
+          });
+        }
+      }
+    });
+
+    // Urutkan berdasarkan ID Karyawan agar rapi
+    employeeReports.sort((a, b) => (a.employeeId || '').localeCompare(b.employeeId || ''));
+
 
     return {
       monthPeriod: yearMonthPrefix,
