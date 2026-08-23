@@ -641,7 +641,7 @@
       </div>
     </div>
 
-    <div class="card" id="calCard" style="opacity: 0.5; pointer-events: none; transition: 0.3s;">
+    <div class="card" id="calCard" style="transition: 0.3s;">
       <div class="cal-header">
         <div class="cal-title" id="calTitle">Memuat...</div>
         <div class="cal-nav">
@@ -687,6 +687,19 @@
     <div class="card" id="summaryCard" style="display: none;">
       <div class="summary-title">Ringkasan Pilihan Anda (<span id="totalSelected">0</span> Hari)</div>
       <div class="chips" id="selectedChips"></div>
+    </div>
+
+    <!-- Card Rekapan Cuti Seluruh Karyawan -->
+    <div class="card" id="rekapListCard">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1.5px solid var(--border, #f1f5f9);">
+        <h3 style="font-size: 15px; font-weight: 700; color: var(--text); margin: 0; display: flex; align-items: center; gap: 8px;">
+          <span>📋</span> Rekapan Cuti Karyawan (<span id="rekapMonthTitle">Agustus 2026</span>)
+        </h3>
+        <span id="rekapTotalBadge" style="font-size: 12px; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px;">0 Karyawan</span>
+      </div>
+      <div id="allCutiRecapContainer">
+        <!-- Diisi oleh renderAllCutiRecapTable() -->
+      </div>
     </div>
   </div>
 
@@ -1087,7 +1100,6 @@
 
       return null;
     }
-
     function renderCalendar() {
       document.getElementById('calTitle').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
       const grid = document.getElementById('calGrid');
@@ -1098,6 +1110,25 @@
 
       const currentMonthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
       const selectedThisMonth = selectedDates.filter(d => d.startsWith(currentMonthPrefix)).length;
+
+      // Ambil seluruh cuti bulan ini untuk ditandai jika belum memilih user
+      let allMonthlyLeaves = {};
+      try {
+        const raw = localStorage.getItem('kuk_db_cuti_v1');
+        if (raw) {
+          const list = JSON.parse(raw);
+          list.forEach(item => {
+            if (Array.isArray(item.tanggal)) {
+              item.tanggal.forEach(t => {
+                if (t.startsWith(currentMonthPrefix)) {
+                  if (!allMonthlyLeaves[t]) allMonthlyLeaves[t] = [];
+                  allMonthlyLeaves[t].push(item.nama || item.fullName);
+                }
+              });
+            }
+          });
+        }
+      } catch(e){}
 
       for (let i = 0; i < firstDay; i++) {
         const d = document.createElement('div'); d.className = 'day empty'; grid.appendChild(d);
@@ -1110,10 +1141,19 @@
         el.className = 'day';
         el.textContent = i;
 
-        if (isLocked) {
+        if (!activeUser) {
+          // Mode ikhtisar umum (sebelum memilih karyawan)
+          if (allMonthlyLeaves[key]) {
+            el.classList.add('booked');
+            el.innerHTML = `${i}<span style="display:block; font-size:9px; font-weight:800; line-height:1; margin-top:2px;">${allMonthlyLeaves[key].length} Cuti</span>`;
+            el.onclick = () => showToast(`Cuti tgl ${i} ${MONTHS[viewMonth]}: ${allMonthlyLeaves[key].join(', ')}`, 'info');
+          } else {
+            el.onclick = () => showToast('Pilih nama karyawan di atas untuk melihat detail atau mengajukan cuti.', 'info');
+          }
+        } else if (isLocked) {
           el.classList.add('locked');
-          if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.75'; }
-          el.onclick = () => showToast('Form dikunci (Mode Rekapan). Pengajuan cuti hanya dibuka pada akhir bulan & 2 hari pertama bulan.', 'warning');
+          if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.85'; }
+          el.onclick = () => showToast(`Form dikunci (Mode Rekapan). Pengajuan cuti bulan ${MONTHS[viewMonth]} hanya dibuka pada akhir bulan s/d tanggal 2.`, 'warning');
         } else if (dateObj < today) {
           el.classList.add('locked');
           if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.7'; }
@@ -1155,11 +1195,22 @@
       }
 
       // Quota Tracker UI
-      document.getElementById('quotaText').textContent = `Kuota ${MONTHS[viewMonth]}: ${selectedThisMonth}/3 Terpakai`;
-      const dots = document.getElementById('quotaDots').children;
-      for (let i = 0; i < 3; i++) {
-        dots[i].className = i < selectedThisMonth ? 'dot active' : 'dot';
+      if (activeUser) {
+        document.getElementById('quotaText').textContent = `Kuota ${MONTHS[viewMonth]}: ${selectedThisMonth}/3 Terpakai`;
+        const dots = document.getElementById('quotaDots').children;
+        for (let i = 0; i < 3; i++) {
+          dots[i].className = i < selectedThisMonth ? 'dot active' : 'dot';
+        }
+      } else {
+        document.getElementById('quotaText').textContent = `Rekapan Jadwal Cuti Bulan ${MONTHS[viewMonth]} ${viewYear}`;
+        const dots = document.getElementById('quotaDots').children;
+        for (let i = 0; i < 3; i++) {
+          dots[i].className = 'dot';
+        }
       }
+
+      // Render tabel seluruh cuti karyawan bulan ini
+      renderAllCutiRecapTable();
     }
 
     function removeDate(key) {
