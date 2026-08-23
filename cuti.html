@@ -256,10 +256,47 @@
       border: 1px dashed #fca5a5;
     }
 
+    .day.cuti-rekap {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1.5px solid #bfdbfe;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .day.cuti-rekap:hover {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(37,99,235,0.15);
+    }
+
+    .cuti-chip-tag {
+      font-size: 8.5px;
+      line-height: 1.1;
+      padding: 1.5px 3px;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      display: block;
+      text-align: center;
+    }
+
     .day.locked {
-      color: #cbd5e1;
-      cursor: not-allowed;
+      color: #94a3b8;
+      cursor: pointer;
       background: #f8fafc;
+      border: 1px solid #f1f5f9;
+    }
+
+    .day.locked:hover {
+      background: #f1f5f9;
     }
 
     /* Quota specific to month */
@@ -608,8 +645,8 @@
     </div>
 
     <div class="header">
-      <h1>📅 Pengajuan Cuti</h1>
-      <p>Pilih jadwal libur Anda. Maksimal 3 hari per bulan.</p>
+      <h1 id="pageMainTitle">📅 Pengajuan Cuti</h1>
+      <p id="pageMainSubtitle">Pilih jadwal libur Anda. Maksimal 3 hari per bulan.</p>
     </div>
 
     <!-- Alert Batas Waktu -->
@@ -622,7 +659,8 @@
       <div><strong>Batas Waktu Berakhir</strong><br>Penginputan/Perubahan data cuti telah dikunci oleh admin.</div>
     </div>
 
-    <div class="card">
+    <!-- Card Identitas Karyawan (Hanya tampil saat mode pengajuan dibuka) -->
+    <div class="card" id="userSelectCard">
       <span class="label">Identitas Anda</span>
       <div class="select-box" id="namaWrap">
         <select disabled>
@@ -674,7 +712,7 @@
 
       <div class="cal-grid" id="calGrid"></div>
 
-      <div class="quota-box">
+      <div class="quota-box" id="quotaBox">
         <div class="quota-text" id="quotaText">Kuota bulan ini: 0/3 Terpakai</div>
         <div class="quota-dots" id="quotaDots">
           <div class="dot"></div>
@@ -703,7 +741,7 @@
     </div>
   </div>
 
-  <div class="bottom-bar">
+  <div class="bottom-bar" id="bottomSubmitBar">
     <button class="btn-submit" id="submitBtn" disabled onclick="handleSubmit()">
       <span class="spinner"></span>
       <span id="btnText">Pilih Karyawan Dahulu</span>
@@ -835,6 +873,13 @@
 
     function checkCutiLockState(batasWaktuCloud = null) {
       const alertEl = document.getElementById('deadlineAlert');
+      const userSelectCard = document.getElementById('userSelectCard');
+      const bottomBar = document.getElementById('bottomSubmitBar');
+      const summaryCard = document.getElementById('summaryCard');
+      const quotaBox = document.getElementById('quotaBox');
+      const pageTitle = document.getElementById('pageMainTitle');
+      const pageSubtitle = document.getElementById('pageMainSubtitle');
+
       const windowOpen = isCutiWindowOpenForMonth(viewYear, viewMonth, today);
       const { startDate, endDate } = getCutiWindowRange(viewYear, viewMonth);
 
@@ -845,8 +890,15 @@
 
       const rangeLabel = `${startDay} ${prevMonthName} s/d ${endDay} ${targetMonthName}`;
 
-      if (!windowOpen) {
+      if (!windowOpen || (batasWaktuCloud && new Date() > new Date(batasWaktuCloud))) {
         isLocked = true;
+        if (userSelectCard) userSelectCard.style.display = 'none';
+        if (bottomBar) bottomBar.style.display = 'none';
+        if (summaryCard) summaryCard.style.display = 'none';
+        if (quotaBox) quotaBox.style.display = 'none';
+        if (pageTitle) pageTitle.textContent = `📅 Rekapan Cuti ${targetMonthName} ${viewYear}`;
+        if (pageSubtitle) pageSubtitle.textContent = `Jadwal libur & cuti bulanan seluruh karyawan KUK La Tansa.`;
+
         if (alertEl) {
           alertEl.style.display = 'flex';
           alertEl.className = 'alert danger';
@@ -855,25 +907,17 @@
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <div><strong>🔒 Pengajuan Cuti ${targetMonthName} ${viewYear} Dikunci (Mode Rekapan)</strong><br>Pengajuan cuti bulan ${targetMonthName} hanya dibuka pada <strong>${rangeLabel}</strong>. Saat ini halaman menampilkan rekapan cuti yang tidak dapat diubah.</div>
-          `;
-        }
-      } else if (batasWaktuCloud && new Date() > new Date(batasWaktuCloud)) {
-        isLocked = true;
-        if (alertEl) {
-          alertEl.style.display = 'flex';
-          alertEl.className = 'alert danger';
-          alertEl.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <div><strong>Batas Waktu Berakhir</strong><br>Penginputan/Perubahan data cuti telah dikunci oleh admin.</div>
+            <div><strong>🔒 Pengajuan Cuti ${targetMonthName} ${viewYear} Dikunci (Mode Rekapan)</strong><br>Pengajuan cuti hanya dibuka pada <strong>${rangeLabel}</strong>. Halaman ini menyajikan rekapan jadwal cuti resmi karyawan.</div>
           `;
         }
       } else {
         isLocked = false;
+        if (userSelectCard) userSelectCard.style.display = 'block';
+        if (bottomBar) bottomBar.style.display = 'flex';
+        if (quotaBox) quotaBox.style.display = 'flex';
+        if (pageTitle) pageTitle.textContent = `📅 Pengajuan Cuti ${targetMonthName} ${viewYear}`;
+        if (pageSubtitle) pageSubtitle.textContent = `Pilih jadwal libur Anda. Maksimal 3 hari per bulan.`;
+
         if (alertEl) {
           alertEl.style.display = 'flex';
           alertEl.className = 'alert success';
@@ -895,7 +939,6 @@
     function init() {
       checkCutiLockState();
 
-      // 1. Instan fallback dari MasterDB lokal
       if (typeof MasterDB !== 'undefined' && MasterDB.getEmployees) {
         const localEmps = MasterDB.getEmployees()
           .filter(e => e.status === 'Active' || e.status === 'Aktif')
@@ -906,16 +949,13 @@
         autoSelectLoggedUser();
       }
 
-      // 2. Sync dari Cloud Google Apps Script
       fetch(`${SCRIPT_URL}?action=init`).then(r => r.json()).then(res => {
         if (res && res.karyawan && res.karyawan.length > 0) {
           dbKaryawan = filterDataByRole(res.karyawan);
           renderSelectDropdown();
           autoSelectLoggedUser();
         }
-
         checkCutiLockState(res ? res.batasWaktu : null);
-
         renderCalendar();
       }).catch(e => {
         console.warn('Init server cuti offline, menggunakan database lokal:', e);
@@ -932,7 +972,6 @@
         const userNama = String(user.nama || user.fullName || '').toLowerCase().trim();
         const userBagian = String(user.bagian || user.department || user.position || '').toLowerCase().trim();
 
-        // 1. Ambil tanggal cuti user
         const myRecord = list.find(x => 
           (x.idKaryawan && String(x.idKaryawan).toLowerCase().trim() === userId) ||
           (x.nama && String(x.nama).toLowerCase().trim() === userNama)
@@ -943,7 +982,6 @@
           selectedDates = [];
         }
 
-        // 2. Bangun leavesMap dan bookedDates untuk rekan di divisi yang sama
         leavesMap = {};
         bookedDates = [];
         list.forEach(item => {
@@ -994,13 +1032,10 @@
 
       const divWrap = document.getElementById('divisiWrap');
       const divText = document.getElementById('bagianText').querySelector('span');
-      const calCard = document.getElementById('calCard');
       const calOverlay = document.getElementById('calOverlay');
 
       if (!activeUser) {
         divWrap.style.display = 'none';
-        calCard.style.opacity = '0.5';
-        calCard.style.pointerEvents = 'none';
         selectedDates = [];
         bookedDates = [];
         renderCalendar();
@@ -1010,15 +1045,11 @@
 
       divWrap.style.display = 'block';
       divText.textContent = activeUser.bagian || 'Tanpa Divisi';
-      calCard.style.opacity = '1';
-      calCard.style.pointerEvents = 'auto';
 
-      // 1. Instan tampilkan data dari database lokal (MasterDB / kuk_db_cuti_v1)
       loadLocalCutiData(activeUser);
       renderCalendar();
       updateUI();
 
-      // 2. Sinkronisasi latar belakang dari cloud
       calOverlay.style.display = 'flex';
       document.getElementById('btnText').textContent = 'Menyinkronkan data...';
 
@@ -1055,7 +1086,6 @@
       const empId = String(activeUser.id || '');
       const isIrvan = empName.includes('irvan') || empId === 'K-011' || empId === 'KRY-009' || empId === '11';
 
-      // Rule 3: Irvan hanya bisa cuti hari Minggu
       if (isIrvan && dateObj && dateObj.getDay() !== 0) {
         return { type: 'irvan_rule', message: 'Irvan hanya dapat mengambil cuti pada hari Minggu.' };
       }
@@ -1064,7 +1094,6 @@
       const others = leavesMap[key];
       const bgLower = String(activeUser.bagian || activeUser.department || activeUser.position || '').trim().toLowerCase();
 
-      // Rule 1: Bagian yang sama tidak boleh cuti bareng
       const sameDeptConflict = others.find(o => {
         if (!o) return false;
         const oBg = String(o.bagian || o.department || o.position || '').trim().toLowerCase();
@@ -1074,7 +1103,6 @@
         return { type: 'dept_conflict', message: `Bentrok: ${sameDeptConflict.nama} (${sameDeptConflict.bagian}) dari bagian yang sama sudah mengambil cuti pada tanggal ini.` };
       }
 
-      // Rule 2: Kepala Toko tidak boleh bareng dengan Admin
       const isKepalaToko = bgLower.includes('kepala toko');
       const isAdmin = bgLower.includes('admin');
 
@@ -1100,6 +1128,7 @@
 
       return null;
     }
+
     function renderCalendar() {
       document.getElementById('calTitle').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
       const grid = document.getElementById('calGrid');
@@ -1111,7 +1140,6 @@
       const currentMonthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
       const selectedThisMonth = selectedDates.filter(d => d.startsWith(currentMonthPrefix)).length;
 
-      // Ambil seluruh cuti bulan ini untuk ditandai jika belum memilih user
       let allMonthlyLeaves = {};
       try {
         const raw = localStorage.getItem('kuk_db_cuti_v1');
@@ -1122,7 +1150,10 @@
               item.tanggal.forEach(t => {
                 if (t.startsWith(currentMonthPrefix)) {
                   if (!allMonthlyLeaves[t]) allMonthlyLeaves[t] = [];
-                  allMonthlyLeaves[t].push(item.nama || item.fullName);
+                  const empName = item.nama || item.fullName;
+                  if (!allMonthlyLeaves[t].includes(empName)) {
+                    allMonthlyLeaves[t].push(empName);
+                  }
                 }
               });
             }
@@ -1138,64 +1169,80 @@
         const key = toKey(viewYear, viewMonth, i);
         const dateObj = new Date(viewYear, viewMonth, i);
         const el = document.createElement('div');
-        el.className = 'day';
-        el.textContent = i;
 
-        if (!activeUser) {
-          // Mode ikhtisar umum (sebelum memilih karyawan)
-          if (allMonthlyLeaves[key]) {
-            el.classList.add('booked');
-            el.innerHTML = `${i}<span style="display:block; font-size:9px; font-weight:800; line-height:1; margin-top:2px;">${allMonthlyLeaves[key].length} Cuti</span>`;
-            el.onclick = () => showToast(`Cuti tgl ${i} ${MONTHS[viewMonth]}: ${allMonthlyLeaves[key].join(', ')}`, 'info');
+        if (isLocked) {
+          const leavesOnThisDay = allMonthlyLeaves[key] || [];
+          if (leavesOnThisDay.length > 0) {
+            el.className = 'day cuti-rekap';
+            el.style.minHeight = '64px';
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            el.style.justifyContent = 'space-between';
+            el.style.padding = '4px 3px';
+            el.innerHTML = `
+              <span style="font-weight:800; font-size:13.5px; align-self:flex-start; margin-left:2px;">${i}</span>
+              <div style="display:flex; flex-direction:column; gap:2px; width:100%; overflow:hidden;">
+                ${leavesOnThisDay.map(nama => `<span class="cuti-chip-tag" title="Cuti: ${nama}">${nama}</span>`).join('')}
+              </div>
+            `;
+            el.onclick = () => showToast(`🏖️ Cuti tgl ${i} ${MONTHS[viewMonth]}: ${leavesOnThisDay.join(', ')}`, 'info');
           } else {
-            el.onclick = () => showToast('Pilih nama karyawan di atas untuk melihat detail atau mengajukan cuti.', 'info');
+            el.className = 'day locked';
+            el.style.minHeight = '64px';
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            el.style.justifyContent = 'flex-start';
+            el.style.padding = '4px 3px';
+            el.innerHTML = `<span style="font-weight:600; font-size:13px; color:#64748b; align-self:flex-start; margin-left:2px;">${i}</span>`;
+            el.onclick = () => showToast(`Tidak ada karyawan yang cuti pada tgl ${i} ${MONTHS[viewMonth]}.`, 'info');
           }
-        } else if (isLocked) {
-          el.classList.add('locked');
-          if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.85'; }
-          el.onclick = () => showToast(`Form dikunci (Mode Rekapan). Pengajuan cuti bulan ${MONTHS[viewMonth]} hanya dibuka pada akhir bulan s/d tanggal 2.`, 'warning');
-        } else if (dateObj < today) {
-          el.classList.add('locked');
-          if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.7'; }
-          el.onclick = () => showToast('Tidak dapat memilih waktu di masa lalu.', 'error');
-        } else if (bookedDates.includes(key)) {
-          el.classList.add('booked');
-          el.onclick = () => showToast(`Diambil rekan di divisi ${activeUser?.bagian}`, 'error');
         } else {
-          // Check operational and individual restrictions
-          const restriction = checkDateRestriction(key, dateObj);
-          if (restriction) {
-            if (restriction.type === 'irvan_rule') {
-              el.classList.add('locked');
-              el.style.opacity = '0.4';
-            } else {
-              el.classList.add('booked');
-            }
-            el.onclick = () => showToast(restriction.message, 'error');
-          } else {
-            if (dateObj.getTime() === today.getTime()) el.classList.add('today');
-            if (selectedDates.includes(key)) el.classList.add('selected');
+          el.className = 'day';
+          el.textContent = i;
 
-            el.onclick = () => {
-              if (selectedDates.includes(key)) {
-                selectedDates = selectedDates.filter(k => k !== key);
+          if (!activeUser) {
+            el.onclick = () => showToast('Pilih nama karyawan pada dropdown di atas terlebih dahulu.', 'info');
+          } else if (dateObj < today) {
+            el.classList.add('locked');
+            if (selectedDates.includes(key)) { el.classList.add('selected'); el.style.opacity = '0.7'; }
+            el.onclick = () => showToast('Tidak dapat memilih waktu di masa lalu.', 'error');
+          } else if (bookedDates.includes(key)) {
+            el.classList.add('booked');
+            el.onclick = () => showToast(`Diambil rekan di divisi ${activeUser?.bagian}`, 'error');
+          } else {
+            const restriction = checkDateRestriction(key, dateObj);
+            if (restriction) {
+              if (restriction.type === 'irvan_rule') {
+                el.classList.add('locked');
+                el.style.opacity = '0.4';
               } else {
-                if (selectedThisMonth >= 3) {
-                  showToast(`Kuota bulan ${MONTHS[viewMonth]} sudah habis (Maks 3).`, 'error');
-                  return;
-                }
-                selectedDates.push(key);
+                el.classList.add('booked');
               }
-              renderCalendar();
-              updateUI();
-            };
+              el.onclick = () => showToast(restriction.message, 'error');
+            } else {
+              if (dateObj.getTime() === today.getTime()) el.classList.add('today');
+              if (selectedDates.includes(key)) el.classList.add('selected');
+
+              el.onclick = () => {
+                if (selectedDates.includes(key)) {
+                  selectedDates = selectedDates.filter(k => k !== key);
+                } else {
+                  if (selectedThisMonth >= 3) {
+                    showToast(`Kuota bulan ${MONTHS[viewMonth]} sudah habis (Maks 3).`, 'error');
+                    return;
+                  }
+                  selectedDates.push(key);
+                }
+                renderCalendar();
+                updateUI();
+              };
+            }
           }
         }
         grid.appendChild(el);
       }
 
-      // Quota Tracker UI
-      if (activeUser) {
+      if (activeUser && !isLocked) {
         document.getElementById('quotaText').textContent = `Kuota ${MONTHS[viewMonth]}: ${selectedThisMonth}/3 Terpakai`;
         const dots = document.getElementById('quotaDots').children;
         for (let i = 0; i < 3; i++) {
@@ -1211,6 +1258,72 @@
 
       // Render tabel seluruh cuti karyawan bulan ini
       renderAllCutiRecapTable();
+    }
+
+    function renderAllCutiRecapTable() {
+      const container = document.getElementById('allCutiRecapContainer');
+      const badgeEl = document.getElementById('rekapTotalBadge');
+      const titleEl = document.getElementById('rekapMonthTitle');
+      if (titleEl) titleEl.textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+      if (!container) return;
+
+      const targetMonthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+      const targetMonthName = MONTHS[viewMonth];
+
+      let allCuti = [];
+      try {
+        const raw = localStorage.getItem('kuk_db_cuti_v1');
+        if (raw) allCuti = JSON.parse(raw);
+      } catch(e){}
+
+      const monthlyList = allCuti.filter(c => {
+        if (!Array.isArray(c.tanggal)) return false;
+        return c.tanggal.some(t => t.startsWith(targetMonthPrefix));
+      });
+
+      if (badgeEl) {
+        badgeEl.textContent = `${monthlyList.length} Karyawan Cuti`;
+      }
+
+      if (monthlyList.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:20px 16px; color:#64748b; background:#f8fafc; border-radius:12px; font-size:13px; border:1px dashed #cbd5e1;">
+            🏖️ Belum ada jadwal cuti terdaftar pada bulan <strong>${targetMonthName} ${viewYear}</strong>.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          ${monthlyList.map(item => {
+            const datesThisMonth = item.tanggal
+              .filter(t => t.startsWith(targetMonthPrefix))
+              .sort();
+            
+            const empName = item.nama || item.fullName || 'Karyawan';
+            const bagian = item.bagian || item.department || item.position || 'Operasional';
+
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 16px;">
+                <div>
+                  <div style="font-weight:700; font-size:14px; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                    ${empName}
+                  </div>
+                  <div style="font-size:12px; color:#64748b; margin-top:2px;">${bagian}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  ${datesThisMonth.map(dKey => {
+                    const dayNum = parseInt(dKey.split('-')[2], 10);
+                    return `<span style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:700; font-size:12px; padding:4px 9px; border-radius:8px;">📅 Tgl ${dayNum}</span>`;
+                  }).join('')}
+                  <span style="font-size:11.5px; background:#e6f4ea; color:#137333; font-weight:800; padding:4px 10px; border-radius:14px;">${datesThisMonth.length} Hari</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
     }
 
     function removeDate(key) {
