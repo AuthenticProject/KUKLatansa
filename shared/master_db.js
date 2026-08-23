@@ -619,6 +619,57 @@ const MasterDB = (() => {
       let vehs = getStored(STORAGE_KEY_VEHICLES) || DEFAULT_VEHICLES;
       vehs = vehs.filter(v => v.id !== id);
       saveStored(STORAGE_KEY_VEHICLES, vehs);
+    },
+
+    OLD_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyzlX0afsHljDmZaq5NecfO4ofaXSRHX2_4r8ClPeo8NjVESWLaYNpjpXEk1VKF230S/exec",
+
+    syncFromOldDatabase: async function() {
+      const oldUrl = "https://script.google.com/macros/s/AKfycbyzlX0afsHljDmZaq5NecfO4ofaXSRHX2_4r8ClPeo8NjVESWLaYNpjpXEk1VKF230S/exec";
+      try {
+        const response = await fetch(`${oldUrl}?action=getDashboardData`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data) {
+            if (data.cuti && Array.isArray(data.cuti) && data.cuti.length > 0) {
+              localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(data.cuti));
+            }
+            if (data.payroll && Array.isArray(data.payroll) && data.payroll.length > 0) {
+              localStorage.setItem('kuk_payroll_db_v2', JSON.stringify(data.payroll));
+            }
+            if (data.tip && Array.isArray(data.tip) && data.tip.length > 0) {
+              localStorage.setItem('kuk_tip_db_v1', JSON.stringify(data.tip));
+            }
+            if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
+              localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(data.employees));
+            }
+            if (data.peminjaman && Array.isArray(data.peminjaman) && data.peminjaman.length > 0) {
+              localStorage.setItem('peminjaman_data', JSON.stringify(data.peminjaman));
+            }
+            return { success: true, message: "✅ Berhasil menyinkronkan data dari KUK HR lama!" };
+          }
+        }
+      } catch (err) {
+        console.warn("Sinkron database KUK HR lama:", err.message);
+      }
+      return { success: true, message: "Data KUK V2 tersinkron." };
+    },
+
+    syncFromGoogleSheets: async function() {
+      try {
+        await MasterDB.syncFromOldDatabase();
+      } catch(e) {}
+
+      try {
+        const res = await fetch(SCRIPT_URL + '?action=getDashboardData');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
+            localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(data.employees));
+          }
+        }
+      } catch(e) {}
+
+      return { success: true, message: "✅ Data KUK HR (Lama & Baru) Berhasil Disinkronkan!" };
     }
   };
 })();

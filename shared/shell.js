@@ -212,6 +212,7 @@
     if (path.includes('rekap_cuti'))       return 'rekap_cuti';
     if (path.includes('cuti'))             return 'cuti';
     if (path.includes('pelanggaran'))      return 'pelanggaran';
+    if (path.includes('rekap_tip'))        return 'rekap_tip';
     if (path.includes('tip'))              return 'tip';
     if (path.includes('karyawan'))         return 'karyawan';
     if (path.includes('users'))            return 'users';
