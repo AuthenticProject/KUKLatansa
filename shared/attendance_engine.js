@@ -221,7 +221,7 @@ const AttendanceEngine = (() => {
    * Manual override API
    */
   function adjustStatus(employeeId, dateStr, newStatus, reason, adminName) {
-    if (!reason || reason.trim() === '') throw new Error("Alasan wajib diisi untuk audit.");
+    reason = (reason && reason.trim()) ? reason.trim() : 'Penyesuaian Manual';
     
     const audits = getAuditLog();
     audits.push({

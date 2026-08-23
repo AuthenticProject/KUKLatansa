@@ -1,19 +1,37 @@
-const CACHE_NAME = 'kuk-hr-cache-v47';
+const CACHE_NAME = 'kuk-hr-cache-v51';
 const STATIC_ASSETS = [
   './',
   './index.html',
+  './dashboard.html',
   './absen.html',
   './cuti.html',
   './rekap_cuti.html',
-  './pelanggaran.html',
+  './rekap_tip.html',
   './tip.html',
+  './pelanggaran.html',
+  './attendance_review.html',
+  './violation_review.html',
+  './fingerprint_import.html',
+  './payroll_dashboard.html',
   './peminjaman.html',
   './peminjaman_admin.html',
   './peminjaman_db.js',
   './karyawan.html',
   './karyawan_db.js',
+  './users.html',
+  './hrd.html',
   './dashboard/',
   './dashboard/index.html',
+  './shared/master_db.js',
+  './shared/shell.js',
+  './shared/shell.css',
+  './shared/design-tokens.css',
+  './shared/security.js',
+  './shared/attendance_engine.js',
+  './shared/violation_engine.js',
+  './shared/dashboard_engine.js',
+  './shared/payroll_engine.js',
+  './shared/fingerprint_engine.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -21,8 +39,10 @@ const STATIC_ASSETS = [
   './favicon-32x32.png',
   './favicon-16x16.png',
   './kop_palen.png',
-  './kop_bangunan.png'
+  './kop_bangunan.png',
+  './kop_umum.png'
 ];
+
 
 // Install Event
 self.addEventListener('install', event => {

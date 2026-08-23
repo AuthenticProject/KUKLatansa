@@ -721,9 +721,16 @@
         const empName = emp.fullName || emp.nama;
         const safeName = empName.replace(/'/g, "\\'");
         const empLeaves = allCutiRecords.filter(c => {
-          const matchId = (c.idKaryawan && (c.idKaryawan === emp.id || c.idKaryawan === emp.fingerprintId));
-          const matchName = (c.nama && empName.toLowerCase().includes(c.nama.toLowerCase()));
-          return (matchId || matchName);
+          if (c.idKaryawan && (c.idKaryawan === emp.id || c.idKaryawan === emp.fingerprintId)) return true;
+          if (c.nama && emp.nama) {
+            const cName = c.nama.toLowerCase().trim();
+            const eName = emp.nama.toLowerCase().trim();
+            const eFullName = (emp.fullName || '').toLowerCase().trim();
+            if (cName === eName || cName === eFullName) return true;
+            const words = eFullName.split(' ');
+            if (words.includes(cName)) return true;
+          }
+          return false;
         });
 
         const leaveDays = new Set();

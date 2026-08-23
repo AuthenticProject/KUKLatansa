@@ -181,11 +181,11 @@ const MasterDB = (() => {
   const DEFAULT_CUTI_DATA = [
     { id: 'CUTI-2026-08-001', idKaryawan: 'K-001', nama: 'Miftah', bagian: 'Kepala Gudang', unit: 'KUK Palen', tanggal: ['2026-08-10', '2026-08-15', '2026-08-18'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:00:00' },
     { id: 'CUTI-2026-08-002', idKaryawan: 'K-002', nama: 'Nukul', bagian: 'Kepala Toko', unit: 'KUK Palen', tanggal: ['2026-08-04', '2026-08-05', '2026-08-06'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:15:00' },
-    { id: 'CUTI-2026-08-003', idKaryawan: 'K-003', nama: 'Wiba', bagian: 'Admin 2', unit: 'KUK Bangunan', tanggal: ['2026-08-02', '2026-08-09', '2026-08-16'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:30:00' },
+    { id: 'CUTI-2026-08-003', idKaryawan: 'K-003', nama: 'Wiba', bagian: 'Admin 2', unit: 'KUK Bangunan', tanggal: ['2026-08-02', '2026-08-10', '2026-08-17'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:30:00' },
     { id: 'CUTI-2026-08-004', idKaryawan: 'K-004', nama: 'Ulin', bagian: 'Kepala Toko', unit: 'KUK Bangunan', tanggal: ['2026-08-08', '2026-08-17', '2026-08-29'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 09:45:00' },
     { id: 'CUTI-2026-08-005', idKaryawan: 'K-005', nama: 'Kahfi', bagian: 'Kasir', unit: 'KUK Bangunan', tanggal: ['2026-08-01', '2026-08-10', '2026-08-20'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:00:00' },
     { id: 'CUTI-2026-08-006', idKaryawan: 'K-006', nama: 'Nur', bagian: 'Kepala Gudang', unit: 'KUK Bangunan', tanggal: ['2026-08-02', '2026-08-16', '2026-08-30'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:15:00' },
-    { id: 'CUTI-2026-08-007', idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', unit: 'KUK Bangunan', tanggal: ['2026-08-05', '2026-08-15', '2026-08-16'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:30:00' },
+    { id: 'CUTI-2026-08-007', idKaryawan: 'K-007', nama: 'Alip', bagian: 'Pengiriman', unit: 'KUK Bangunan', tanggal: ['2026-08-05', '2026-08-16', '2026-08-17'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:30:00' },
     { id: 'CUTI-2026-08-008', idKaryawan: 'K-008', nama: 'Riyan', bagian: 'Frontliner', unit: 'KUK Bangunan', tanggal: ['2026-08-04', '2026-08-15', '2026-08-28'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 10:45:00' },
     { id: 'CUTI-2026-08-009', idKaryawan: 'K-009', nama: 'Hiba', bagian: 'Frontliner', unit: 'KUK Bangunan', tanggal: ['2026-08-06', '2026-08-18', '2026-08-29'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:00:00' },
     { id: 'CUTI-2026-08-010', idKaryawan: 'K-010', nama: 'Rohman', bagian: 'Frontliner', unit: 'KUK Bangunan', tanggal: ['2026-08-03', '2026-08-16', '2026-08-23'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:15:00' },
@@ -198,6 +198,8 @@ const MasterDB = (() => {
     "id": "TIP-017",
     "tanggal": "2026-08-19",
     "namaKaryawan": "Nur",
+    "nama": "Nur",
+    "karyawan": "Nur",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 5mm",
     "luasM2": 14080,
@@ -209,6 +211,8 @@ const MasterDB = (() => {
     "id": "TIP-016",
     "tanggal": "2026-08-19",
     "namaKaryawan": "Wiba",
+    "nama": "Wiba",
+    "karyawan": "Wiba",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 3mm",
     "luasM2": 5705,
@@ -220,6 +224,8 @@ const MasterDB = (() => {
     "id": "TIP-015",
     "tanggal": "2026-08-15",
     "namaKaryawan": "Wiba",
+    "nama": "Wiba",
+    "karyawan": "Wiba",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 3mm",
     "luasM2": 2055,
@@ -231,6 +237,8 @@ const MasterDB = (() => {
     "id": "TIP-014",
     "tanggal": "2026-08-12",
     "namaKaryawan": "Wiba",
+    "nama": "Wiba",
+    "karyawan": "Wiba",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 3mm",
     "luasM2": 9588,
@@ -242,6 +250,8 @@ const MasterDB = (() => {
     "id": "TIP-013",
     "tanggal": "2026-08-12",
     "namaKaryawan": "Wiba",
+    "nama": "Wiba",
+    "karyawan": "Wiba",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 3mm",
     "luasM2": 9588,
@@ -253,6 +263,8 @@ const MasterDB = (() => {
     "id": "TIP-012",
     "tanggal": "2026-08-16",
     "namaKaryawan": "Ulin",
+    "nama": "Ulin",
+    "karyawan": "Ulin",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Riben 5mm",
     "luasM2": 9000,
@@ -264,6 +276,8 @@ const MasterDB = (() => {
     "id": "TIP-011",
     "tanggal": "2026-08-11",
     "namaKaryawan": "Kahfi",
+    "nama": "Kahfi",
+    "karyawan": "Kahfi",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 3mm",
     "luasM2": 29445,
@@ -275,6 +289,8 @@ const MasterDB = (() => {
     "id": "TIP-010",
     "tanggal": "2026-08-11",
     "namaKaryawan": "Kahfi",
+    "nama": "Kahfi",
+    "karyawan": "Kahfi",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 2mm",
     "luasM2": 20308,
@@ -286,6 +302,8 @@ const MasterDB = (() => {
     "id": "TIP-009",
     "tanggal": "2026-08-11",
     "namaKaryawan": "Nur",
+    "nama": "Nur",
+    "karyawan": "Nur",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 2mm",
     "luasM2": 40000,
@@ -297,6 +315,8 @@ const MasterDB = (() => {
     "id": "TIP-008",
     "tanggal": "2026-08-07",
     "namaKaryawan": "Kahfi",
+    "nama": "Kahfi",
+    "karyawan": "Kahfi",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 5mm",
     "luasM2": 8000,
@@ -308,6 +328,8 @@ const MasterDB = (() => {
     "id": "TIP-007",
     "tanggal": "2026-08-06",
     "namaKaryawan": "Nur",
+    "nama": "Nur",
+    "karyawan": "Nur",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 5mm",
     "luasM2": 6840,
@@ -319,6 +341,8 @@ const MasterDB = (() => {
     "id": "TIP-006",
     "tanggal": "2026-08-07",
     "namaKaryawan": "Alip",
+    "nama": "Alip",
+    "karyawan": "Alip",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Cermin 3mm",
     "luasM2": 2359.9,
@@ -330,6 +354,8 @@ const MasterDB = (() => {
     "id": "TIP-005",
     "tanggal": "2026-08-06",
     "namaKaryawan": "Nur",
+    "nama": "Nur",
+    "karyawan": "Nur",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Riben 5mm",
     "luasM2": 3419,
@@ -341,6 +367,8 @@ const MasterDB = (() => {
     "id": "TIP-004",
     "tanggal": "2026-08-06",
     "namaKaryawan": "Nur",
+    "nama": "Nur",
+    "karyawan": "Nur",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Air 5mm",
     "luasM2": 6840,
@@ -352,6 +380,8 @@ const MasterDB = (() => {
     "id": "TIP-003",
     "tanggal": "2026-08-04",
     "namaKaryawan": "Alip",
+    "nama": "Alip",
+    "karyawan": "Alip",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Riben 5mm",
     "luasM2": 7999,
@@ -363,6 +393,8 @@ const MasterDB = (() => {
     "id": "TIP-002",
     "tanggal": "2026-08-02",
     "namaKaryawan": "Kahfi",
+    "nama": "Kahfi",
+    "karyawan": "Kahfi",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Riben 5mm",
     "luasM2": 8708,
@@ -374,6 +406,8 @@ const MasterDB = (() => {
     "id": "TIP-001",
     "tanggal": "2026-08-02",
     "namaKaryawan": "Kahfi",
+    "nama": "Kahfi",
+    "karyawan": "Kahfi",
     "unit": "KUK Bangunan",
     "jenisKaca": "Kaca Riben 5mm",
     "luasM2": 8.428,
@@ -447,21 +481,11 @@ const MasterDB = (() => {
     }
 
     let cutiData = getStored('kuk_db_cuti_v1');
-    const needsCutiReset = !cutiData || cutiData.length === 0 || cutiData.some(c => Array.isArray(c.tanggal) && c.tanggal.length > 3);
+    const needsCutiReset = !cutiData || cutiData.length !== 11 || cutiData.some(c => Array.isArray(c.tanggal) && c.tanggal.length !== 3);
     if (needsCutiReset) {
       saveStored('kuk_db_cuti_v1', DEFAULT_CUTI_DATA);
     } else {
-      let updated = false;
-      DEFAULT_CUTI_DATA.forEach(def => {
-        const idx = cutiData.findIndex(c => c.id === def.id || (c.idKaryawan === def.idKaryawan && c.id && c.id.startsWith('CUTI-2026-08')));
-        if (idx > -1) {
-          cutiData[idx] = { ...cutiData[idx], ...def };
-          updated = true;
-        }
-      });
-      if (updated) {
-        saveStored('kuk_db_cuti_v1', cutiData);
-      }
+      saveStored('kuk_db_cuti_v1', DEFAULT_CUTI_DATA);
     }
 
     let violData = getStored('kuk_violations_db');
@@ -477,7 +501,8 @@ const MasterDB = (() => {
     }
 
     let tipData = getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1');
-    if (!tipData || tipData.length < 17) {
+    const hasMissingNames = tipData && tipData.some(t => !(t.namaKaryawan || t.karyawan || t.nama || t.name) || (t.namaKaryawan === '-' && t.karyawan === '-'));
+    if (!tipData || tipData.length < 17 || hasMissingNames) {
       saveStored('kuk_db_tip_v1', DEFAULT_TIP_DATA);
       saveStored('kuk_tip_db_v1', DEFAULT_TIP_DATA);
     }

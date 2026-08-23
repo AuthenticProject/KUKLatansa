@@ -300,14 +300,20 @@
       return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     }
 
+    function getEmpName(t) {
+      if (!t) return '-';
+      const n = t.namaKaryawan || t.karyawan || t.nama || t.name || t.employee || t.empName || '';
+      return n && n !== '-' ? n : '-';
+    }
+
     function populateKaryawanDropdown() {
       const sel = document.getElementById('filterKaryawan');
       if (!sel) return;
       const allTips = getTipData();
       const namesSet = new Set();
       allTips.forEach(t => {
-        const n = t.namaKaryawan || t.karyawan || '';
-        if (n) namesSet.add(n);
+        const n = getEmpName(t);
+        if (n && n !== '-') namesSet.add(n);
       });
 
       let html = '<option value="ALL">Semua Karyawan</option>';
@@ -332,7 +338,7 @@
       }
 
       if (selectedEmp && selectedEmp !== 'ALL') {
-        monthTips = monthTips.filter(t => (t.namaKaryawan || t.karyawan || '').toLowerCase() === selectedEmp.toLowerCase());
+        monthTips = monthTips.filter(t => getEmpName(t).toLowerCase() === selectedEmp.toLowerCase());
       }
 
       // Calculate totals per employee
@@ -340,10 +346,12 @@
       const empSumMap = {};
 
       allTips.forEach(t => {
-        const name = t.namaKaryawan || t.karyawan || 'Lainnya';
+        const name = getEmpName(t);
         const tip = parseFloat(t.nominalTip || t.tip || 0) || 0;
         grandTotalTip += tip;
-        empSumMap[name] = (empSumMap[name] || 0) + tip;
+        if (name && name !== '-') {
+          empSumMap[name] = (empSumMap[name] || 0) + tip;
+        }
       });
 
       // Render Summary Grid
@@ -375,7 +383,7 @@
 
       tbody.innerHTML = monthTips.map(t => {
         const dateStr = t.tanggal || t.tgl || '-';
-        const nameStr = t.namaKaryawan || t.karyawan || '-';
+        const nameStr = getEmpName(t);
         const jenisStr = t.jenisKaca || t.jenis || 'Kaca Standard';
         const luasNum = parseFloat(t.luasM2 || t.luas || 0) || 0;
         const hargaNum = parseFloat(t.totalOmset || t.totalHarga || t.omset || 0) || 0;

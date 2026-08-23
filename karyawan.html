@@ -1291,7 +1291,7 @@
         renderRekrutmenTable();
       } else if (tab === 'rekontrak') {
         bKon.classList.add('active'); cKon.style.display = 'block';
-        renderRekontrakTable();
+        renderMasterTable();
       } else if (tab === 'gaji') {
         bGaj.classList.add('active'); cGaj.style.display = 'block';
         renderGajiTable();
@@ -1521,19 +1521,27 @@
     function renderRekontrakTable() {
       KaryawanDB.updateStatusRekontrakOtomatis();
       const list = KaryawanDB.getRekontrakList();
-      const q = (document.getElementById('konSearch').value || '').toLowerCase();
-      const fToko = document.getElementById('konFilterToko').value;
-      const fStatus = document.getElementById('konFilterStatus').value;
+      // DOM elements may not exist when called from non-rekontrak contexts (e.g. PKWT save)
+      const elSearch = document.getElementById('konSearch');
+      const elFilterToko = document.getElementById('konFilterToko');
+      const elFilterStatus = document.getElementById('konFilterStatus');
+      const q = (elSearch ? elSearch.value || '' : '').toLowerCase();
+      const fToko = elFilterToko ? elFilterToko.value : 'ALL';
+      const fStatus = elFilterStatus ? elFilterStatus.value : 'ALL';
 
       let total = list.length;
       let aktif = list.filter(r => r.statusKontrak === 'Kontrak Aktif').length;
       let hampir = list.filter(r => r.statusKontrak.includes('Hampir')).length;
       let habis = list.filter(r => r.statusKontrak === 'Habis Masa Kontrak').length;
 
-      document.getElementById('statKonTotal').textContent = total;
-      document.getElementById('statKonAktif').textContent = aktif;
-      document.getElementById('statKonHampir').textContent = hampir;
-      document.getElementById('statKonHabis').textContent = habis;
+      const elTotal = document.getElementById('statKonTotal');
+      const elAktif = document.getElementById('statKonAktif');
+      const elHampir = document.getElementById('statKonHampir');
+      const elHabis = document.getElementById('statKonHabis');
+      if (elTotal) elTotal.textContent = total;
+      if (elAktif) elAktif.textContent = aktif;
+      if (elHampir) elHampir.textContent = hampir;
+      if (elHabis) elHabis.textContent = habis;
 
       const filtered = list.filter(r => {
         const matchQ = !q || r.namaLengkap.toLowerCase().includes(q) || r.jabatan.toLowerCase().includes(q);
@@ -1543,6 +1551,7 @@
       });
 
       const tbody = document.getElementById('konTableBody');
+      if (!tbody) return; // not in context where rekontrak table exists
       tbody.innerHTML = '';
 
       if (filtered.length === 0) {
