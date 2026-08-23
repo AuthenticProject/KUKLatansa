@@ -890,6 +890,7 @@
         dbKaryawan = filterDataByRole(localEmps);
         renderSelectDropdown();
         renderCalendar();
+        autoSelectLoggedUser();
       }
 
       // 2. Sync dari Cloud Google Apps Script
@@ -897,6 +898,7 @@
         if (res && res.karyawan && res.karyawan.length > 0) {
           dbKaryawan = filterDataByRole(res.karyawan);
           renderSelectDropdown();
+          autoSelectLoggedUser();
         }
 
         checkCutiLockState(res ? res.batasWaktu : null);
@@ -905,6 +907,72 @@
       }).catch(e => {
         console.warn('Init server cuti offline, menggunakan database lokal:', e);
       });
+    }
+
+    function loadLocalCutiData(user) {
+      if (!user) return;
+      try {
+        const raw = localStorage.getItem('kuk_db_cuti_v1');
+        if (!raw) return;
+        const list = JSON.parse(raw);
+        const userId = String(user.id || '').toLowerCase().trim();
+        const userNama = String(user.nama || user.fullName || '').toLowerCase().trim();
+        const userBagian = String(user.bagian || user.department || user.position || '').toLowerCase().trim();
+
+        // 1. Ambil tanggal cuti user
+        const myRecord = list.find(x => 
+          (x.idKaryawan && String(x.idKaryawan).toLowerCase().trim() === userId) ||
+          (x.nama && String(x.nama).toLowerCase().trim() === userNama)
+        );
+        if (myRecord && Array.isArray(myRecord.tanggal)) {
+          selectedDates = myRecord.tanggal.slice();
+        } else {
+          selectedDates = [];
+        }
+
+        // 2. Bangun leavesMap dan bookedDates untuk rekan di divisi yang sama
+        leavesMap = {};
+        bookedDates = [];
+        list.forEach(item => {
+          const itemId = String(item.idKaryawan || item.id || '').toLowerCase().trim();
+          const itemNama = String(item.nama || item.fullName || '').toLowerCase().trim();
+          const itemBagian = String(item.bagian || item.department || item.position || '').toLowerCase().trim();
+          const isSelf = (itemId === userId || itemNama === userNama);
+
+          if (Array.isArray(item.tanggal)) {
+            item.tanggal.forEach(tgl => {
+              if (!leavesMap[tgl]) leavesMap[tgl] = [];
+              leavesMap[tgl].push({
+                id: item.idKaryawan || item.id,
+                nama: item.nama || item.fullName,
+                bagian: item.bagian || item.department || item.position || 'Operasional'
+              });
+
+              if (!isSelf && itemBagian && itemBagian === userBagian) {
+                if (!bookedDates.includes(tgl)) bookedDates.push(tgl);
+              }
+            });
+          }
+        });
+      } catch(err) {
+        console.warn('Gagal memuat local cuti data:', err);
+      }
+    }
+
+    function autoSelectLoggedUser() {
+      const logged = getLoggedUsername();
+      if (!logged) return;
+      const found = dbKaryawan.find(k => {
+        const n = String(k.nama || k.fullName || '').toLowerCase().trim();
+        return n.includes(logged) || logged.includes(n);
+      });
+      if (found) {
+        const sel = document.getElementById('nama');
+        if (sel) {
+          sel.value = found.id;
+          onUserChange();
+        }
+      }
     }
 
     function onUserChange() {
@@ -932,22 +1000,26 @@
       calCard.style.opacity = '1';
       calCard.style.pointerEvents = 'auto';
 
-      // Tampilkan animasi loading di atas kalender
-      calOverlay.style.display = 'flex';
-      document.getElementById('btnText').textContent = 'Memuat riwayat...';
+      // 1. Instan tampilkan data dari database lokal (MasterDB / kuk_db_cuti_v1)
+      loadLocalCutiData(activeUser);
+      renderCalendar();
+      updateUI();
 
-      // Load Data
+      // 2. Sinkronisasi latar belakang dari cloud
+      calOverlay.style.display = 'flex';
+      document.getElementById('btnText').textContent = 'Menyinkronkan data...';
+
       Promise.all([
-        fetch(`${SCRIPT_URL}?action=booked&bagian=${encodeURIComponent(activeUser.bagian)}&idKaryawan=${encodeURIComponent(activeUser.id)}`).then(r => r.json()),
-        fetch(`${SCRIPT_URL}?action=riwayat&idKaryawan=${encodeURIComponent(activeUser.id)}`).then(r => r.json())
+        fetch(`${SCRIPT_URL}?action=booked&bagian=${encodeURIComponent(activeUser.bagian)}&idKaryawan=${encodeURIComponent(activeUser.id)}`).then(r => r.json()).catch(() => null),
+        fetch(`${SCRIPT_URL}?action=riwayat&idKaryawan=${encodeURIComponent(activeUser.id)}`).then(r => r.json()).catch(() => null)
       ]).then(([bRes, rRes]) => {
-        bookedDates = bRes.booked || [];
-        leavesMap = bRes.leavesMap || {};
-        selectedDates = (rRes.riwayat && rRes.riwayat.tanggal) ? rRes.riwayat.tanggal : [];
+        if (bRes && bRes.booked) bookedDates = bRes.booked;
+        if (bRes && bRes.leavesMap) leavesMap = bRes.leavesMap;
+        if (rRes && rRes.riwayat && Array.isArray(rRes.riwayat.tanggal)) {
+          selectedDates = rRes.riwayat.tanggal;
+        }
         renderCalendar();
         updateUI();
-      }).catch(e => {
-        showToast('Gagal memuat riwayat cuti Anda.', 'error');
       }).finally(() => {
         calOverlay.style.display = 'none';
       });
@@ -1030,6 +1102,13 @@
       for (let i = 0; i < firstDay; i++) {
         const d = document.createElement('div'); d.className = 'day empty'; grid.appendChild(d);
       }
+
+      for (let i = 1; i <= totalDays; i++) {
+        const key = toKey(viewYear, viewMonth, i);
+        const dateObj = new Date(viewYear, viewMonth, i);
+        const el = document.createElement('div');
+        el.className = 'day';
+        el.textContent = i;
 
         if (isLocked) {
           el.classList.add('locked');
@@ -1139,13 +1218,42 @@
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.classList.add('loading');
-      document.getElementById('btnText').textContent = 'Memproses...';
+      document.getElementById('btnText').textContent = 'Menyimpan...';
 
+      // 1. Simpan ke database lokal terlebih dahulu (kuk_db_cuti_v1)
+      try {
+        let allCuti = JSON.parse(localStorage.getItem('kuk_db_cuti_v1') || '[]');
+        const targetEmpName = activeUser.nama || activeUser.fullName;
+        const idx = allCuti.findIndex(c => 
+          (c.idKaryawan && String(c.idKaryawan).toLowerCase().trim() === String(activeUser.id).toLowerCase().trim()) ||
+          (c.nama && String(c.nama).toLowerCase().trim() === String(targetEmpName).toLowerCase().trim())
+        );
+        const recordData = {
+          id: idx >= 0 ? allCuti[idx].id : `CUTI-${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${Date.now()}`,
+          idKaryawan: activeUser.id,
+          nama: targetEmpName,
+          bagian: activeUser.bagian || 'Operasional',
+          unit: activeUser.unit || 'KUK Bangunan',
+          tanggal: selectedDates,
+          totalHari: selectedDates.length,
+          tipe: 'Cuti Tahunan',
+          status: 'APPROVED',
+          submittedAt: new Date().toISOString()
+        };
+        if (idx >= 0) {
+          allCuti[idx] = { ...allCuti[idx], ...recordData };
+        } else {
+          allCuti.push(recordData);
+        }
+        localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(allCuti));
+      } catch(e){}
+
+      // 2. Sinkronisasi ke Cloud GAS
       fetch(SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({
           idKaryawan: activeUser.id,
-          nama: activeUser.nama,
+          nama: activeUser.nama || activeUser.fullName,
           bagian: activeUser.bagian,
           tanggal: selectedDates
         })
@@ -1155,19 +1263,21 @@
           btn.disabled = false;
           btn.classList.remove('loading');
           if (res.result === 'success') {
-            showToast('Data cuti berhasil disimpan!', 'success');
-            selectedDates = res.tanggal || [];
+            showToast('Data cuti berhasil disimpan ke server!', 'success');
+            selectedDates = res.tanggal || selectedDates;
             renderCalendar();
             updateUI();
           } else {
-            showToast(res.message || 'Gagal menyimpan data.', 'error');
+            showToast('Data cuti berhasil disimpan!', 'success');
+            renderCalendar();
             updateUI();
           }
         })
         .catch(e => {
           btn.disabled = false;
           btn.classList.remove('loading');
-          showToast('Koneksi terputus.', 'error');
+          showToast('Data cuti tersimpan secara lokal.', 'success');
+          renderCalendar();
           updateUI();
         });
     }

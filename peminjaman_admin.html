@@ -934,11 +934,15 @@
 
       const filtered = allList.filter(item => {
         const matchStatus = currentFilter === 'Semua' || item.status === currentFilter;
+        const peminjam = String(item.namaPeminjam || '').toLowerCase();
+        const plat = String(item.platKendaraan || '').toLowerCase();
+        const nama = String(item.namaKendaraan || '').toLowerCase();
+        const divisi = String(item.divisi || item.kamar || '').toLowerCase();
         const matchQuery = !query ||
-          item.namaPeminjam.toLowerCase().includes(query) ||
-          item.platKendaraan.toLowerCase().includes(query) ||
-          item.namaKendaraan.toLowerCase().includes(query) ||
-          item.divisi.toLowerCase().includes(query);
+          peminjam.includes(query) ||
+          plat.includes(query) ||
+          nama.includes(query) ||
+          divisi.includes(query);
         return matchStatus && matchQuery;
       });
 

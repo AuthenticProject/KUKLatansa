@@ -424,25 +424,26 @@ const PeminjamanDB = (() => {
 
   function savePeminjaman(data) {
     const list = getPeminjamanList();
-    const kendaraan = getKendaraanById(data.kendaraanId);
+    const kendaraan = getKendaraanById(data.kendaraanId || data.idKendaraan);
     const isL300 = kendaraan ? (String(kendaraan.nama||'').toUpperCase().includes('L300')) : (String(data.namaKendaraan||'').toUpperCase().includes('L300'));
     const isEngkel = kendaraan ? (String(kendaraan.nama||'').toUpperCase().includes('ENGKEL')) : (String(data.namaKendaraan||'').toUpperCase().includes('ENGKEL'));
     const defaultQr = isL300 ? (localStorage.getItem('kuk_qr_img_L300') || 'QR-L300.jpeg') : (isEngkel ? (localStorage.getItem('kuk_qr_img_ENGKEL') || 'qr-engkel.png') : '');
 
     const newRecord = {
       id: 'PINJAM-' + Date.now() + '-' + Math.floor(Math.random() * 100),
-      namaPeminjam: data.namaPeminjam.trim(),
+      namaPeminjam: (data.namaPeminjam || '').trim(),
       kamar: (data.kamar || data.divisi || '').trim(),
       divisi: (data.kamar || data.divisi || '').trim(),
-      kontak: data.kontak.trim(),
-      kendaraanId: data.kendaraanId,
+      kontak: (data.kontak || '').trim(),
+      kendaraanId: data.kendaraanId || data.idKendaraan,
       namaKendaraan: kendaraan ? kendaraan.nama : data.namaKendaraan || '-',
       platKendaraan: kendaraan ? kendaraan.plat : data.platKendaraan || '-',
       qrImage: kendaraan ? (kendaraan.qrImage || defaultQr) : defaultQr,
       qrCode: kendaraan ? (kendaraan.qrCode || '') : '',
+      simImage: data.simImage || '',
       waktuMulai: data.waktuMulai,
       waktuRencanaKembali: data.waktuRencanaKembali,
-      keperluan: data.keperluan.trim(),
+      keperluan: (data.keperluan || '').trim(),
       status: 'Aktif/Dipinjam',
       waktuAktualKembali: null,
       kerusakan: null,
@@ -835,6 +836,11 @@ _TB. KUK Latansa PMDG_`;
 })();
 
 // Alias agar kompatibel dengan pemanggilan PeminjamanService di dashboard maupun PeminjamanDB di form
-window.PeminjamanDB = PeminjamanDB;
-window.PeminjamanService = PeminjamanDB;
+if (typeof window !== 'undefined') {
+  window.PeminjamanDB = PeminjamanDB;
+  window.PeminjamanService = PeminjamanDB;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PeminjamanDB;
+}
 
