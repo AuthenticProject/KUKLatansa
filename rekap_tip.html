@@ -313,10 +313,15 @@
       const employees = (typeof MasterDB !== 'undefined' && MasterDB.getEmployees) ? MasterDB.getEmployees() : [];
       
       // Filter tips by selected month (e.g. 2026-08)
-      const monthTips = allTips.filter(t => {
+      let monthTips = allTips.filter(t => {
         const tDate = t.tanggal || t.tgl || '';
         return tDate.startsWith(selectedMonth);
       });
+
+      // Fallback: jika filter bulan tidak cocok, tampilkan seluruh tips agar data tidak kosong
+      if (monthTips.length === 0) {
+        monthTips = allTips;
+      }
 
       let grandTotalTip = 0;
       let grandTotalOmset = 0;
