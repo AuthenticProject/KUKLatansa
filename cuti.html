@@ -1476,6 +1476,18 @@
         });
     }
 
+    function init() {
+      if (typeof MasterDB !== 'undefined') {
+        MasterDB.init();
+        dbKaryawan = filterDataByRole(MasterDB.getKaryawan());
+      }
+      checkCutiLockState();
+      renderSelectDropdown();
+      autoSelectLoggedUser();
+      renderCalendar();
+      updateUI();
+    }
+
     init();
   </script>
   <script>
