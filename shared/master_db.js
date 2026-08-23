@@ -192,29 +192,196 @@ const MasterDB = (() => {
     { id: 'CUTI-2026-08-011', idKaryawan: 'K-011', nama: 'Irvan', bagian: 'Admin 3', unit: 'KUK Bangunan', tanggal: ['2026-08-05', '2026-08-15', '2026-08-23'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:30:00' }
   ];
 
-  // Data Tip Pemotongan Kaca (3%) Karyawan KUK Bangunan (Dynamic Month & Historical)
-  const currentYM = new Date().toISOString().slice(0, 7);
+  // Data Tip Pemotongan Kaca (3%) Resmi KUK Bangunan (17 Transaksi Historis Resmi)
   const DEFAULT_TIP_DATA = [
-    { id: 'TIP-CURR-001', namaKaryawan: 'Kahfi', unit: 'KUK Bangunan', tanggal: `${currentYM}-02`, jenisKaca: 'Kaca Bening 5mm', luasM2: 12.5, nominalOmset: 2666667, nominalTip: 80000, keterangan: 'Pemotongan Kaca Bening 5mm (3%)' },
-    { id: 'TIP-CURR-002', namaKaryawan: 'Alip', unit: 'KUK Bangunan', tanggal: `${currentYM}-04`, jenisKaca: 'Kaca Cermin 3mm', luasM2: 15.0, nominalOmset: 3000000, nominalTip: 90000, keterangan: 'Pemotongan Kaca Cermin 3mm (3%)' },
-    { id: 'TIP-CURR-003', namaKaryawan: 'Riyan', unit: 'KUK Bangunan', tanggal: `${currentYM}-05`, jenisKaca: 'Kaca Es 5mm', luasM2: 13.3, nominalOmset: 2666667, nominalTip: 80000, keterangan: 'Pemotongan Kaca Es 5mm (3%)' },
-    { id: 'TIP-CURR-004', namaKaryawan: 'Hiba', unit: 'KUK Bangunan', tanggal: `${currentYM}-08`, jenisKaca: 'Kaca Riben 5mm', luasM2: 12.5, nominalOmset: 2500000, nominalTip: 75000, keterangan: 'Pemotongan Kaca Riben 5mm (3%)' },
-    { id: 'TIP-CURR-005', namaKaryawan: 'Rohman', unit: 'KUK Bangunan', tanggal: `${currentYM}-10`, jenisKaca: 'Kaca Bening 3mm', luasM2: 12.5, nominalOmset: 2500000, nominalTip: 75000, keterangan: 'Pemotongan Kaca Bening 3mm (3%)' },
-    { id: 'TIP-CURR-006', namaKaryawan: 'Irvan', unit: 'KUK Bangunan', tanggal: `${currentYM}-12`, jenisKaca: 'Kaca Tempered 8mm', luasM2: 20.0, nominalOmset: 4000000, nominalTip: 120000, keterangan: 'Pemotongan Kaca Tempered 8mm (3%)' },
-    { id: 'TIP-CURR-007', namaKaryawan: 'Wiba', unit: 'KUK Bangunan', tanggal: `${currentYM}-14`, jenisKaca: 'Kaca Cermin 5mm', luasM2: 16.6, nominalOmset: 3333333, nominalTip: 100000, keterangan: 'Pemotongan Kaca Cermin 5mm (3%)' },
-    { id: 'TIP-CURR-008', namaKaryawan: 'Nur', unit: 'KUK Bangunan', tanggal: `${currentYM}-16`, jenisKaca: 'Kaca Es 3mm', luasM2: 16.6, nominalOmset: 3333333, nominalTip: 100000, keterangan: 'Pemotongan Kaca Es 3mm (3%)' },
-    { id: 'TIP-CURR-009', namaKaryawan: 'Ulin', unit: 'KUK Bangunan', tanggal: `${currentYM}-18`, jenisKaca: 'Kaca Bening 8mm', luasM2: 25.0, nominalOmset: 5000000, nominalTip: 150000, keterangan: 'Pemotongan Kaca Bening 8mm (3%)' },
-
-    { id: 'TIP-2026-08-001', namaKaryawan: 'Kahfi', unit: 'KUK Bangunan', tanggal: '2026-08-02', jenisKaca: 'Kaca Bening 5mm', luasM2: 12.5, nominalOmset: 2666667, nominalTip: 80000, keterangan: 'Pemotongan Kaca Bening 5mm (3%)' },
-    { id: 'TIP-2026-08-002', namaKaryawan: 'Alip', unit: 'KUK Bangunan', tanggal: '2026-08-04', jenisKaca: 'Kaca Cermin 3mm', luasM2: 15.0, nominalOmset: 3000000, nominalTip: 90000, keterangan: 'Pemotongan Kaca Cermin 3mm (3%)' },
-    { id: 'TIP-2026-08-003', namaKaryawan: 'Riyan', unit: 'KUK Bangunan', tanggal: '2026-08-05', jenisKaca: 'Kaca Es 5mm', luasM2: 13.3, nominalOmset: 2666667, nominalTip: 80000, keterangan: 'Pemotongan Kaca Es 5mm (3%)' },
-    { id: 'TIP-2026-08-004', namaKaryawan: 'Hiba', unit: 'KUK Bangunan', tanggal: '2026-08-08', jenisKaca: 'Kaca Riben 5mm', luasM2: 12.5, nominalOmset: 2500000, nominalTip: 75000, keterangan: 'Pemotongan Kaca Riben 5mm (3%)' },
-    { id: 'TIP-2026-08-005', namaKaryawan: 'Rohman', unit: 'KUK Bangunan', tanggal: '2026-08-10', jenisKaca: 'Kaca Bening 3mm', luasM2: 12.5, nominalOmset: 2500000, nominalTip: 75000, keterangan: 'Pemotongan Kaca Bening 3mm (3%)' },
-    { id: 'TIP-2026-08-006', namaKaryawan: 'Irvan', unit: 'KUK Bangunan', tanggal: '2026-08-12', jenisKaca: 'Kaca Tempered 8mm', luasM2: 20.0, nominalOmset: 4000000, nominalTip: 120000, keterangan: 'Pemotongan Kaca Tempered 8mm (3%)' },
-    { id: 'TIP-2026-08-007', namaKaryawan: 'Wiba', unit: 'KUK Bangunan', tanggal: '2026-08-14', jenisKaca: 'Kaca Cermin 5mm', luasM2: 16.6, nominalOmset: 3333333, nominalTip: 100000, keterangan: 'Pemotongan Kaca Cermin 5mm (3%)' },
-    { id: 'TIP-2026-08-008', namaKaryawan: 'Nur', unit: 'KUK Bangunan', tanggal: '2026-08-16', jenisKaca: 'Kaca Es 3mm', luasM2: 16.6, nominalOmset: 3333333, nominalTip: 100000, keterangan: 'Pemotongan Kaca Es 3mm (3%)' },
-    { id: 'TIP-2026-08-009', namaKaryawan: 'Ulin', unit: 'KUK Bangunan', tanggal: '2026-08-18', jenisKaca: 'Kaca Bening 8mm', luasM2: 25.0, nominalOmset: 5000000, nominalTip: 150000, keterangan: 'Pemotongan Kaca Bening 8mm (3%)' }
-  ];
+  {
+    "id": "TIP-017",
+    "tanggal": "2026-08-19",
+    "namaKaryawan": "Nur",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 5mm",
+    "luasM2": 14080,
+    "totalOmset": 225280,
+    "nominalTip": 6758.4,
+    "keterangan": "Pemotongan Kaca Air 5mm"
+  },
+  {
+    "id": "TIP-016",
+    "tanggal": "2026-08-19",
+    "namaKaryawan": "Wiba",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 3mm",
+    "luasM2": 5705,
+    "totalOmset": 74165,
+    "nominalTip": 2224.95,
+    "keterangan": "Pemotongan Kaca Air 3mm"
+  },
+  {
+    "id": "TIP-015",
+    "tanggal": "2026-08-15",
+    "namaKaryawan": "Wiba",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 3mm",
+    "luasM2": 2055,
+    "totalOmset": 26715,
+    "nominalTip": 801.45,
+    "keterangan": "Pemotongan Kaca Air 3mm"
+  },
+  {
+    "id": "TIP-014",
+    "tanggal": "2026-08-12",
+    "namaKaryawan": "Wiba",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 3mm",
+    "luasM2": 9588,
+    "totalOmset": 124644,
+    "nominalTip": 3739.32,
+    "keterangan": "Pemotongan Kaca Air 3mm"
+  },
+  {
+    "id": "TIP-013",
+    "tanggal": "2026-08-12",
+    "namaKaryawan": "Wiba",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 3mm",
+    "luasM2": 9588,
+    "totalOmset": 124644,
+    "nominalTip": 3739.32,
+    "keterangan": "Pemotongan Kaca Air 3mm"
+  },
+  {
+    "id": "TIP-012",
+    "tanggal": "2026-08-16",
+    "namaKaryawan": "Ulin",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Riben 5mm",
+    "luasM2": 9000,
+    "totalOmset": 162000,
+    "nominalTip": 4860,
+    "keterangan": "Pemotongan Kaca Riben 5mm"
+  },
+  {
+    "id": "TIP-011",
+    "tanggal": "2026-08-11",
+    "namaKaryawan": "Kahfi",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 3mm",
+    "luasM2": 29445,
+    "totalOmset": 382785,
+    "nominalTip": 11483.55,
+    "keterangan": "Pemotongan Kaca Air 3mm"
+  },
+  {
+    "id": "TIP-010",
+    "tanggal": "2026-08-11",
+    "namaKaryawan": "Kahfi",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 2mm",
+    "luasM2": 20308,
+    "totalOmset": 223388,
+    "nominalTip": 6701.64,
+    "keterangan": "Pemotongan Kaca Air 2mm"
+  },
+  {
+    "id": "TIP-009",
+    "tanggal": "2026-08-11",
+    "namaKaryawan": "Nur",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 2mm",
+    "luasM2": 40000,
+    "totalOmset": 440000,
+    "nominalTip": 13200,
+    "keterangan": "Pemotongan Kaca Air 2mm"
+  },
+  {
+    "id": "TIP-008",
+    "tanggal": "2026-08-07",
+    "namaKaryawan": "Kahfi",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 5mm",
+    "luasM2": 8000,
+    "totalOmset": 128000,
+    "nominalTip": 3840,
+    "keterangan": "Pemotongan Kaca Air 5mm"
+  },
+  {
+    "id": "TIP-007",
+    "tanggal": "2026-08-06",
+    "namaKaryawan": "Nur",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 5mm",
+    "luasM2": 6840,
+    "totalOmset": 109440,
+    "nominalTip": 3283.2,
+    "keterangan": "Pemotongan Kaca Air 5mm"
+  },
+  {
+    "id": "TIP-006",
+    "tanggal": "2026-08-07",
+    "namaKaryawan": "Alip",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Cermin 3mm",
+    "luasM2": 2359.9,
+    "totalOmset": 47198,
+    "nominalTip": 1415.94,
+    "keterangan": "Pemotongan Kaca Cermin 3mm"
+  },
+  {
+    "id": "TIP-005",
+    "tanggal": "2026-08-06",
+    "namaKaryawan": "Nur",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Riben 5mm",
+    "luasM2": 3419,
+    "totalOmset": 61542,
+    "nominalTip": 1846.26,
+    "keterangan": "Pemotongan Kaca Riben 5mm"
+  },
+  {
+    "id": "TIP-004",
+    "tanggal": "2026-08-06",
+    "namaKaryawan": "Nur",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Air 5mm",
+    "luasM2": 6840,
+    "totalOmset": 109440,
+    "nominalTip": 3283.2,
+    "keterangan": "Pemotongan Kaca Air 5mm"
+  },
+  {
+    "id": "TIP-003",
+    "tanggal": "2026-08-04",
+    "namaKaryawan": "Alip",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Riben 5mm",
+    "luasM2": 7999,
+    "totalOmset": 143982,
+    "nominalTip": 4319.46,
+    "keterangan": "Pemotongan Kaca Riben 5mm"
+  },
+  {
+    "id": "TIP-002",
+    "tanggal": "2026-08-02",
+    "namaKaryawan": "Kahfi",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Riben 5mm",
+    "luasM2": 8708,
+    "totalOmset": 156744,
+    "nominalTip": 4702.32,
+    "keterangan": "Pemotongan Kaca Riben 5mm"
+  },
+  {
+    "id": "TIP-001",
+    "tanggal": "2026-08-02",
+    "namaKaryawan": "Kahfi",
+    "unit": "KUK Bangunan",
+    "jenisKaca": "Kaca Riben 5mm",
+    "luasM2": 8.428,
+    "totalOmset": 151.7,
+    "nominalTip": 4.55,
+    "keterangan": "Pemotongan Kaca Riben 5mm"
+  }
+];
 
   let dbInitialized = false;
 
@@ -310,7 +477,7 @@ const MasterDB = (() => {
     }
 
     let tipData = getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1');
-    if (!tipData || tipData.length === 0) {
+    if (!tipData || tipData.length < 17) {
       saveStored('kuk_db_tip_v1', DEFAULT_TIP_DATA);
       saveStored('kuk_tip_db_v1', DEFAULT_TIP_DATA);
     }
