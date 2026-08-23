@@ -192,6 +192,19 @@ const MasterDB = (() => {
     { id: 'CUTI-2026-08-011', idKaryawan: 'K-011', nama: 'Irvan', bagian: 'Admin 3', unit: 'KUK Bangunan', tanggal: ['2026-08-05', '2026-08-15', '2026-08-23'], totalHari: 3, tipe: 'Cuti Tahunan', alasan: 'Cuti Bulanan Reguler (Maks 3 Hari)', status: 'APPROVED', submittedAt: '2026-07-28 11:30:00' }
   ];
 
+  // Data Tip Pemotongan Kaca (3%) Karyawan KUK Bangunan Periode Agustus 2026
+  const DEFAULT_TIP_DATA = [
+    { id: 'TIP-2026-08-001', namaKaryawan: 'Kahfi', unit: 'KUK Bangunan', tanggal: '2026-08-02', jenisKaca: 'Kaca Bening 5mm', luasM2: 12.5, nominalOmset: 2666667, nominalTip: 80000, keterangan: 'Pemotongan Kaca Bening 5mm (3%)' },
+    { id: 'TIP-2026-08-002', namaKaryawan: 'Alip', unit: 'KUK Bangunan', tanggal: '2026-08-04', jenisKaca: 'Kaca Cermin 3mm', luasM2: 15.0, nominalOmset: 3000000, nominalTip: 90000, keterangan: 'Pemotongan Kaca Cermin 3mm (3%)' },
+    { id: 'TIP-2026-08-003', namaKaryawan: 'Riyan', unit: 'KUK Bangunan', tanggal: '2026-08-05', jenisKaca: 'Kaca Es 5mm', luasM2: 13.3, nominalOmset: 2666667, nominalTip: 80000, keterangan: 'Pemotongan Kaca Es 5mm (3%)' },
+    { id: 'TIP-2026-08-004', namaKaryawan: 'Hiba', unit: 'KUK Bangunan', tanggal: '2026-08-08', jenisKaca: 'Kaca Riben 5mm', luasM2: 12.5, nominalOmset: 2500000, nominalTip: 75000, keterangan: 'Pemotongan Kaca Riben 5mm (3%)' },
+    { id: 'TIP-2026-08-005', namaKaryawan: 'Rohman', unit: 'KUK Bangunan', tanggal: '2026-08-10', jenisKaca: 'Kaca Bening 3mm', luasM2: 12.5, nominalOmset: 2500000, nominalTip: 75000, keterangan: 'Pemotongan Kaca Bening 3mm (3%)' },
+    { id: 'TIP-2026-08-006', namaKaryawan: 'Irvan', unit: 'KUK Bangunan', tanggal: '2026-08-12', jenisKaca: 'Kaca Tempered 8mm', luasM2: 20.0, nominalOmset: 4000000, nominalTip: 120000, keterangan: 'Pemotongan Kaca Tempered 8mm (3%)' },
+    { id: 'TIP-2026-08-007', namaKaryawan: 'Wiba', unit: 'KUK Bangunan', tanggal: '2026-08-14', jenisKaca: 'Kaca Cermin 5mm', luasM2: 16.6, nominalOmset: 3333333, nominalTip: 100000, keterangan: 'Pemotongan Kaca Cermin 5mm (3%)' },
+    { id: 'TIP-2026-08-008', namaKaryawan: 'Nur', unit: 'KUK Bangunan', tanggal: '2026-08-16', jenisKaca: 'Kaca Es 3mm', luasM2: 16.6, nominalOmset: 3333333, nominalTip: 100000, keterangan: 'Pemotongan Kaca Es 3mm (3%)' },
+    { id: 'TIP-2026-08-009', namaKaryawan: 'Ulin', unit: 'KUK Bangunan', tanggal: '2026-08-18', jenisKaca: 'Kaca Bening 8mm', luasM2: 25.0, nominalOmset: 5000000, nominalTip: 150000, keterangan: 'Pemotongan Kaca Bening 8mm (3%)' }
+  ];
+
   let dbInitialized = false;
 
   function getStored(key) {
@@ -283,6 +296,12 @@ const MasterDB = (() => {
     if (!payrollRuns || payrollRuns.length === 0) {
       saveStored('kuk_payroll_db', DEFAULT_PAYROLL_RUNS);
       saveStored('kuk_db_gaji_v1', DEFAULT_GAJI_HISTORI);
+    }
+
+    let tipData = getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1');
+    if (!tipData || tipData.length === 0) {
+      saveStored('kuk_db_tip_v1', DEFAULT_TIP_DATA);
+      saveStored('kuk_tip_db_v1', DEFAULT_TIP_DATA);
     }
 
     dbInitialized = true;
@@ -670,7 +689,10 @@ const MasterDB = (() => {
       } catch(e) {}
 
       return { success: true, message: "✅ Data KUK HR (Lama & Baru) Berhasil Disinkronkan!" };
-    }
+    },
+
+    DEFAULT_TIP_DATA: DEFAULT_TIP_DATA,
+    getTipData: () => getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1') || DEFAULT_TIP_DATA
   };
 })();
 

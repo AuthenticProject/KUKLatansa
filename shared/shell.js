@@ -857,10 +857,10 @@
 
   /* ── Initialise ───────────────────────────────────────────────────── */
   function init() {
-    // If this page is in the isolated list, skip auth and shell entirely.
-    // The page is public-access; dashboard still reads its data from MasterDB.
-    if (SHELL_ISOLATED_PAGES.includes(getActivePage())) return;
-
+    var isIsolatedPage = SHELL_ISOLATED_PAGES.includes(getActivePage());
+    // Only isolate if user is NOT logged in (public employee form view).
+    // If logged in as admin/staff, ALWAYS inject the Dashboard App Shell!
+    if (isIsolatedPage && !getUsername()) return;
     if (!checkAuth()) return;
     injectShell();
   }

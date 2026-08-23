@@ -289,10 +289,17 @@
 
     function getTipData() {
       try {
-        const raw = localStorage.getItem('kuk_db_tip_v1');
-        return raw ? JSON.parse(raw) : [];
+        if (typeof MasterDB !== 'undefined' && MasterDB.getTipData) {
+          const list = MasterDB.getTipData();
+          if (Array.isArray(list) && list.length > 0) return list;
+        }
+        const raw1 = localStorage.getItem('kuk_db_tip_v1');
+        if (raw1) { const parsed = JSON.parse(raw1); if (Array.isArray(parsed) && parsed.length > 0) return parsed; }
+        const raw2 = localStorage.getItem('kuk_tip_db_v1');
+        if (raw2) { const parsed = JSON.parse(raw2); if (Array.isArray(parsed) && parsed.length > 0) return parsed; }
+        return (typeof MasterDB !== 'undefined' && MasterDB.DEFAULT_TIP_DATA) ? MasterDB.DEFAULT_TIP_DATA : [];
       } catch(e) {
-        return [];
+        return (typeof MasterDB !== 'undefined' && MasterDB.DEFAULT_TIP_DATA) ? MasterDB.DEFAULT_TIP_DATA : [];
       }
     }
 
