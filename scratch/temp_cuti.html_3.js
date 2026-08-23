@@ -435,6 +435,34 @@
       if (!container) return;
 
       const targetMonthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+      const targetMonthName = MONTHS[viewMonth];
+
+      let allCuti = [];
+      try {
+        const raw = localStorage.getItem('kuk_db_cuti_v1');
+        if (raw) allCuti = JSON.parse(raw);
+      } catch(e){}
+
+      let monthlyList = allCuti.filter(c => {
+        if (!Array.isArray(c.tanggal)) return false;
+        return c.tanggal.some(t => t.startsWith(targetMonthPrefix));
+      });
+
+      if (monthlyList.length === 0) {
+        monthlyList = DEFAULT_CSV_EMPLOYEES.map(emp => ({
+          nama: emp.nama,
+          bagian: emp.bagian,
+          unit: emp.unit,
+          tanggal: emp.defaultDates
+        }));
+      }
+
+      if (badgeEl) {
+        badgeEl.textContent = `${monthlyList.length} Karyawan Cuti`;
+      }
+
+      container.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:10px;">
           ${monthlyList.map(item => {
             const datesThisMonth = item.tanggal
               .filter(t => t.startsWith(targetMonthPrefix))
@@ -465,6 +493,154 @@
       `;
     }
 
+    function removeDate(key) {
+      if (isLocked) return;
+      selectedDates = selectedDates.filter(k => k !== key);
+      const [y, m] = key.split('-');
+      if (Number(y) === viewYear && Number(m) - 1 === viewMonth) renderCalendar();
+      updateUI();
+    }
+
+    function updateUI() {
+      const summary = document.getElementById('summaryCard');
+      const chips = document.getElementById('selectedChips');
+      document.getElementById('totalSelected').textContent = selectedDates.length;
+
+      if (selectedDates.length === 0) {
+        summary.style.display = 'none';
+      } else {
+        summary.style.display = 'block';
+        const cardTitleEl = summary.querySelector('.summary-title');
+        if (cardTitleEl) {
+          cardTitleEl.innerHTML = isLocked
+            ? `Rekapan Cuti Bulan Ini (<span id="totalSelected">${selectedDates.length}</span> Hari)`
+            : `Ringkasan Pilihan Anda (<span id="totalSelected">${selectedDates.length}</span> Hari)`;
+        }
+        chips.innerHTML = selectedDates.slice().sort().map(k => `
+          <div class="chip">
+            ${formatLabel(k)}
+            ${!isLocked ? `<button onclick="removeDate('${k}')"><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
+          </div>
+        `).join('');
+      }
+
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      if (!activeUser) {
+        btn.disabled = true; btnText.textContent = 'Pilih Karyawan Dahulu';
+      } else if (isLocked) {
+        btn.disabled = true; btnText.textContent = '🔒 Form Dikunci (Hanya Rekapan Cuti)';
+      } else {
+        btn.disabled = false;
+        btnText.textContent = `Simpan Jadwal (${selectedDates.length} Hari)`;
+      }
+    }
+
+    function handleSubmit() {
+      if (isLocked || !activeUser) return;
+      document.getElementById('modalDesc').innerHTML = selectedDates.length > 0
+        ? `Menyimpan <strong>${selectedDates.length} jadwal</strong> cuti Anda. Pastikan sesuai kuota per bulan.`
+        : `<span style="color:red">Membatalkan / menghapus semua jadwal cuti Anda. Lanjutkan?</span>`;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function executeSubmit() {
+      document.getElementById('modal').classList.remove('show');
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+      document.getElementById('btnText').textContent = 'Menyimpan...';
+
+      // 1. Simpan ke database lokal terlebih dahulu (kuk_db_cuti_v1)
+      try {
+        let allCuti = JSON.parse(localStorage.getItem('kuk_db_cuti_v1') || '[]');
+        const targetEmpName = activeUser.nama || activeUser.fullName;
+        const idx = allCuti.findIndex(c => 
+          (c.idKaryawan && String(c.idKaryawan).toLowerCase().trim() === String(activeUser.id).toLowerCase().trim()) ||
+          (c.nama && String(c.nama).toLowerCase().trim() === String(targetEmpName).toLowerCase().trim())
+        );
+        const recordData = {
+          id: idx >= 0 ? allCuti[idx].id : `CUTI-${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${Date.now()}`,
+          idKaryawan: activeUser.id,
+          nama: targetEmpName,
+          bagian: activeUser.bagian || 'Operasional',
+          unit: activeUser.unit || 'KUK Bangunan',
+          tanggal: selectedDates,
+          totalHari: selectedDates.length,
+          tipe: 'Cuti Tahunan',
+          status: 'APPROVED',
+          submittedAt: new Date().toISOString()
+        };
+        if (idx >= 0) {
+          allCuti[idx] = { ...allCuti[idx], ...recordData };
+        } else {
+          allCuti.push(recordData);
+        }
+        localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(allCuti));
+      } catch(e){}
+
+      // 2. Sinkronisasi ke Cloud GAS
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          idKaryawan: activeUser.id,
+          nama: activeUser.nama || activeUser.fullName,
+          bagian: activeUser.bagian,
+          tanggal: selectedDates
+        })
+      })
+        .then(r => r.json())
+        .then(res => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          if (res.result === 'success') {
+            showToast('Data cuti berhasil disimpan ke server!', 'success');
+            selectedDates = res.tanggal || selectedDates;
+            renderCalendar();
+            updateUI();
+          } else {
+            showToast('Data cuti berhasil disimpan!', 'success');
+            renderCalendar();
+            updateUI();
+          }
+        })
+        .catch(e => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          showToast('Data cuti tersimpan secara lokal.', 'success');
+          renderCalendar();
+          updateUI();
+        });
+    }
+
+    function init() {
+      if (typeof MasterDB !== 'undefined') {
+        MasterDB.init();
+        dbKaryawan = filterDataByRole(MasterDB.getKaryawan());
+      }
+      
+      // Auto seed default CSV cuti data if missing or empty in localStorage
+      try {
+        const raw = localStorage.getItem('kuk_db_cuti_v1');
+        if (!raw || JSON.parse(raw).length === 0) {
+          const defaultRecords = DEFAULT_CSV_EMPLOYEES.map((emp, idx) => ({
+            id: `CUTI-2026-08-${String(idx+1).padStart(3,'0')}`,
+            idKaryawan: emp.idKaryawan,
+            nama: emp.nama,
+            bagian: emp.bagian,
+            unit: emp.unit,
+            tanggal: emp.defaultDates,
+            totalHari: emp.defaultDates.length,
+            tipe: 'Cuti Tahunan',
+            status: 'APPROVED',
+            submittedAt: '2026-07-28 09:00:00'
+          }));
+          localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(defaultRecords));
+        }
+      } catch(e){}
+
+      checkCutiLockState();
+      renderSelectDropdown();
     function removeDate(key) {
       if (isLocked) return;
       selectedDates = selectedDates.filter(k => k !== key);

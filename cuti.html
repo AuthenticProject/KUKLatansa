@@ -1535,19 +1535,7 @@
           })
           .catch(err => console.error('SW failed', err));
       });
-      
-      if (!localStorage.getItem('v10_cuti_migrated')) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for(let registration of registrations) { registration.unregister(); }
-        });
-        caches.keys().then(function(names) {
-          for (let name of names) caches.delete(name);
-        });
-        localStorage.setItem('v10_cuti_migrated', 'true');
-        setTimeout(() => window.location.reload(true), 1500);
-      }
     }
   </script>
 </body>
-
 </html>
