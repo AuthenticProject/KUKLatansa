@@ -200,6 +200,7 @@
           <button class="btn btn-primary" onclick="updateTicket('VERIFIED')">Verifikasi Pelanggaran</button>
           <button class="btn" style="background:#dc2626; color:white;" onclick="updateTicket('ACTION')">Beri SP / Tindakan</button>
           <button class="btn" style="background:#059669; color:white; grid-column: span 2;" onclick="updateTicket('CLOSED')">Tutup Kasus (Selesai)</button>
+          <button class="btn" style="background:linear-gradient(135deg, #700000 0%, #4a0000 100%); color:white; grid-column: span 2; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:700;" onclick="cetakSuratPeringatanCurrent()">🖨️ Cetak Surat Peringatan (SP) / Pelanggaran</button>
         </div>
       </div>
       
@@ -353,6 +354,118 @@
       } catch (e) {
         alert("Gagal update: " + e.message);
       }
+    }
+
+    function cetakSuratPeringatanCurrent() {
+      if (!currentTicketId) return;
+      const tickets = ViolationEngine.getViolations();
+      const t = tickets.find(x => x.id === currentTicketId);
+      if (!t) return;
+
+      const unitStr = t.unit || 'KUK Bangunan';
+      const isPalen = unitStr.toLowerCase().includes('palen');
+      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      const unitCode = isPalen ? 'PLN' : 'BGN';
+      const now = new Date();
+      const tglFormatted = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      const noSurat = `SP/KUK-${unitCode}/${now.getFullYear()}/${t.id.replace('VIO-','')}`;
+
+      const printWin = window.open('', '_blank', 'width=800,height=900');
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Surat Peringatan - ${t.employeeName} - ${t.id}</title>
+          <style>
+            body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; line-height: 1.6; background: #fff; }
+            .surat-box { max-width: 720px; margin: 0 auto; }
+            .kop-container { text-align: center; border-bottom: 2.5px solid #540000; padding-bottom: 8px; margin-bottom: 20px; }
+            .kop-img { width: 100%; max-height: 125px; object-fit: contain; display: block; margin: 0 auto; }
+            .title-box { text-align: center; margin-bottom: 24px; }
+            .title-box h2 { font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase; text-decoration: underline; }
+            .title-box p { font-size: 13px; margin: 4px 0 0; }
+            table { width: 100%; font-size: 14px; margin: 12px 0 18px; border-collapse: collapse; }
+            table td { padding: 4px 0; vertical-align: top; }
+            .desc-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 6px; margin: 16px 0; font-size: 13.5px; }
+            .sign-area { display: flex; justify-content: space-between; margin-top: 40px; text-align: center; font-size: 14px; }
+            .sign-col { width: 220px; }
+            .sign-space { height: 75px; }
+            @media print { body { padding: 15px; } .btn-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="surat-box">
+            <div class="kop-container">
+              <img src="${kopSrc}" alt="Kop Surat" class="kop-img">
+            </div>
+
+            <div class="title-box">
+              <h2>SURAT PERINGATAN (SP) KARYAWAN</h2>
+              <p>Nomor: <strong>${noSurat}</strong></p>
+            </div>
+
+            <p style="font-size: 14px; margin-bottom: 10px;">
+              Surat Peringatan ini diterbitkan oleh Manajemen KUK La Tansa kepada karyawan di bawah ini:
+            </p>
+
+            <table>
+              <tr>
+                <td style="width: 180px;">Nama Karyawan</td>
+                <td style="width: 15px;">:</td>
+                <td><strong>${t.employeeName}</strong></td>
+              </tr>
+              <tr>
+                <td>Unit Penempatan</td>
+                <td>:</td>
+                <td>${unitStr}</td>
+              </tr>
+              <tr>
+                <td>Tanggal Pelanggaran</td>
+                <td>:</td>
+                <td>${t.date}</td>
+              </tr>
+              <tr>
+                <td>Kategori / Rule Broken</td>
+                <td>:</td>
+                <td><strong>${t.ruleBroken}</strong></td>
+              </tr>
+            </table>
+
+            <div class="desc-box">
+              <strong>Detail Nilai / Catatan Pelanggaran:</strong>
+              <div style="margin-top: 4px; font-family: monospace; color: #b91c1c; font-size: 14px;">${t.calculatedValue}</div>
+              <div style="margin-top: 8px; font-size: 13px; color: #334155;">Status Peninjauan: <strong>${t.status}</strong></div>
+            </div>
+
+            <p style="font-size: 14px; text-align: justify; margin-top: 14px;">
+              Berdasarkan hasil peninjauan dan evaluasi kedisiplinan kerja, karyawan yang bersangkutan dinyatakan telah melakukan pelanggaran terhadap peraturan tata tertib kerja operasional KUK La Tansa.
+            </p>
+            <p style="font-size: 14px; text-align: justify; margin-top: 10px;">
+              Diharapkan agar yang bersangkutan segera melakukan perbaikan kinerja dan tidak mengulangi pelanggaran serupa di kemudian hari. Apabila terjadi pelanggaran berulang, pihak manajemen berhak memberikan sanksi lanjutan yang lebih tegas sesuai ketentuan ketenagakerjaan yang berlaku.
+            </p>
+
+            <div class="sign-area">
+              <div class="sign-col">
+                <p>Mengetahui,<br><strong>Pimpinan / HRD Toko</strong></p>
+                <div class="sign-space"></div>
+                <p style="text-decoration: underline; font-weight: bold;">( Koordinator HR Portal )</p>
+              </div>
+              <div class="sign-col">
+                <p>${isPalen ? 'Kolelet' : 'Rangkasbitung'}, ${tglFormatted}<br>Penerima SP (Karyawan),</p>
+                <div class="sign-space"></div>
+                <p style="text-decoration: underline; font-weight: bold;">( ${t.employeeName} )</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 30px;">
+            <button class="btn-print" onclick="window.print()" style="padding: 10px 24px; font-weight: bold; background: #540000; color: white; border: none; border-radius: 8px; cursor: pointer;">🖨️ Cetak Surat Peringatan (PDF)</button>
+          </div>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
     }
   </script>
   <script src="shared/security.js"></script>

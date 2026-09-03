@@ -19,7 +19,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <link rel="stylesheet" href="shared/design-tokens.css">
+  <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <style>
     :root {
@@ -347,10 +347,15 @@
         <input type="text" id="vpWaktu" placeholder="Pilih waktu & tanggal...">
       </div>
 
-      <button class="btn-submit" id="submitBtn" onclick="savePelanggaran()">
-        <span class="loader"></span>
-        <span id="btnText">Simpan Data Pelanggaran</span>
-      </button>
+      <div style="display: flex; gap: 10px; flex-direction: column;">
+        <button class="btn-submit" id="submitBtn" onclick="savePelanggaran()">
+          <span class="loader"></span>
+          <span id="btnText">Simpan Data Pelanggaran</span>
+        </button>
+        <button type="button" class="btn-submit" style="background: #334155; box-shadow: none;" onclick="cetakBuktiPelanggaran()">
+          <span>🖨️ Cetak Surat / Bukti Pelanggaran</span>
+        </button>
+      </div>
     </div>
 
     <div class="back-link">
@@ -537,6 +542,9 @@
             document.getElementById('btnText').textContent = '✓ Berhasil Disimpan';
             btn.style.background = 'var(--success)';
             
+            // Simpan cache data pelanggaran terakhir untuk cetak
+            window._lastSavedPelanggaran = { ...payload };
+
             // Reset form
             document.getElementById('vpKaryawan').value = '';
             document.getElementById('vpJenis').value = '';
@@ -564,6 +572,155 @@
           document.getElementById('btnText').textContent = 'Simpan Data Pelanggaran';
           showToast('Gagal terhubung ke server.', 'error');
         });
+    }
+
+    function cetakBuktiPelanggaran() {
+      let dataToPrint = null;
+      if (window._lastSavedPelanggaran) {
+        dataToPrint = window._lastSavedPelanggaran;
+      } else {
+        const idKaryawan = document.getElementById('vpKaryawan').value;
+        const selectKaryawan = document.getElementById('vpKaryawan');
+        const selectedOption = selectKaryawan ? selectKaryawan.options[selectKaryawan.selectedIndex] : null;
+        const nama = selectedOption ? (selectedOption.getAttribute('data-nama') || selectedOption.text) : '';
+        
+        const selectJenis = document.getElementById('vpJenis') ? document.getElementById('vpJenis').value : '';
+        let jenis = selectJenis;
+        if (selectJenis === 'Lainnya') {
+          jenis = document.getElementById('vpCustomJenis').value;
+        }
+        
+        const poin = document.getElementById('vpPoin').value || 0;
+        const tempat = document.getElementById('vpTempat').value || '-';
+        const staf = document.getElementById('vpStaf').value || 'Staf HR';
+        const waktu = document.getElementById('vpWaktu').value || new Date().toISOString();
+
+        if (nama && jenis) {
+          dataToPrint = { idKaryawan, nama, jenis, poin, tempat, staf, waktu };
+        }
+      }
+
+      if (!dataToPrint || !dataToPrint.nama || !dataToPrint.jenis) {
+        return showToast('Pilih karyawan dan jenis pelanggaran untuk mencetak.', 'error');
+      }
+
+      const { idKaryawan, nama, jenis, poin, tempat, staf, waktu } = dataToPrint;
+
+      // Deteksi Toko Karyawan
+      let isPalen = false;
+      let namaLower = String(nama).toLowerCase();
+      if (namaLower.includes('miftah') || namaLower.includes('nukul')) {
+        isPalen = true;
+      } else if (typeof MasterDB !== 'undefined' && MasterDB.karyawan) {
+        const found = MasterDB.karyawan.find(k => k.id === idKaryawan || k.nama.toLowerCase() === namaLower || (k.fullName && k.fullName.toLowerCase() === namaLower));
+        if (found && found.unit && found.unit.toLowerCase().includes('palen')) isPalen = true;
+      }
+
+      const unitName = isPalen ? 'KUK Palen' : 'KUK Bangunan';
+      const unitCode = isPalen ? 'PLN' : 'BGN';
+      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      const now = new Date();
+      const tglFormatted = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      const noSurat = `PLG/KUK-${unitCode}/${now.getFullYear()}/${Math.floor(100+Math.random()*899)}`;
+
+      const printWin = window.open('', '_blank', 'width=800,height=900');
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Surat Bukti Pelanggaran - ${nama}</title>
+          <style>
+            body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; line-height: 1.6; background: #fff; }
+            .surat-box { max-width: 720px; margin: 0 auto; }
+            .kop-container { text-align: center; border-bottom: 2.5px solid #540000; padding-bottom: 8px; margin-bottom: 20px; }
+            .kop-img { width: 100%; max-height: 125px; object-fit: contain; display: block; margin: 0 auto; }
+            .title-box { text-align: center; margin-bottom: 24px; }
+            .title-box h2 { font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase; text-decoration: underline; }
+            .title-box p { font-size: 13px; margin: 4px 0 0; }
+            table { width: 100%; font-size: 14px; margin: 12px 0 18px; border-collapse: collapse; }
+            table td { padding: 4px 0; vertical-align: top; }
+            .desc-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 6px; margin: 16px 0; font-size: 13.5px; }
+            .sign-area { display: flex; justify-content: space-between; margin-top: 40px; text-align: center; font-size: 14px; }
+            .sign-col { width: 220px; }
+            .sign-space { height: 75px; }
+            @media print { body { padding: 15px; } .btn-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="surat-box">
+            <div class="kop-container">
+              <img src="${kopSrc}" alt="Kop Surat" class="kop-img">
+            </div>
+
+            <div class="title-box">
+              <h2>SURAT BUKTI PELANGGARAN KARYAWAN</h2>
+              <p>Nomor: <strong>${noSurat}</strong></p>
+            </div>
+
+            <p style="font-size: 14px; margin-bottom: 10px;">
+              Menerangkan bahwa pada hari dan waktu yang tercatat telah terjadi pelanggaran disiplin kerja operasional sebagai berikut:
+            </p>
+
+            <table>
+              <tr>
+                <td style="width: 180px;">Nama Karyawan</td>
+                <td style="width: 15px;">:</td>
+                <td><strong>${nama}</strong></td>
+              </tr>
+              <tr>
+                <td>Unit / Lokasi Toko</td>
+                <td>:</td>
+                <td>${unitName}</td>
+              </tr>
+              <tr>
+                <td>Waktu Kejadian</td>
+                <td>:</td>
+                <td>${waktu}</td>
+              </tr>
+              <tr>
+                <td>Tempat Kejadian</td>
+                <td>:</td>
+                <td>${tempat}</td>
+              </tr>
+              <tr>
+                <td>Staf Pencatat</td>
+                <td>:</td>
+                <td>${staf}</td>
+              </tr>
+            </table>
+
+            <div class="desc-box">
+              <strong>Jenis & Akumulasi Poin Pelanggaran:</strong>
+              <div style="margin-top: 4px; font-size: 14px; font-weight: bold; color: #b91c1c;">${jenis}</div>
+              <div style="margin-top: 4px; font-size: 13px; color: #475569;">Poin Pelanggaran: <strong>${poin} Poin</strong></div>
+            </div>
+
+            <p style="font-size: 14px; text-align: justify; margin-top: 14px;">
+              Surat catatan pelanggaran ini dibuat sebagai arsip kedisiplinan resmi dan bahan evaluasi performa kerja karyawan secara periodik oleh Manajemen KUK La Tansa.
+            </p>
+
+            <div class="sign-area">
+              <div class="sign-col">
+                <p>Staf Penginput / HR,<br><strong>${unitName}</strong></p>
+                <div class="sign-space"></div>
+                <p style="text-decoration: underline; font-weight: bold;">( ${staf} )</p>
+              </div>
+              <div class="sign-col">
+                <p>${isPalen ? 'Kolelet' : 'Rangkasbitung'}, ${tglFormatted}<br>Karyawan Bersangkutan,</p>
+                <div class="sign-space"></div>
+                <p style="text-decoration: underline; font-weight: bold;">( ${nama} )</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 30px;">
+            <button class="btn-print" onclick="window.print()" style="padding: 10px 24px; font-weight: bold; background: #540000; color: white; border: none; border-radius: 8px; cursor: pointer;">🖨️ Cetak Bukti Pelanggaran (PDF)</button>
+          </div>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
     }
 
     init();

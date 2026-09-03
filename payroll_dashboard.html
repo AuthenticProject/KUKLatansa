@@ -682,7 +682,8 @@
           <td style="text-align:right;">
             ${editBtnHTML}
             <button class="btn btn-secondary btn-sm" onclick="showBreakdown('${s.employeeId}')">🔍 Rincian</button>
-            <button class="btn btn-primary btn-sm" onclick="printSlip('${s.employeeId}')">🖨️ Cetak</button>
+            <button class="btn btn-warning btn-sm" onclick="printSuratKeteranganGaji('${s.employeeId}')" style="background:#d97706; color:#fff;" title="Cetak Surat Keterangan Gaji">📜 Ket. Gaji</button>
+            <button class="btn btn-primary btn-sm" onclick="printSlip('${s.employeeId}')">🖨️ Slip Gaji</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -719,6 +720,9 @@
       const slip = currentPeriod.slips.find(s => s.employeeId === empId);
       if (!slip) return;
 
+      const isPalen = slip.unit && String(slip.unit).toLowerCase().includes('palen');
+      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+
       const printWin = window.open('', '_blank', 'width=700,height=800');
       printWin.document.write(`
         <!DOCTYPE html>
@@ -727,9 +731,9 @@
           <title>Slip Gaji - ${slip.employeeName} - ${currentPeriod.periodName}</title>
           <style>
             body { font-family: 'Outfit', Arial, sans-serif; padding: 30px; color: #0f172a; line-height: 1.5; }
-            .slip-card { border: 2px solid #540000; border-radius: 12px; padding: 24px; max-width: 600px; margin: 0 auto; }
-            .header { text-align: center; border-bottom: 2px double #540000; padding-bottom: 12px; margin-bottom: 16px; }
-            .header h2 { color: #540000; margin: 0; font-size: 20px; text-transform: uppercase; }
+            .slip-card { border: 2px solid #540000; border-radius: 12px; padding: 24px; max-width: 600px; margin: 0 auto; background: #fff; }
+            .header { text-align: center; border-bottom: 2px solid #540000; padding-bottom: 12px; margin-bottom: 16px; }
+            .header h2 { color: #540000; margin: 0; font-size: 18px; text-transform: uppercase; font-weight: 800; }
             .header p { margin: 2px 0 0; font-size: 12px; color: #64748b; }
             .meta-table { width: 100%; font-size: 13px; margin-bottom: 16px; }
             .meta-table td { padding: 4px 0; }
@@ -746,8 +750,8 @@
         <body>
           <div class="slip-card">
             <div class="header">
+              <img src="${kopSrc}" alt="Kop Surat" style="width:100%; max-height:115px; object-fit:contain; display:block; margin:0 auto 10px;">
               <h2>SLIP GAJI KARYAWAN</h2>
-              <p>KUK LA TANSA • ${slip.unit.toUpperCase()}</p>
               <p style="font-weight:700; color:#540000; margin-top:4px;">Periode: ${currentPeriod.periodName}</p>
             </div>
             <table class="meta-table">
@@ -780,6 +784,188 @@
           </div>
           <div style="text-align:center; margin-top:20px;">
             <button class="btn-print" onclick="window.print()" style="padding:10px 20px; font-weight:bold; background:#540000; color:white; border:none; border-radius:8px; cursor:pointer;">🖨️ Cetak Slip Gaji</button>
+          </div>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
+    }
+
+    function getBulanRomawi(month1to12) {
+      const romawi = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+      const idx = Math.max(1, Math.min(12, Number(month1to12) || 1)) - 1;
+      return romawi[idx] || "V";
+    }
+
+    function terbilangIndo(bilangan) {
+      bilangan = Math.floor(Math.abs(Number(bilangan) || 0));
+      if (bilangan === 0) return "Nol Rupiah";
+
+      const angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+      function konversi(n) {
+        if (n < 12) return angka[n];
+        if (n < 20) return konversi(n - 10) + " Belas";
+        if (n < 100) return konversi(Math.floor(n / 10)) + " Puluh " + konversi(n % 10);
+        if (n < 200) return "Seratus " + konversi(n - 100);
+        if (n < 1000) return konversi(Math.floor(n / 100)) + " Ratus " + konversi(n % 100);
+        if (n < 2000) return "Seribu " + konversi(n - 1000);
+        if (n < 1000000) return konversi(Math.floor(n / 1000)) + " Ribu " + konversi(n % 1000);
+        if (n < 1000000000) return konversi(Math.floor(n / 1000000)) + " Juta " + konversi(n % 1000000);
+        if (n < 1000000000000) return konversi(Math.floor(n / 1000000000)) + " Miliar " + konversi(n % 1000000000);
+        return "";
+      }
+      return (konversi(bilangan) + " Rupiah").replace(/\s+/g, ' ').trim();
+    }
+
+    function printSuratKeteranganGaji(empId) {
+      if (!currentPeriod) return;
+      const slip = currentPeriod.slips.find(s => s.employeeId === empId);
+      if (!slip) return;
+
+      const isPalen = slip.unit && String(slip.unit).toLowerCase().includes('palen');
+      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      const tokoFullTitle = isPalen ? 'PALEN CENTRE "KUK"' : 'TB. KUK La Tansa';
+      const unitName = slip.unit || (isPalen ? 'KUK Palen' : 'KUK Bangunan');
+
+      // Nomor Surat format: No : (Nomor surat/HRD-Finance/Bulan keberapa dlm romawi/tahun) -> No : 168/HRD-Finance/V/2026
+      let bulanNum = 5;
+      let tahunNum = new Date().getFullYear();
+      if (currentPeriod.periodMonth) {
+        const parts = String(currentPeriod.periodMonth).split('-');
+        if (parts.length === 2) {
+          tahunNum = parts[0];
+          bulanNum = parseInt(parts[1], 10);
+        }
+      }
+      const bulanRomawi = getBulanRomawi(bulanNum);
+      const nomorUrut = slip.slipNumber ? (slip.slipNumber.replace(/[^0-9]/g, '').slice(-3) || '168') : '168';
+      const noSurat = `${nomorUrut}/HRD-Finance/${bulanRomawi}/${tahunNum}`;
+
+      // Tanggal aktif (akhir bulan)
+      const lastDay = new Date(tahunNum, bulanNum, 0);
+      const tglAktifStr = lastDay.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const namaBendahara = 'Ari Hermawan';
+      const jabatanBendahara = 'Bendahara TB. KUK La Tansa';
+
+      const gp = Number(slip.baseSalary || 0);
+      const gb = Number(slip.gajiBagian || 0);
+      const hadiahPondok = Number(slip.hadiahPondok || 0);
+      const tipKaca = Number(slip.tipKaca || 0);
+      const tunjanganKeluarga = Number(slip.tunjanganKeluarga || 0);
+      const insentifCuti = Number(slip.insentifCuti || 0);
+      const bonusIncentive = Number(slip.bonusIncentive || 0);
+      
+      const lateDed = slip.breakdown ? Number(slip.breakdown.lateDeduction || 0) : 0;
+      const absDed = slip.breakdown ? Number(slip.breakdown.absentDeduction || 0) : 0;
+      const otherDed = Number(slip.otherDeductions || 0);
+      const totalDed = lateDed + absDed + otherDed;
+      const tot = Number(slip.takeHomePay || (gp + gb + hadiahPondok + tipKaca + tunjanganKeluarga + insentifCuti + bonusIncentive - totalDed));
+
+      const printWin = window.open('', '_blank', 'width=800,height=900');
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Surat Keterangan Gaji - ${slip.employeeName} - ${noSurat}</title>
+          <style>
+            body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; line-height: 1.6; background: #fff; }
+            .surat-box { max-width: 720px; margin: 0 auto; }
+            .kop-container { text-align: center; border-bottom: 2.5px solid #540000; padding-bottom: 8px; margin-bottom: 22px; }
+            .kop-img { width: 100%; max-height: 125px; object-fit: contain; display: block; margin: 0 auto; }
+            .title-box { text-align: center; margin-bottom: 24px; }
+            .title-box h2 { font-size: 17px; font-weight: bold; text-decoration: underline; margin: 0; text-transform: uppercase; }
+            .title-box p { font-size: 13.5px; margin: 4px 0 0; font-weight: 600; }
+            table.info-table { width: 100%; font-size: 14px; margin: 8px 0 16px; border-collapse: collapse; }
+            table.info-table td { padding: 3px 0; vertical-align: top; }
+            .sign-area { display: flex; justify-content: flex-end; text-align: center; margin-top: 40px; font-size: 14px; }
+            .sign-col { width: 260px; }
+            .sign-space { height: 75px; display: flex; align-items: center; justify-content: center; margin: 4px 0; }
+            @media print { body { padding: 15px; } .btn-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="surat-box">
+            <div class="kop-container">
+              <img src="${kopSrc}" alt="Kop Surat" class="kop-img">
+            </div>
+
+            <div class="title-box">
+              <h2>Surat Keterangan Gaji</h2>
+              <p>No : ${noSurat}</p>
+            </div>
+
+            <p style="font-size: 14px; margin-bottom: 6px;">Yang bertanda tangan di bawah ini:</p>
+            <table class="info-table">
+              <tr>
+                <td style="width: 160px;">Nama</td>
+                <td style="width: 15px;">:</td>
+                <td style="font-weight: bold;">${namaBendahara}</td>
+              </tr>
+              <tr>
+                <td>Jabatan</td>
+                <td>:</td>
+                <td>${jabatanBendahara}</td>
+              </tr>
+            </table>
+
+            <p style="font-size: 14px; margin: 16px 0 6px;">Menerangkan dengan sebenar-benarnya bahwa:</p>
+            <table class="info-table">
+              <tr>
+                <td style="width: 160px;">Nama</td>
+                <td style="width: 15px;">:</td>
+                <td style="font-weight: bold;">${slip.employeeName}</td>
+              </tr>
+              <tr>
+                <td>Jabatan</td>
+                <td>:</td>
+                <td>${slip.position || 'Staf'} (${unitName})</td>
+              </tr>
+            </table>
+
+            <p style="font-size: 14px; text-align: justify; margin: 18px 0 10px; line-height: 1.6;">
+              Hingga saat ini tanggal <strong>${tglAktifStr}</strong> yang bersangkutan masih aktif bekerja dan <strong>${tokoFullTitle}</strong> memberikan penghasilan sebagai berikut:
+            </p>
+
+            <table class="info-table" style="margin-left: 10px;">
+              <tr>
+                <td style="width: 220px;">Gaji pokok</td>
+                <td style="width: 15px;">:</td>
+                <td>Rp ${gp.toLocaleString('id-ID')}</td>
+              </tr>
+              <tr>
+                <td>Gaji bagian</td>
+                <td>:</td>
+                <td>Rp ${gb.toLocaleString('id-ID')}</td>
+              </tr>
+              ${hadiahPondok > 0 ? `<tr><td>Hadiah dari pondok</td><td>:</td><td>Rp ${hadiahPondok.toLocaleString('id-ID')}</td></tr>` : ''}
+              ${tipKaca > 0 ? `<tr><td>Tip</td><td>:</td><td>Rp ${tipKaca.toLocaleString('id-ID')}</td></tr>` : ''}
+              ${tunjanganKeluarga > 0 ? `<tr><td>Tunjangan Berkeluarga</td><td>:</td><td>Rp ${tunjanganKeluarga.toLocaleString('id-ID')}</td></tr>` : ''}
+              ${insentifCuti > 0 ? `<tr><td>Insentif Cuti</td><td>:</td><td>Rp ${insentifCuti.toLocaleString('id-ID')}</td></tr>` : ''}
+              ${bonusIncentive > 0 ? `<tr><td>Bonus / Insentif Kinerja</td><td>:</td><td>Rp ${bonusIncentive.toLocaleString('id-ID')}</td></tr>` : ''}
+              ${totalDed > 0 ? `<tr style="color:#dc2626;"><td>Poin Pelanggaran / Potongan</td><td>:</td><td>- Rp ${totalDed.toLocaleString('id-ID')}</td></tr>` : '<tr><td>Poin Pelanggaran</td><td>:</td><td>0 (-)</td></tr>'}
+            </table>
+
+            <p style="font-size: 14px; text-align: justify; margin: 18px 0 12px; line-height: 1.6;">
+              Sehingga total gaji yang diperoleh ialah sebesar <strong>Rp ${tot.toLocaleString('id-ID')}</strong> (<em>${terbilangIndo(tot)}</em>)
+            </p>
+            <p style="font-size: 14px; text-align: justify; margin: 12px 0 35px; line-height: 1.6;">
+              Demikian Surat keterangan penghasilan ini, semoga dapat dipergunakan sebagaimana mestinya.
+            </p>
+
+            <div class="sign-area">
+              <div class="sign-col">
+                <p style="margin: 0;">Hormat Kami,</p>
+                <p style="margin: 4px 0 0; font-weight: bold;">${jabatanBendahara}</p>
+                <div class="sign-space"></div>
+                <p style="margin: 0; font-weight: bold; text-decoration: underline;">( ${namaBendahara} )</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 30px;">
+            <button class="btn-print" onclick="window.print()" style="padding: 10px 24px; font-weight: bold; background: #540000; color: white; border: none; border-radius: 8px; cursor: pointer;">🖨️ Cetak Surat Keterangan Gaji (PDF)</button>
           </div>
         </body>
         </html>
