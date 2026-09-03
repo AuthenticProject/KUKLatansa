@@ -55,21 +55,45 @@ const AttendanceEngine = (() => {
     try {
       const cutiList = getCutiDatabase();
       for (const item of cutiList) {
-        const matchEmp = (item.idKaryawan && item.idKaryawan === employee.id) ||
-                         (item.nama && employee.nama && item.nama.toLowerCase().includes(employee.nama.toLowerCase())) ||
-                         (item.nama && employee.fullName && item.nama.toLowerCase().includes(employee.fullName.toLowerCase()));
-        if (matchEmp) {
-          // Status disetujui / aktif
-          const status = (item.status || '').toLowerCase();
-          if (status === 'ditolak') continue;
+        // Status: abaikan jika ditolak / dibatalkan
+        const status = (item.status || '').toLowerCase();
+        if (status === 'ditolak' || status === 'dibatalkan' || status === 'rejected') continue;
 
-          if (Array.isArray(item.tanggal) && item.tanggal.includes(dateStr)) return true;
-          if (item.startDate && item.endDate && dateStr >= item.startDate && dateStr <= item.endDate) return true;
-          if (item.tanggal === dateStr) return true;
+        const empName = (employee.fullName || employee.nama || '').toLowerCase().trim();
+        const empId = (employee.id || '').toLowerCase().trim();
+        const itemEmpId = (item.idKaryawan || '').toLowerCase().trim();
+        const itemEmpName = (item.nama || item.namaLengkap || '').toLowerCase().trim();
+
+        const matchEmp = (empId && itemEmpId && empId === itemEmpId) ||
+                         (empName && itemEmpName && (
+                           empName === itemEmpName || 
+                           empName.includes(itemEmpName) || 
+                           itemEmpName.includes(empName)
+                         ));
+
+        if (matchEmp) {
+          const cutiNote = item.alasan || item.jenisCuti || item.tipeCuti || 'Cuti Resmi';
+          // 1. Array tanggal: e.g. ['2026-08-12', '2026-08-13']
+          if (Array.isArray(item.tanggal) && item.tanggal.includes(dateStr)) {
+            return { isLeave: true, note: cutiNote };
+          }
+          // 2. String tanggal: e.g. '2026-08-12' atau '2026-08-12, 2026-08-13'
+          if (item.tanggal && typeof item.tanggal === 'string') {
+            const splitted = item.tanggal.split(',').map(s => s.trim());
+            if (splitted.includes(dateStr) || item.tanggal === dateStr) {
+              return { isLeave: true, note: cutiNote };
+            }
+          }
+          // 3. Rentang tanggal: startDate s/d endDate
+          if (item.startDate && item.endDate && dateStr >= item.startDate && dateStr <= item.endDate) {
+            return { isLeave: true, note: cutiNote };
+          }
         }
       }
-    } catch (e) {}
-    return false;
+    } catch (e) {
+      console.warn('Error isLeaveFromCutiDb:', e);
+    }
+    return null;
   }
 
   /**
@@ -83,12 +107,13 @@ const AttendanceEngine = (() => {
       return { status: latest.newStatus, isOverride: true, reason: latest.reason };
     }
 
-    // 2. Check for submitted forms (Leave, Sick, Permission, Dinas) & Cuti DB
-    const isCutiDb = isLeaveFromCutiDb(employee, dateStr);
-    if (isCutiDb) {
-      return { status: 'LEAVE', isOverride: false, note: 'Cuti Resmi Terdaftar' };
+    // 2. Check for Cuti Database (kuk_db_cuti_v1 / Rekap Cuti Resmi)
+    const cutiInfo = isLeaveFromCutiDb(employee, dateStr);
+    if (cutiInfo) {
+      return { status: 'LEAVE', isOverride: false, note: cutiInfo.note ? `Cuti (${cutiInfo.note})` : 'Cuti Resmi' };
     }
 
+    // 3. Check for submitted public forms (Leave, Sick, Permission, Dinas)
     const empForms = forms.filter(f => f.employeeId === employee.id && formCoversDate(f, dateStr));
     let hasFormLeave = false;
     let hasFormSick = false;
@@ -106,21 +131,17 @@ const AttendanceEngine = (() => {
       }
     }
 
-    if (hasFormSick) return { status: 'SICK', isOverride: false };
-    if (hasFormLeave) return { status: 'LEAVE', isOverride: false };
-    if (hasFormPermission) return { status: 'PERMISSION', isOverride: false };
+    if (hasFormSick) return { status: 'SICK', isOverride: false, note: 'Sakit' };
+    if (hasFormLeave) return { status: 'LEAVE', isOverride: false, note: 'Cuti Pengajuan' };
+    if (hasFormPermission) return { status: 'PERMISSION', isOverride: false, note: 'Izin' };
     if (hasDinas) return { status: 'EXCUSED', isOverride: false, note: 'Dinas Luar' };
 
-    // 3. Check Fingerprints
+    // 4. Check Fingerprints
     const empScans = fingerprints.filter(fp => (fp.employeeId === employee.id || (employee.fingerprintId && fp.pin == employee.fingerprintId)) && fp.date === dateStr);
     
     if (empScans.length === 0) {
-      // Check if it's Sunday (OFF)
-      const dayOfWeek = new Date(dateStr).getDay();
-      if (dayOfWeek === 0) return { status: 'OFF', isOverride: false };
-      
-      // Mangkir murni tanpa cuti/izin
-      return { status: 'ABSENT', isOverride: false };
+      // Toko tetap buka hari Minggu (tidak libur), default kehadiran adalah PRESENT (Hadir)
+      return { status: 'PRESENT', isOverride: false, note: 'Hadir' };
     }
 
     if (empScans.length === 1) {

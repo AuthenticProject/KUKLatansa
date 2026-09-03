@@ -236,16 +236,27 @@ const FingerprintEngine = (() => {
   function isDateCoveredByCuti(employee, dateStr) {
     const cutiList = getCutiList();
     for (const item of cutiList) {
-      const matchEmp = (item.idKaryawan && employee.id && item.idKaryawan === employee.id) ||
-                       (item.nama && employee.nama && item.nama.toLowerCase().includes(employee.nama.toLowerCase())) ||
-                       (item.nama && employee.fullName && item.nama.toLowerCase().includes(employee.fullName.toLowerCase()));
-      if (matchEmp) {
-        const st = (item.status || '').toLowerCase();
-        if (st === 'ditolak') continue;
+      const st = (item.status || '').toLowerCase();
+      if (st === 'ditolak' || st === 'dibatalkan' || st === 'rejected') continue;
 
+      const empName = (employee.fullName || employee.nama || '').toLowerCase().trim();
+      const empId = (employee.id || '').toLowerCase().trim();
+      const itemEmpId = (item.idKaryawan || '').toLowerCase().trim();
+      const itemEmpName = (item.nama || item.namaLengkap || '').toLowerCase().trim();
+
+      const matchEmp = (empId && itemEmpId && empId === itemEmpId) ||
+                       (empName && itemEmpName && (
+                         empName === itemEmpName || 
+                         empName.includes(itemEmpName) || 
+                         itemEmpName.includes(empName)
+                       ));
+      if (matchEmp) {
         if (Array.isArray(item.tanggal) && item.tanggal.includes(dateStr)) return true;
+        if (item.tanggal && typeof item.tanggal === 'string') {
+          const splitted = item.tanggal.split(',').map(s => s.trim());
+          if (splitted.includes(dateStr) || item.tanggal === dateStr) return true;
+        }
         if (item.startDate && item.endDate && dateStr >= item.startDate && dateStr <= item.endDate) return true;
-        if (item.tanggal === dateStr) return true;
       }
     }
     return false;
@@ -407,8 +418,6 @@ const FingerprintEngine = (() => {
             if (isLeave) {
               totalCuti++;
               dailyLogs.push({ date: dateStr, status: 'LEAVE', punches: [], note: 'Cuti Resmi' });
-            } else if (isSunday) {
-              dailyLogs.push({ date: dateStr, status: 'OFF', punches: [], note: 'Hari Libur / Minggu' });
             } else {
               totalAlpa++;
               dailyLogs.push({ date: dateStr, status: 'ABSENT', punches: [], note: 'Tidak Masuk / Alpa (Potong Rp 28.500)' });
@@ -588,13 +597,10 @@ const FingerprintEngine = (() => {
           for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${yearMonthPrefix}-${String(day).padStart(2, '0')}`;
             const dayOfWeek = new Date(dateStr).getDay();
-            const isSunday = dayOfWeek === 0;
             const isLeave = isDateCoveredByCuti(emp, dateStr);
             if (isLeave) {
               totalCuti++;
               dailyLogs.push({ date: dateStr, status: 'LEAVE', punches: [], isBreakForgiven: false, note: 'Cuti Resmi' });
-            } else if (isSunday) {
-              dailyLogs.push({ date: dateStr, status: 'OFF', punches: [], isBreakForgiven: false, note: 'Hari Libur / Minggu' });
             } else {
               totalAlpa++;
               dailyLogs.push({ date: dateStr, status: 'ABSENT', punches: [], isBreakForgiven: false, note: 'Tidak Masuk / Alpa (Potong Rp 28.500)' });

@@ -162,7 +162,10 @@ const PayrollEngine = (() => {
       const baseSalary = Number(emp.gajiPokok) > 0 ? Number(emp.gajiPokok) : defaultBase;
       const gajiBagian = Number(emp.gajiBagian) || 0;
       const tunjanganKeluarga = emp.sudahBerkeluarga ? 50000 : 0;
-      const hadiahPondok = Number(emp.hadiahPondok) || 0;
+      const DEFAULT_HADIAH_PONDOK_BANGUNAN = 150000;
+      const hadiahPondok = Number(emp.hadiahPondok) > 0
+        ? Number(emp.hadiahPondok)
+        : (isPalen ? 0 : DEFAULT_HADIAH_PONDOK_BANGUNAN);
       const insentifCuti = Number(emp.insentifCuti) || 0;
 
       empData[emp.id] = {
