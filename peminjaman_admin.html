@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -457,6 +457,50 @@
     }
     .toast.success { border-left-color: var(--kuk-success); }
     .toast.error { border-left-color: var(--kuk-danger); }
+
+    /* ── MOBILE OVERRIDES ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .container { padding: 14px 12px !important; gap: 14px !important; }
+
+      /* Top nav */
+      .top-nav { padding: 14px 14px !important; gap: 10px !important; border-radius: 14px !important; }
+      .brand-info h1 { font-size: 15px !important; }
+      .brand-info p { font-size: 11px !important; }
+      .brand-icon { font-size: 22px !important; width: 38px !important; height: 38px !important; }
+      .nav-actions { width: 100% !important; gap: 6px !important; }
+      .btn-nav { flex: 1 1 auto !important; justify-content: center !important; font-size: 12px !important; padding: 9px 10px !important; }
+
+      /* Stats grid: 2 columns */
+      .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+      .stat-card { padding: 12px !important; gap: 10px !important; }
+      .stat-icon { width: 38px !important; height: 38px !important; font-size: 18px !important; border-radius: 10px !important; }
+      .stat-value { font-size: 20px !important; }
+      .stat-label { font-size: 10px !important; }
+
+      /* Filter bar */
+      .filter-bar { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; padding: 12px 14px !important; }
+      .filter-pills { flex-wrap: wrap !important; gap: 6px !important; }
+      .pill { font-size: 11.5px !important; padding: 7px 12px !important; }
+      .search-wrap { max-width: 100% !important; }
+
+      /* Tables */
+      .table-responsive { -webkit-overflow-scrolling: touch !important; }
+      th { padding: 10px 12px !important; font-size: 10px !important; }
+      td { padding: 11px 12px !important; font-size: 12.5px !important; }
+
+      /* Action buttons compact */
+      .action-group { gap: 4px !important; }
+      .btn-action { padding: 6px 8px !important; font-size: 10.5px !important; gap: 4px !important; }
+
+      /* Armada grid: 1 column on small phone */
+      #armadaGrid { grid-template-columns: 1fr !important; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { gap: 6px !important; }
+      .stat-card { padding: 10px !important; }
+      .stat-value { font-size: 18px !important; }
+    }
   </style>
 </head>
 <body>
@@ -628,15 +672,18 @@
     </header>
 
     <!-- Navigasi Tab Utama -->
-    <div style="display:flex; gap:10px; border-bottom:1.5px solid var(--kuk-border); padding-bottom:12px; flex-wrap:wrap;">
-      <button class="pill active" id="tabBtnPinjam" onclick="switchMainTab('pinjam')" style="font-size:13.5px; padding:10px 22px;">
+    <div style="display:flex; gap:8px; border-bottom:1.5px solid var(--kuk-border); padding-bottom:12px; overflow-x:auto; scrollbar-width:none;">
+      <button class="pill active" id="tabBtnPinjam" onclick="switchMainTab('pinjam')" style="font-size:13px; padding:9px 18px; white-space:nowrap; flex-shrink:0;">
         📋 Riwayat Peminjaman
       </button>
-      <button class="pill" id="tabBtnBbm" onclick="switchMainTab('bbm')" style="font-size:13.5px; padding:10px 22px;">
-        ⛽ Log BBM & Struk SPBU
+      <button class="pill" id="tabBtnBbm" onclick="switchMainTab('bbm')" style="font-size:13px; padding:9px 18px; white-space:nowrap; flex-shrink:0;">
+        ⛽ Log BBM &amp; Struk SPBU
       </button>
-      <button class="pill" id="tabBtnServis" onclick="switchMainTab('servis')" style="font-size:13.5px; padding:10px 22px;">
-        🛠️ Jadwal & Servis Armada
+      <button class="pill" id="tabBtnServis" onclick="switchMainTab('servis')" style="font-size:13px; padding:9px 18px; white-space:nowrap; flex-shrink:0;">
+        🛠️ Jadwal &amp; Servis Armada
+      </button>
+      <button class="pill" id="tabBtnArmada" onclick="switchMainTab('armada')" style="font-size:13px; padding:9px 18px; white-space:nowrap; flex-shrink:0; background:linear-gradient(135deg,#e0f2fe,#bfdbfe); color:#1e40af; border-color:#93c5fd;">
+        🚗 Database Armada
       </button>
     </div>
 
@@ -693,7 +740,12 @@
 
       <!-- Table Section -->
       <div class="table-card">
-        <div class="table-responsive">
+        <!-- Mobile Cards List for Peminjaman (No horizontal scrolling!) -->
+        <div id="pinjamMobileCards" class="show-mobile" style="display:none; padding:12px; flex-direction:column; gap:12px;">
+          <!-- Rendered by JS on mobile -->
+        </div>
+
+        <div class="table-responsive hide-mobile">
           <table>
             <thead>
               <tr>
@@ -797,9 +849,26 @@
         </div>
       </div>
     </div>
+
+    <!-- ================= TAB 4: DATABASE ARMADA ================= -->
+    <div id="tabContentArmada" style="display:none; padding-top:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h3 style="font-size:18px; font-weight:800; color:var(--kuk-maroon);">🚗 Database Armada Kendaraan</h3>
+          <p style="font-size:12.5px; color:var(--kuk-text-muted); margin-top:3px;">Daftar seluruh kendaraan operasional beserta status, QR code, dan informasi teknis.</p>
+        </div>
+        <button class="pill" onclick="renderArmadaGrid()" style="padding:9px 16px; background:#f1f5f9; color:#475569; border-color:#cbd5e1; font-weight:700; border-radius:100px; cursor:pointer;">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <!-- Armada Cards Grid -->
+      <div id="armadaGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:16px;">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
   </div>
 
-  <!-- MODAL TAMBAH / EDIT SERVIS -->
   <div class="modal-backdrop" id="modalServis">
     <div class="modal-card">
       <div class="modal-header">
@@ -899,14 +968,17 @@
       document.getElementById('tabBtnPinjam').classList.toggle('active', tab === 'pinjam');
       document.getElementById('tabBtnBbm').classList.toggle('active', tab === 'bbm');
       document.getElementById('tabBtnServis').classList.toggle('active', tab === 'servis');
+      document.getElementById('tabBtnArmada').classList.toggle('active', tab === 'armada');
 
       document.getElementById('tabContentPinjam').style.display = tab === 'pinjam' ? 'block' : 'none';
       document.getElementById('tabContentBbm').style.display = tab === 'bbm' ? 'block' : 'none';
       document.getElementById('tabContentServis').style.display = tab === 'servis' ? 'block' : 'none';
+      document.getElementById('tabContentArmada').style.display = tab === 'armada' ? 'block' : 'none';
 
       if (tab === 'pinjam') renderTable();
       if (tab === 'bbm') renderBbmTable();
       if (tab === 'servis') renderServisTable();
+      if (tab === 'armada') renderArmadaGrid();
     }
 
     function setFilter(status) {
@@ -946,106 +1018,187 @@
       });
 
       const tbody = document.getElementById('tableBody');
+      const mobileCards = document.getElementById('pinjamMobileCards');
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                Tidak ada data peminjaman yang sesuai dengan filter pencarian.
+              </td>
+            </tr>
+          `;
+        }
+        if (mobileCards) {
+          mobileCards.innerHTML = `
+            <div style="text-align:center; padding:36px 16px; color:var(--text-muted); background:#f8fafc; border-radius:14px; border:1px dashed #cbd5e1;">
               Tidak ada data peminjaman yang sesuai dengan filter pencarian.
-            </td>
-          </tr>
-        `;
+            </div>
+          `;
+        }
         return;
       }
 
-      tbody.innerHTML = filtered.map(item => {
-        let statusClass = 'aktif';
-        if (item.status === 'Selesai') statusClass = 'selesai';
-        if (item.status === 'Rusak/Bermasalah') statusClass = 'rusak';
+      if (tbody) {
+        tbody.innerHTML = filtered.map(item => {
+          let statusClass = 'aktif';
+          if (item.status === 'Selesai') statusClass = 'selesai';
+          if (item.status === 'Rusak/Bermasalah') statusClass = 'rusak';
 
-        const pinjamStr = formatDateTime(item.waktuMulai);
-        const kembaliRencanaStr = formatDateTime(item.waktuRencanaKembali);
-        const kembaliAktualStr = item.waktuAktualKembali ? formatDateTime(item.waktuAktualKembali) : null;
+          const pinjamStr = formatDateTime(item.waktuMulai);
+          const kembaliRencanaStr = formatDateTime(item.waktuRencanaKembali);
+          const kembaliAktualStr = item.waktuAktualKembali ? formatDateTime(item.waktuAktualKembali) : null;
 
-        const waUrl = PeminjamanDB.getWhatsAppLoanUrl(item);
-        const waReminderUrl = PeminjamanDB.getWhatsAppOverdueUrl(item);
+          const waUrl = PeminjamanDB.getWhatsAppLoanUrl(item);
+          const waReminderUrl = PeminjamanDB.getWhatsAppOverdueUrl(item);
 
-        return `
-          <tr>
-            <td>
-              <div class="user-info">
-                <h4>${item.namaPeminjam}</h4>
-                <p>${item.divisi} &bull; ${item.kontak}</p>
-              </div>
-            </td>
+          return `
+            <tr>
+              <td>
+                <div class="user-info">
+                  <h4>${item.namaPeminjam}</h4>
+                  <p>${item.divisi} &bull; ${item.kontak}</p>
+                </div>
+              </td>
 
-            <td>
-              <div class="vehicle-badge">
-                <span class="plat-chip">${item.platKendaraan}</span>
-                <span>${item.namaKendaraan}</span>
-              </div>
-              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
-                Tujuan: ${item.keperluan}
-              </div>
-            </td>
+              <td>
+                <div class="vehicle-badge">
+                  <span class="plat-chip">${item.platKendaraan}</span>
+                  <span>${item.namaKendaraan}</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                  Tujuan: ${item.keperluan}
+                </div>
+              </td>
 
-            <td>
-              <div class="time-info">${pinjamStr}</div>
-            </td>
+              <td>
+                <div class="time-info">${pinjamStr}</div>
+              </td>
 
-            <td>
-              ${
-                item.status === 'Selesai' && kembaliAktualStr
-                  ? `<div class="time-info" style="color: #34d399;">Kembali: ${kembaliAktualStr}</div>`
-                  : `<div class="time-info">Rencana: ${kembaliRencanaStr}</div>`
-              }
-              ${
-                item.status === 'Rusak/Bermasalah' && item.kerusakan
-                  ? `<div class="time-sub" style="color: #f87171;">Dilaporkan: ${formatDateOnly(item.kerusakan.tanggalKejadian)}</div>`
-                  : ''
-              }
-            </td>
-
-            <td>
-              <span class="status-badge ${statusClass}">${item.status}</span>
-            </td>
-
-            <td>
-              <div class="action-group">
+              <td>
                 ${
-                  item.status === 'Aktif/Dipinjam'
-                    ? `
-                      <button class="btn-action selesai" onclick="handleSelesai('${item.id}', '${item.platKendaraan}')">
-                        <span>✓ Selesai</span>
-                      </button>
-                      <button class="btn-action rusak" onclick="openModalKerusakan('${item.id}')">
-                        <span>⚠️ Laporkan Kerusakan</span>
-                      </button>
-                      <a href="${waReminderUrl}" target="_blank" class="btn-action" style="background:#10b981; color:#fff; text-decoration:none;">
-                        <span>📲 WA Reminder</span>
-                      </a>
-                    `
-                    : ''
+                  item.status === 'Selesai' && kembaliAktualStr
+                    ? `<div class="time-info" style="color: #34d399;">Kembali: ${kembaliAktualStr}</div>`
+                    : `<div class="time-info">Rencana: ${kembaliRencanaStr}</div>`
                 }
                 ${
-                  item.status === 'Rusak/Bermasalah'
-                    ? `
-                      <button class="btn-action cetak" onclick="openModalSurat('${item.id}')">
-                        <span>🖨️ Cetak Surat Ganti Rugi</span>
-                      </button>
-                    `
+                  item.status === 'Rusak/Bermasalah' && item.kerusakan
+                    ? `<div class="time-sub" style="color: #f87171;">Dilaporkan: ${formatDateOnly(item.kerusakan.tanggalKejadian)}</div>`
                     : ''
                 }
-                ${
-                  item.status === 'Selesai'
-                    ? `<span style="font-size: 12px; color: var(--text-muted);">Tuntas</span>`
-                    : ''
-                }
+              </td>
+
+              <td>
+                <span class="status-badge ${statusClass}">${item.status}</span>
+              </td>
+
+              <td>
+                <div class="action-group">
+                  ${
+                    item.status === 'Aktif/Dipinjam'
+                      ? `
+                        <button class="btn-action selesai" onclick="handleSelesai('${item.id}', '${item.platKendaraan}')">
+                          <span>✓ Selesai</span>
+                        </button>
+                        <button class="btn-action rusak" onclick="openModalKerusakan('${item.id}')">
+                          <span>⚠️ Laporkan Kerusakan</span>
+                        </button>
+                        <a href="${waReminderUrl}" target="_blank" class="btn-action" style="background:#10b981; color:#fff; text-decoration:none;">
+                          <span>📲 WA Reminder</span>
+                        </a>
+                      `
+                      : ''
+                  }
+                  ${
+                    item.status === 'Rusak/Bermasalah'
+                      ? `
+                        <button class="btn-action cetak" onclick="openModalSurat('${item.id}')">
+                          <span>🖨️ Cetak Surat Ganti Rugi</span>
+                        </button>
+                      `
+                      : ''
+                  }
+                  ${
+                    item.status === 'Selesai'
+                      ? `<span style="font-size: 12px; color: var(--text-muted);">Tuntas</span>`
+                      : ''
+                  }
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (mobileCards) {
+        mobileCards.innerHTML = filtered.map(item => {
+          let statusClass = 'aktif';
+          if (item.status === 'Selesai') statusClass = 'selesai';
+          if (item.status === 'Rusak/Bermasalah') statusClass = 'rusak';
+
+          const pinjamStr = formatDateTime(item.waktuMulai);
+          const kembaliRencanaStr = formatDateTime(item.waktuRencanaKembali);
+          const kembaliAktualStr = item.waktuAktualKembali ? formatDateTime(item.waktuAktualKembali) : null;
+          const waReminderUrl = PeminjamanDB.getWhatsAppOverdueUrl(item);
+
+          return `
+            <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:16px; padding:15px 16px; box-shadow:0 3px 10px rgba(0,0,0,0.03); display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div>
+                  <div style="font-weight:800; font-size:15px; color:#0f172a;">${item.namaPeminjam}</div>
+                  <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${item.divisi} &bull; ${item.kontak}</div>
+                </div>
+                <span class="status-badge ${statusClass}">${item.status}</span>
               </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
+
+              <div style="display:flex; align-items:center; gap:8px; background:#f8fafc; padding:8px 12px; border-radius:10px; border:1px solid #e2e8f0;">
+                <span class="plat-chip" style="margin:0;">${item.platKendaraan}</span>
+                <div style="font-size:13px; font-weight:700; color:#1e293b;">${item.namaKendaraan}</div>
+              </div>
+
+              <div style="font-size:12px; color:var(--text-muted);">
+                <strong>Keperluan:</strong> ${item.keperluan}
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11.5px; background:#f1f5f9; padding:8px 12px; border-radius:8px;">
+                <div>
+                  <div style="color:#64748b; font-weight:600;">Waktu Pinjam:</div>
+                  <div style="font-weight:700; color:#0f172a;">${pinjamStr}</div>
+                </div>
+                <div>
+                  <div style="color:#64748b; font-weight:600;">Kembali:</div>
+                  <div style="font-weight:700; color:${item.status === 'Selesai' ? '#10b981' : '#b45309'};">
+                    ${item.status === 'Selesai' && kembaliAktualStr ? kembaliAktualStr : kembaliRencanaStr}
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
+                ${item.status === 'Aktif/Dipinjam' ? `
+                  <button class="btn-action selesai" style="flex:1; justify-content:center; padding:9px 12px; font-size:12px;" onclick="handleSelesai('${item.id}', '${item.platKendaraan}')">
+                    ✓ Selesai
+                  </button>
+                  <button class="btn-action rusak" style="flex:1; justify-content:center; padding:9px 12px; font-size:12px;" onclick="openModalKerusakan('${item.id}')">
+                    ⚠️ Lapor Rusak
+                  </button>
+                  <a href="${waReminderUrl}" target="_blank" class="btn-action" style="background:#10b981; color:#fff; text-decoration:none; flex:1 1 100%; justify-content:center; padding:9px 12px; font-size:12px;">
+                    📲 Kirim WA Reminder
+                  </a>
+                ` : ''}
+                ${item.status === 'Rusak/Bermasalah' ? `
+                  <button class="btn-action cetak" style="width:100%; justify-content:center; padding:9px 12px; font-size:12px;" onclick="openModalSurat('${item.id}')">
+                    🖨️ Cetak Surat Ganti Rugi
+                  </button>
+                ` : ''}
+                ${item.status === 'Selesai' ? `
+                  <div style="font-size:12px; color:#10b981; font-weight:700; padding:4px 0;">✓ Peminjaman Selesai</div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     // --- TAB 2: RENDER LOG BBM ---
@@ -1345,6 +1498,88 @@
 
     function cetakSuratSekarang() {
       window.print();
+    }
+
+    function renderArmadaGrid() {
+      const grid = document.getElementById('armadaGrid');
+      if (!grid) return;
+
+      const list = PeminjamanDB.getKendaraanList();
+      const allPinjam = PeminjamanDB.getPeminjamanList();
+
+      if (!list || list.length === 0) {
+        grid.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:32px;">Tidak ada data kendaraan.</p>';
+        return;
+      }
+
+      grid.innerHTML = list.map(k => {
+        const statusColor = k.status === 'Tersedia'
+          ? { bg: '#dcfce7', color: '#15803d', border: '#86efac' }
+          : k.status === 'Dipinjam'
+          ? { bg: '#fef3c7', color: '#b45309', border: '#fcd34d' }
+          : { bg: '#fee2e2', color: '#b91c1c', border: '#fca5a5' };
+
+        const totalPinjam = allPinjam.filter(p => p.kendaraanId === k.id || p.platKendaraan === k.plat).length;
+        const aktif = allPinjam.filter(p => (p.kendaraanId === k.id || p.platKendaraan === k.plat) && p.status === 'Aktif/Dipinjam').length;
+
+        const qrHTML = k.qrImage
+          ? `<img src="${k.qrImage}" alt="QR ${k.nama}" style="width:80px; height:80px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;">`
+          : `<div style="width:80px; height:80px; background:#f1f5f9; border-radius:8px; border:1px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; font-size:28px;">${k.icon || '🚗'}</div>`;
+
+        const toggleLabel = k.status === 'Tersedia' ? '⬛ Tandai Tidak Tersedia' : '✅ Tandai Tersedia';
+        const toggleColor = k.status === 'Tersedia' ? '#f1f5f9' : '#dcfce7';
+        const toggleTextColor = k.status === 'Tersedia' ? '#475569' : '#15803d';
+
+        return `
+          <div style="background:#fff; border:1.5px solid #e2e8f0; border-radius:16px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.04); transition:box-shadow 0.2s;">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                <div style="width:46px; height:46px; border-radius:12px; background:rgba(84,0,0,0.08); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">${k.icon || '🚗'}</div>
+                <div style="min-width:0;">
+                  <div style="font-size:15px; font-weight:800; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k.nama}</div>
+                  <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${k.jenis || 'Operasional'}</div>
+                </div>
+              </div>
+              <span style="background:${statusColor.bg}; color:${statusColor.color}; border:1px solid ${statusColor.border}; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:800; white-space:nowrap; flex-shrink:0;">${k.status || 'Tersedia'}</span>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
+              <div>
+                <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Plat / ID</div>
+                <div style="font-size:13px; font-weight:800; color:var(--kuk-maroon); background:rgba(84,0,0,0.07); padding:4px 10px; border-radius:6px; display:inline-block;">${k.plat || k.id}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Total Pinjam</div>
+                <div style="font-size:18px; font-weight:900; color:#0f172a;">${totalPinjam}x ${aktif > 0 ? `<span style="font-size:12px; font-weight:700; color:#d97706;">(${aktif} Aktif)</span>` : ''}</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
+              ${qrHTML}
+              <div style="flex:1; font-size:11.5px; color:#64748b; line-height:1.5;">
+                <div><strong>ID:</strong> ${k.id}</div>
+                ${k.qrCode ? `<div style="margin-top:4px; word-break:break-all;"><strong>QR Link:</strong> <a href="${k.qrCode}" target="_blank" style="color:var(--kuk-maroon); font-size:10px;">${k.qrCode.length > 40 ? k.qrCode.slice(0, 40) + '…' : k.qrCode}</a></div>` : ''}
+              </div>
+            </div>
+
+            <button onclick="toggleStatusArmada('${k.id}')"
+              style="width:100%; padding:9px; border-radius:10px; border:1px solid #e2e8f0; background:${toggleColor}; color:${toggleTextColor}; font-weight:700; font-size:12.5px; cursor:pointer; transition:all 0.2s;">
+              ${toggleLabel}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleStatusArmada(kendaraanId) {
+      const list = PeminjamanDB.getKendaraanList();
+      const k = list.find(x => x.id === kendaraanId);
+      if (!k) return;
+      const newStatus = k.status === 'Tersedia' ? 'Tidak Tersedia' : 'Tersedia';
+      if (!confirm(`Ubah status "${k.nama}" menjadi "${newStatus}"?`)) return;
+      PeminjamanDB.saveKendaraan({ ...k, status: newStatus });
+      renderArmadaGrid();
+      showToast(`Status ${k.nama} diubah ke: ${newStatus}`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {

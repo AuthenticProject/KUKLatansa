@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -345,6 +345,144 @@
       align-items: center;
       gap: 10px;
     }
+
+    /* View Switcher Controls */
+    .view-toggle-wrap {
+      display: inline-flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+      max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .view-toggle-btn {
+      padding: 7px 15px;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 12.5px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .view-toggle-btn.active {
+      background: #ffffff;
+      color: var(--kuk-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .view-toggle-btn:hover:not(.active) {
+      color: #1e293b;
+      background: rgba(255,255,255,0.6);
+    }
+
+    .approval-card-item {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ── MOBILE OVERRIDES ─────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .app-container { gap: 14px !important; }
+
+      /* Header: compact & stack */
+      .page-header {
+        padding: 14px 16px !important;
+        gap: 10px !important;
+        border-radius: 14px !important;
+      }
+      .header-titles h1 { font-size: 17px !important; }
+      .header-titles p { font-size: 11.5px !important; }
+      .header-actions {
+        width: 100% !important;
+        gap: 6px !important;
+      }
+      .header-actions .btn {
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+        font-size: 11.5px !important;
+        padding: 8px 8px !important;
+      }
+
+      /* KPI grid: 2 column */
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+      }
+      .kpi-card { padding: 12px 12px !important; gap: 10px !important; }
+      .kpi-icon { width: 36px !important; height: 36px !important; font-size: 18px !important; }
+      .kpi-info h3 { font-size: 16px !important; }
+      .kpi-info p { font-size: 10.5px !important; }
+
+      /* Card header: stack vertically */
+      .card-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 12px 14px !important;
+        gap: 10px !important;
+      }
+      .card-header > div:last-child {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+      }
+
+      /* Filter controls: full width & smaller */
+      .filter-select,
+      .filter-input {
+        flex: 1 1 auto !important;
+        font-size: 13px !important;
+        padding: 8px 10px !important;
+        min-width: 90px !important;
+      }
+      #searchEmp {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+      }
+
+      /* Matrix wrapper: touch scroll */
+      .matrix-wrapper {
+        border-radius: 8px !important;
+        max-height: 55vh !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      /* Matrix table: keep compact */
+      .matrix-table { font-size: 11px !important; }
+      .matrix-table th, .matrix-table td { padding: 6px 3px !important; min-width: 26px !important; }
+      .matrix-table th.emp-head { min-width: 140px !important; padding-left: 10px !important; }
+      .matrix-table td.emp-col { min-width: 140px !important; padding-left: 10px !important; font-size: 11.5px !important; }
+
+      /* Card body padding */
+      .card-body { padding: 12px 10px !important; }
+
+      /* Approval table: horizontal scroll */
+      .card-body div[style*="overflow-x"] { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+      .data-table { min-width: 560px !important; font-size: 12px !important; }
+      .data-table th { padding: 8px 10px !important; font-size: 10px !important; }
+      .data-table td { padding: 10px 10px !important; font-size: 12px !important; }
+
+      /* Approval action buttons */
+      .btn-sm { padding: 5px 9px !important; font-size: 11px !important; }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid { gap: 6px !important; }
+      .kpi-card { padding: 10px !important; }
+      .kpi-info h3 { font-size: 14px !important; }
+      .matrix-table th.emp-head,
+      .matrix-table td.emp-col { min-width: 110px !important; font-size: 10.5px !important; }
+    }
   </style>
 </head>
 <body>
@@ -415,14 +553,14 @@
       </div>
     </section>
 
-    <!-- 3. Matriks Kalender Jadwal Cuti Karyawan -->
+    <!-- 3. Matriks / Ringkasan Jadwal Cuti Karyawan -->
     <section class="card" id="captureContainer">
       <div class="card-header">
         <div>
           <div class="card-title">
-            <span>📊</span> Matriks Jadwal Cuti Seluruh Karyawan (Gantt View)
+            <span>📊</span> Jadwal & Rekapan Cuti Karyawan
           </div>
-          <p style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">Matriks jadwal libur dan pengajuan cuti seluruh divisi per tanggal. Klik tanggal untuk toggle cuti.</p>
+          <p style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">Daftar jadwal libur dan cuti seluruh divisi. Pilih tampilan Kartu (bebas geser), Agenda Harian, atau Matriks 31 Hari.</p>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -454,8 +592,37 @@
         </div>
       </div>
 
+      <!-- View Switcher Tabs -->
+      <div style="padding: 12px 18px 0 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid #f1f5f9;">
+        <div class="view-toggle-wrap">
+          <button id="viewBtnCards" class="view-toggle-btn active" onclick="switchRekapView('cards')">
+            📋 Ringkasan Cuti
+          </button>
+          <button id="viewBtnAgenda" class="view-toggle-btn" onclick="switchRekapView('agenda')">
+            📅 Agenda Harian
+          </button>
+          <button id="viewBtnMatrix" class="view-toggle-btn" onclick="switchRekapView('matrix')">
+            📊 Matriks 31 Hari
+          </button>
+        </div>
+        <div id="rekapViewHelper" style="font-size:12px; font-weight:600; color:var(--kuk-text-muted);">
+          📱 Mode Kartu: Ringkas &amp; Rapi Tanpa Perlu Geser Layar
+        </div>
+      </div>
+
       <div class="card-body">
-        <div class="matrix-wrapper">
+        <!-- VIEW 1: CARDS / LIST (Zero horizontal scroll, perfect for mobile!) -->
+        <div id="rekapCardsContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- VIEW 2: AGENDA HARIAN -->
+        <div id="rekapAgendaContainer" style="display:none; flex-direction:column; gap:10px;">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- VIEW 3: MATRIKS GANTT 31 HARI -->
+        <div id="rekapMatrixContainer" class="matrix-wrapper" style="display:none;">
           <table class="matrix-table" id="matrixTable">
             <thead id="matrixHead"></thead>
             <tbody id="matrixBody"></tbody>
@@ -477,7 +644,13 @@
       </div>
 
       <div class="card-body" style="padding: 0;">
-        <div style="overflow-x: auto;">
+        <!-- Mobile Cards for Approval Queue (Zero scroll, instant action!) -->
+        <div id="approvalCardsList" class="show-mobile" style="display:none; padding:12px; flex-direction:column; gap:10px;">
+          <!-- Rendered by JS for mobile -->
+        </div>
+
+        <!-- Desktop Table for Approval Queue -->
+        <div id="approvalTableView" class="hide-mobile" style="overflow-x: auto;">
           <table class="data-table">
             <thead>
               <tr>
@@ -611,6 +784,7 @@
         MasterDB.init();
         currentEmployees = MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif');
       }
+      switchRekapView('cards');
       loadRekapData();
       loadApprovalList();
       checkDeadlineStatus();
@@ -690,6 +864,34 @@
       }
     }
 
+    let currentRekapView = 'cards';
+
+    function switchRekapView(mode) {
+      currentRekapView = mode;
+      const btnCards = document.getElementById('viewBtnCards');
+      const btnAgenda = document.getElementById('viewBtnAgenda');
+      const btnMatrix = document.getElementById('viewBtnMatrix');
+      const helper = document.getElementById('rekapViewHelper');
+
+      if (btnCards) btnCards.classList.toggle('active', mode === 'cards');
+      if (btnAgenda) btnAgenda.classList.toggle('active', mode === 'agenda');
+      if (btnMatrix) btnMatrix.classList.toggle('active', mode === 'matrix');
+
+      const cardsWrap = document.getElementById('rekapCardsContainer');
+      const agendaWrap = document.getElementById('rekapAgendaContainer');
+      const matrixWrap = document.getElementById('rekapMatrixContainer');
+
+      if (cardsWrap) cardsWrap.style.display = mode === 'cards' ? 'grid' : 'none';
+      if (agendaWrap) agendaWrap.style.display = mode === 'agenda' ? 'flex' : 'none';
+      if (matrixWrap) matrixWrap.style.display = mode === 'matrix' ? 'block' : 'none';
+
+      if (helper) {
+        if (mode === 'cards') helper.innerHTML = '📱 <strong>Mode Kartu Ringkas:</strong> Tampilan rapi, aesthetic, dan bebas geser layar';
+        else if (mode === 'agenda') helper.innerHTML = '📅 <strong>Mode Agenda Harian:</strong> Jadwal cuti dikelompokkan per tanggal libur';
+        else helper.innerHTML = '📊 <strong>Mode Matriks 31 Hari:</strong> Tabel Gantt kalender bulanan seluruh divisi';
+      }
+    }
+
     function filterMatrix() {
       const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
       const year = parseInt(document.getElementById('selYear').value, 10);
@@ -703,6 +905,9 @@
       const isStaff = isStaffUserLoggedIn();
 
       const tbody = document.getElementById('matrixBody');
+      const cardsContainer = document.getElementById('rekapCardsContainer');
+      const agendaContainer = document.getElementById('rekapAgendaContainer');
+
       let emps = currentEmployees;
 
       if (selUnit !== 'ALL') {
@@ -713,11 +918,16 @@
       }
 
       if (emps.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${totalDays + 2}" style="padding:40px; color:var(--kuk-text-muted);">Tidak ada data karyawan yang cocok.</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="${totalDays + 2}" style="padding:40px; color:var(--kuk-text-muted); text-align:center;">Tidak ada data karyawan yang cocok.</td></tr>`;
+        if (cardsContainer) cardsContainer.innerHTML = `<div style="grid-column:1/-1; padding:40px; color:var(--kuk-text-muted); text-align:center; background:#f8fafc; border-radius:14px; border:1px dashed #cbd5e1;">Tidak ada data karyawan yang cocok dengan filter.</div>`;
+        if (agendaContainer) agendaContainer.innerHTML = `<div style="padding:40px; color:var(--kuk-text-muted); text-align:center; background:#f8fafc; border-radius:14px; border:1px dashed #cbd5e1;">Tidak ada data jadwal cuti yang cocok.</div>`;
         return;
       }
 
       let bHtml = '';
+      let cardsHtml = '';
+      const dayScheduleMap = {}; // key: day number, value: array of { emp, name, unit }
+
       emps.forEach(emp => {
         const empName = emp.fullName || emp.nama;
         const safeName = empName.replace(/'/g, "\\'");
@@ -743,17 +953,27 @@
           }
         });
 
+        const sortedDays = Array.from(leaveDays).sort((a, b) => a - b);
         const isBangunan = (emp.unit && emp.unit.includes('Bangunan'));
+        const deptLabel = emp.department || emp.position || 'Staff';
+
+        // Index for Agenda view
+        sortedDays.forEach(d => {
+          if (!dayScheduleMap[d]) dayScheduleMap[d] = [];
+          dayScheduleMap[d].push({ emp, name: empName, dept: deptLabel, unit: isBangunan ? 'Bangunan' : 'Palen' });
+        });
+
         const editBadgeHTML = isStaff
           ? `<span style="font-size:11px; padding:3px 7px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; color:#475569; font-weight:600;">✏️ Edit</span>`
           : '';
 
+        // 1. Matrix Row HTML
         bHtml += `<tr>
           <td class="emp-col" style="${isStaff ? 'cursor:pointer;' : ''}" ${isStaff ? `onclick="openEditCutiModal('${emp.id}', '${safeName}')"` : ''} title="${isStaff ? `Klik untuk mengedit cuti ${empName}` : `Rekapan cuti ${empName}`}">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
               <div>
                 <div style="font-weight:800; color:var(--kuk-text); font-size:13px;">${empName}</div>
-                <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}">${emp.department || emp.position || 'Staff'} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
+                <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}">${deptLabel} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
               </div>
               ${editBadgeHTML}
             </div>
@@ -775,9 +995,103 @@
           </td>`;
         }
         bHtml += `</tr>`;
+
+        // 2. Card View HTML (Zero Horizontal Scroll!)
+        const cardBg = leaveDays.size > 0 ? '#ffffff' : '#fafafa';
+        const daysChips = sortedDays.length > 0
+          ? sortedDays.map(d => {
+              const dObj = new Date(year, monthIdx, d);
+              const dayName = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'][dObj.getDay()];
+              return `<span style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:12px; font-weight:700; padding:4px 9px; border-radius:8px; display:inline-flex; align-items:center; gap:4px;">
+                        <span style="opacity:0.75; font-size:10px;">${dayName}</span>
+                        <span>${d} ${MONTHS[monthIdx].substring(0,3)}</span>
+                      </span>`;
+            }).join('')
+          : `<span style="font-size:12px; color:#94a3b8; font-style:italic;">Belum ada cuti terjadwal</span>`;
+
+        cardsHtml += `
+          <div style="background:${cardBg}; border:1.5px solid #e2e8f0; border-radius:16px; padding:15px 16px; box-shadow:0 3px 10px rgba(0,0,0,0.03); display:flex; flex-direction:column; gap:12px; transition:box-shadow 0.2s;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+              <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                <div style="width:38px; height:38px; border-radius:10px; background:${isBangunan ? 'rgba(3,105,161,0.1)' : 'rgba(180,83,9,0.1)'}; color:${isBangunan ? '#0369a1' : '#b45309'}; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;">
+                  ${empName.charAt(0).toUpperCase()}
+                </div>
+                <div style="min-width:0;">
+                  <div style="font-weight:800; font-size:14.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${empName}</div>
+                  <span class="badge-unit ${isBangunan ? 'badge-bangunan' : 'badge-palen'}" style="margin-top:2px; display:inline-block;">${deptLabel} • ${isBangunan ? 'Bangunan' : 'Palen'}</span>
+                </div>
+              </div>
+              <span style="font-size:12px; font-weight:800; padding:5px 12px; border-radius:100px; background:${leaveDays.size > 0 ? '#fee2e2' : '#f1f5f9'}; color:${leaveDays.size > 0 ? '#991b1b' : '#64748b'}; white-space:nowrap; flex-shrink:0;">
+                ${leaveDays.size > 0 ? `🏖️ ${leaveDays.size} Hari` : '0 Hari'}
+              </span>
+            </div>
+
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-bottom:6px;">Tanggal Cuti:</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                ${daysChips}
+              </div>
+            </div>
+
+            ${isStaff ? `
+              <div style="border-top:1px dashed #e2e8f0; padding-top:10px; margin-top:auto;">
+                <button onclick="openEditCutiModal('${emp.id}', '${safeName}')"
+                  style="width:100%; padding:8px 12px; border-radius:10px; background:#f8fafc; border:1px solid #cbd5e1; color:#334155; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <span>✏️ Atur Cuti ${empName}</span>
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
       });
 
-      tbody.innerHTML = bHtml;
+      // 3. Agenda View HTML (Zero Horizontal Scroll!)
+      let agendaHtml = '';
+      const daysWithLeave = Object.keys(dayScheduleMap).map(Number).sort((a, b) => a - b);
+
+      if (daysWithLeave.length === 0) {
+        agendaHtml = `<div style="padding:40px; color:var(--kuk-text-muted); text-align:center; background:#f8fafc; border-radius:14px; border:1px dashed #cbd5e1;">Belum ada jadwal cuti yang terdaftar untuk ${MONTHS[monthIdx]} ${year}.</div>`;
+      } else {
+        daysWithLeave.forEach(d => {
+          const dObj = new Date(year, monthIdx, d);
+          const dayNameFull = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][dObj.getDay()];
+          const isSunday = dObj.getDay() === 0;
+          const isFriday = dObj.getDay() === 5;
+          const isToday = (`${year}-${monthStr}-${String(d).padStart(2,'0')}` === todayStr);
+          const list = dayScheduleMap[d];
+
+          agendaHtml += `
+            <div style="background:#ffffff; border:1.5px solid ${isToday ? 'var(--kuk-primary)' : '#e2e8f0'}; border-radius:14px; padding:14px 18px; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:18px;">${isToday ? '⭐' : (isSunday ? '🔴' : (isFriday ? '🕌' : '📅'))}</span>
+                  <div>
+                    <div style="font-weight:800; font-size:14.5px; color:${isSunday ? '#dc2626' : 'var(--kuk-primary)'};">
+                      ${dayNameFull}, ${d} ${MONTHS[monthIdx]} ${year}
+                      ${isToday ? '<span style="font-size:11px; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:100px; margin-left:6px; font-weight:800;">Hari Ini</span>' : ''}
+                    </div>
+                  </div>
+                </div>
+                <span style="font-size:12px; font-weight:800; background:#fee2e2; color:#991b1b; padding:4px 10px; border-radius:100px;">
+                  ${list.length} Karyawan Cuti
+                </span>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                ${list.map(item => `
+                  <span style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:6px 12px; font-size:12.5px; font-weight:700; color:#1e293b; display:inline-flex; align-items:center; gap:6px;">
+                    👤 ${item.name}
+                    <span style="font-size:11px; color:#64748b; font-weight:600;">(${item.dept} • ${item.unit})</span>
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      if (tbody) tbody.innerHTML = bHtml;
+      if (cardsContainer) cardsContainer.innerHTML = cardsHtml;
+      if (agendaContainer) agendaContainer.innerHTML = agendaHtml;
     }
 
     function toggleCutiDate(empId, empName, year, monthIdx, day) {
@@ -1035,55 +1349,119 @@
       document.getElementById('badgePendingTittle').textContent = `${pending.length} Menunggu Persetujuan`;
 
       const tbody = document.getElementById('approvalTbody');
+      const cardsList = document.getElementById('approvalCardsList');
+
       if (pending.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" style="text-align: center; padding: 36px; color: var(--kuk-text-muted);">
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 36px; color: var(--kuk-text-muted);">
+                ✅ Tidak ada pengajuan cuti yang menunggu persetujuan saat ini.
+              </td>
+            </tr>
+          `;
+        }
+        if (cardsList) {
+          cardsList.innerHTML = `
+            <div style="text-align: center; padding: 30px 16px; color: var(--kuk-text-muted); background:#f8fafc; border-radius:14px; border:1px dashed #cbd5e1;">
               ✅ Tidak ada pengajuan cuti yang menunggu persetujuan saat ini.
-            </td>
-          </tr>
-        `;
+            </div>
+          `;
+        }
         return;
       }
 
-      tbody.innerHTML = pending.map(item => {
-        const empName = item.employeeName || item.nama || 'Karyawan';
-        const emp = currentEmployees.find(e => e.id === item.employeeId || (e.fullName && e.fullName.toLowerCase() === empName.toLowerCase()));
-        const unit = emp ? emp.unit : (item.unit || 'KUK Bangunan');
-        const dept = emp ? (emp.department || emp.position) : (item.department || 'Staff');
-        const dates = item.dates || (item.startDate ? `${item.startDate} s/d ${item.endDate}` : (item.tanggal ? (Array.isArray(item.tanggal) ? item.tanggal.join(', ') : item.tanggal) : '-'));
+      if (tbody) {
+        tbody.innerHTML = pending.map(item => {
+          const empName = item.employeeName || item.nama || 'Karyawan';
+          const emp = currentEmployees.find(e => e.id === item.employeeId || (e.fullName && e.fullName.toLowerCase() === empName.toLowerCase()));
+          const unit = emp ? emp.unit : (item.unit || 'KUK Bangunan');
+          const dept = emp ? (emp.department || emp.position) : (item.department || 'Staff');
+          const dates = item.dates || (item.startDate ? `${item.startDate} s/d ${item.endDate}` : (item.tanggal ? (Array.isArray(item.tanggal) ? item.tanggal.join(', ') : item.tanggal) : '-'));
 
-        return `
-          <tr>
-            <td style="font-size: 12px; color: var(--kuk-text-muted); white-space: nowrap;">
-              ${item.submittedAt || item.date || '-'}
-            </td>
-            <td>
-              <div style="font-weight: 800; color: var(--kuk-primary); font-size: 13.5px;">${empName}</div>
-              <div style="font-size: 11px; color: var(--kuk-text-muted);">${item.employeeId || '-'}</div>
-            </td>
-            <td>
-              <div>${unit}</div>
-              <div style="font-size: 11px; color: var(--kuk-text-muted);">${dept}</div>
-            </td>
-            <td>
-              <span style="font-weight: 700; color: #b45309; background: #fef3c7; padding: 3px 8px; border-radius: 6px; font-size: 12px;">
-                📅 ${dates}
-              </span>
-            </td>
-            <td>
-              <span style="font-weight: 600;">${item.leaveType || item.tipe || 'Cuti Tahunan'}</span>
-            </td>
-            <td style="font-size: 12.5px; color: var(--kuk-text-muted); max-width: 200px;">
-              ${item.reason || item.alasan || '-'}
-            </td>
-            <td style="text-align: right; white-space: nowrap; padding-right: 24px;">
-              <button class="btn btn-sm btn-success" onclick="approveLeave('${item.id}', true)">✓ Setujui</button>
-              <button class="btn btn-sm btn-danger" onclick="approveLeave('${item.id}', false)">✕ Tolak</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+          return `
+            <tr>
+              <td style="font-size: 12px; color: var(--kuk-text-muted); white-space: nowrap;">
+                ${item.submittedAt || item.date || '-'}
+              </td>
+              <td>
+                <div style="font-weight: 800; color: var(--kuk-primary); font-size: 13.5px;">${empName}</div>
+                <div style="font-size: 11px; color: var(--kuk-text-muted);">${item.employeeId || '-'}</div>
+              </td>
+              <td>
+                <div>${unit}</div>
+                <div style="font-size: 11px; color: var(--kuk-text-muted);">${dept}</div>
+              </td>
+              <td>
+                <span style="font-weight: 700; color: #b45309; background: #fef3c7; padding: 3px 8px; border-radius: 6px; font-size: 12px;">
+                  📅 ${dates}
+                </span>
+              </td>
+              <td>
+                <span style="font-weight: 600;">${item.leaveType || item.tipe || 'Cuti Tahunan'}</span>
+              </td>
+              <td style="font-size: 12.5px; color: var(--kuk-text-muted); max-width: 200px;">
+                ${item.reason || item.alasan || '-'}
+              </td>
+              <td style="text-align: right; white-space: nowrap; padding-right: 24px;">
+                <button class="btn btn-sm btn-success" onclick="approveLeave('${item.id}', true)">✓ Setujui</button>
+                <button class="btn btn-sm btn-danger" onclick="approveLeave('${item.id}', false)">✕ Tolak</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (cardsList) {
+        cardsList.innerHTML = pending.map(item => {
+          const empName = item.employeeName || item.nama || 'Karyawan';
+          const emp = currentEmployees.find(e => e.id === item.employeeId || (e.fullName && e.fullName.toLowerCase() === empName.toLowerCase()));
+          const unit = emp ? emp.unit : (item.unit || 'KUK Bangunan');
+          const dept = emp ? (emp.department || emp.position) : (item.department || 'Staff');
+          const dates = item.dates || (item.startDate ? `${item.startDate} s/d ${item.endDate}` : (item.tanggal ? (Array.isArray(item.tanggal) ? item.tanggal.join(', ') : item.tanggal) : '-'));
+
+          return `
+            <div class="approval-card-item">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div>
+                  <div style="font-weight:800; font-size:15px; color:var(--kuk-primary);">${empName}</div>
+                  <div style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">${dept} &bull; ${unit}</div>
+                </div>
+                <span style="font-size:11px; background:#eff6ff; color:#1d4ed8; font-weight:800; padding:3px 9px; border-radius:6px; border:1px solid #bfdbfe; white-space:nowrap;">
+                  ${item.leaveType || item.tipe || 'Cuti Tahunan'}
+                </span>
+              </div>
+
+              <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:10px; padding:9px 12px; font-size:13px; font-weight:700; color:#b45309; display:flex; align-items:center; gap:6px;">
+                <span>📅</span>
+                <span>Periode: ${dates}</span>
+              </div>
+
+              ${(item.reason || item.alasan) ? `
+                <div style="font-size:12.5px; color:#475569; background:#f8fafc; border-radius:8px; padding:8px 12px; line-height:1.4;">
+                  <strong>Alasan:</strong> ${item.reason || item.alasan}
+                </div>
+              ` : ''}
+
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#94a3b8; margin-top:2px;">
+                <span>Diajukan: ${item.submittedAt || item.date || '-'}</span>
+                <span>ID: ${item.employeeId || '-'}</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;">
+                <button class="btn btn-sm btn-success" onclick="approveLeave('${item.id}', true)"
+                  style="justify-content:center; padding:10px; font-size:13px; font-weight:800; border-radius:10px;">
+                  ✓ Setujui
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="approveLeave('${item.id}', false)"
+                  style="justify-content:center; padding:10px; font-size:13px; font-weight:800; border-radius:10px;">
+                  ✕ Tolak
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     function approveLeave(submissionId, isApproved) {

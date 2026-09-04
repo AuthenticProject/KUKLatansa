@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -233,7 +233,12 @@
         </div>
       </div>
 
-      <div class="table-wrapper">
+      <!-- Mobile Cards for Tip Entries -->
+      <div id="tipMobileCards" class="show-mobile" style="display:none; flex-direction:column; gap:10px; margin-bottom:14px;">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="table-wrapper hide-mobile">
         <table>
           <thead>
             <tr>
@@ -375,35 +380,68 @@
       });
       grid.innerHTML = gridHtml;
 
-      // Render Detailed Table
+      // Render Detailed Table and Mobile Cards
       const tbody = document.getElementById('rekapTipTableBody');
+      const mobileCards = document.getElementById('tipMobileCards');
+
       if (monthTips.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">Tidak ada transaksi tip pemotongan kaca.</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">Tidak ada transaksi tip pemotongan kaca.</td></tr>';
+        if (mobileCards) mobileCards.innerHTML = '<div style="text-align:center; padding:30px 16px; color:#94a3b8; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1;">Tidak ada transaksi tip pemotongan kaca.</div>';
         return;
       }
 
-      tbody.innerHTML = monthTips.map(t => {
-        const dateStr = t.tanggal || t.tgl || '-';
-        const nameStr = getEmpName(t);
-        const jenisStr = t.jenisKaca || t.jenis || 'Kaca Standard';
-        const luasNum = parseFloat(t.luasM2 || t.luas || 0) || 0;
-        const hargaNum = parseFloat(t.totalOmset || t.totalHarga || t.omset || 0) || 0;
-        const tipNum = parseFloat(t.nominalTip || t.tip || 0) || 0;
+      if (tbody) {
+        tbody.innerHTML = monthTips.map(t => {
+          const dateStr = t.tanggal || t.tgl || '-';
+          const nameStr = getEmpName(t);
+          const jenisStr = t.jenisKaca || t.jenis || 'Kaca Standard';
+          const luasNum = parseFloat(t.luasM2 || t.luas || 0) || 0;
+          const hargaNum = parseFloat(t.totalOmset || t.totalHarga || t.omset || 0) || 0;
+          const tipNum = parseFloat(t.nominalTip || t.tip || 0) || 0;
 
-        return `
-          <tr>
-            <td style="font-weight:700; color:#475569;">${dateStr}</td>
-            <td><strong style="color:#0f172a;">${nameStr}</strong></td>
-            <td><span style="font-weight:600; color:#0ea5e9; background:#f0f9ff; padding:3px 8px; border-radius:6px;">${jenisStr}</span></td>
-            <td style="font-weight:700;">${luasNum}</td>
-            <td style="font-weight:600; color:#334155;">${formatRp(hargaNum)}</td>
-            <td><span class="badge-tip">${formatRp(tipNum)}</span></td>
-            <td style="text-align:center;">
-              <button onclick="deleteTipItem('${t.id}')" class="btn-del" title="Hapus Transaksi">🗑️</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+          return `
+            <tr>
+              <td style="font-weight:700; color:#475569;">${dateStr}</td>
+              <td><strong style="color:#0f172a;">${nameStr}</strong></td>
+              <td><span style="font-weight:600; color:#0ea5e9; background:#f0f9ff; padding:3px 8px; border-radius:6px;">${jenisStr}</span></td>
+              <td style="font-weight:700;">${luasNum}</td>
+              <td style="font-weight:600; color:#334155;">${formatRp(hargaNum)}</td>
+              <td><span class="badge-tip">${formatRp(tipNum)}</span></td>
+              <td style="text-align:center;">
+                <button onclick="deleteTipItem('${t.id}')" class="btn-del" title="Hapus Transaksi">🗑️</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (mobileCards) {
+        mobileCards.innerHTML = monthTips.map(t => {
+          const dateStr = t.tanggal || t.tgl || '-';
+          const nameStr = getEmpName(t);
+          const jenisStr = t.jenisKaca || t.jenis || 'Kaca Standard';
+          const luasNum = parseFloat(t.luasM2 || t.luas || 0) || 0;
+          const hargaNum = parseFloat(t.totalOmset || t.totalHarga || t.omset || 0) || 0;
+          const tipNum = parseFloat(t.nominalTip || t.tip || 0) || 0;
+
+          return `
+            <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:14px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.03); display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:15px; color:#0f172a;">${nameStr}</strong>
+                <span class="badge-tip">${formatRp(tipNum)}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#64748b;">
+                <span>📅 ${dateStr}</span>
+                <span style="font-weight:700; color:#0ea5e9; background:#f0f9ff; padding:2px 8px; border-radius:6px;">${jenisStr}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; border-top:1px dashed #f1f5f9; padding-top:8px;">
+                <div>Luas: <strong>${luasNum} m²</strong> &bull; Total: <strong>${formatRp(hargaNum)}</strong></div>
+                <button onclick="deleteTipItem('${t.id}')" class="btn-del" title="Hapus Transaksi" style="padding:4px 8px;">🗑️ Hapus</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     function deleteTipItem(id) {

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * KUK La Tansa - Mobile Responsive System
  * Centralized mobile overrides for all pages.
  * Loaded AFTER shell.css and page-specific styles.
@@ -243,6 +243,13 @@
 }
 
 /* UTILITY */
-@media (max-width: 768px) { .hide-mobile { display: none !important; } }
-@media (min-width: 769px) { .show-mobile { display: none !important; } }
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: flex !important; }
+  .show-mobile-grid { display: grid !important; }
+  .show-mobile-block { display: block !important; }
+}
+@media (min-width: 769px) {
+  .show-mobile, .show-mobile-grid, .show-mobile-block { display: none !important; }
+}
 @media (max-width: 480px) { .hide-sm { display: none !important; } }

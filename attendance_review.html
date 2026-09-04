@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -150,7 +150,12 @@
         <button class="btn btn-primary" onclick="loadData()">Tampilkan</button>
       </div>
 
-      <div style="overflow-x:auto;">
+      <!-- Mobile Cards for Attendance -->
+      <div id="attendanceMobileCards" class="show-mobile" style="display:none; flex-direction:column; gap:10px; margin-top:14px;">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="hide-mobile" style="overflow-x:auto;">
         <table id="attendanceTable">
           <thead>
             <tr>
@@ -237,9 +242,17 @@
 
       const data = AttendanceEngine.getDailyAttendance(date);
       const tbody = document.getElementById('attendanceBody');
+      const mobileCards = document.getElementById('attendanceMobileCards');
       tbody.innerHTML = '';
+      if (mobileCards) mobileCards.innerHTML = '';
 
       const filtered = unit === 'ALL' ? data : data.filter(d => d.unit === unit);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--kuk-text-muted);">Tidak ada data kehadiran untuk tanggal ini.</td></tr>';
+        if (mobileCards) mobileCards.innerHTML = '<div style="text-align:center; padding:24px; color:var(--kuk-text-muted); background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1;">Tidak ada data kehadiran untuk tanggal ini.</div>';
+        return;
+      }
 
       filtered.forEach(row => {
         const tr = document.createElement('tr');
@@ -268,6 +281,28 @@
           <td style="font-size:12px; color:var(--kuk-text-muted);">${noteStr}</td>
         `;
         tbody.appendChild(tr);
+
+        if (mobileCards) {
+          const card = document.createElement('div');
+          card.style.cssText = 'background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:14px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.03); display:flex; flex-direction:column; gap:8px;';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+              <div>
+                <strong style="font-size:15px; color:#0f172a;">${row.employeeName}</strong>
+                <div style="font-size:12px; color:var(--kuk-text-muted); margin-top:2px;">${row.unit}</div>
+              </div>
+              <div class="badge ${statusClass}" onclick="openModal('${row.employeeId}', '${row.employeeName}', '${row.status}')" style="cursor:pointer;" title="Klik untuk ubah status">
+                ${row.status}
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:8px;">
+              <div>Masuk: <strong>${inTimeStr}</strong></div>
+              <div>Keluar: <strong>${outTimeStr}</strong></div>
+            </div>
+            ${noteStr ? `<div style="font-size:11.5px; color:#64748b;">${noteStr}</div>` : ''}
+          `;
+          mobileCards.appendChild(card);
+        }
       });
     }
 
