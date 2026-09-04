@@ -929,8 +929,8 @@ body.kuk-sidebar-expanded .kuk-topbar {
   background: var(--kuk-sidebar-bg);
   border-top: 1px solid var(--kuk-sidebar-border);
   z-index: 100;
-  padding: 4px 0;
-  padding-bottom: env(safe-area-inset-bottom, 4px);
+  padding: 6px 0 0;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 6px);
   box-shadow: 0 -4px 24px rgba(0,0,0,0.25);
 }
 
@@ -1073,7 +1073,8 @@ body.kuk-has-shell .menu-item.active {
 @media (max-width: 768px) {
   body.kuk-has-shell {
     padding-left: 0 !important;
-    padding-bottom: 72px !important; /* Space for mobile nav */
+    padding-top: calc(var(--kuk-topbar-h) + 8px) !important;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* Hide desktop sidebar, show mobile hamburger */

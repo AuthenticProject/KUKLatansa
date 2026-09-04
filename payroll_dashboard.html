@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
+  <link rel="stylesheet" href="shared/mobile.css">
   <style>
     body.kuk-has-shell {
       padding-top: 80px !important;
@@ -388,6 +389,26 @@
           <div class="form-group">
             <label>Potongan Lain / Kasbon (Rp)</label>
             <input type="number" id="eOtherDeductions">
+          </div>
+        </div>
+
+        <!-- Absent Count — editable, recalculates deduction -->
+        <div style="background:#fef2f2; border:1.5px solid #fca5a5; border-radius:12px; padding:14px 16px; margin-top:4px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <span style="font-size:17px;">🚫</span>
+            <span style="font-size:13px; font-weight:800; color:#dc2626;">Potongan Absensi / Tidak Masuk</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="color:#dc2626;">Jumlah Hari Tidak Masuk (Alpa)</label>
+              <input type="number" id="eAbsentCount" min="0" step="1"
+                style="border-color:#fca5a5; background:#fff5f5;"
+                oninput="previewAbsentDeduction()">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="color:#dc2626;">Estimasi Potongan (@Rp28.500)</label>
+              <div id="eAbsentDeductionPreview" style="padding:10px 14px; border-radius:10px; background:#fee2e2; border:1px solid #fca5a5; font-weight:800; color:#dc2626; font-size:14px; line-height:1.4;">Rp 0</div>
+            </div>
           </div>
         </div>
 
@@ -1171,6 +1192,11 @@
       document.getElementById('eBonusIncentive').value = slip.bonusIncentive || 0;
       document.getElementById('eOtherDeductions').value = slip.otherDeductions || 0;
 
+      // Populate absent count field & show current deduction preview
+      const absentCount = (slip.attendanceCounts && slip.attendanceCounts.ABSENT) || 0;
+      document.getElementById('eAbsentCount').value = absentCount;
+      previewAbsentDeduction();
+
       document.getElementById('editSlipModal').classList.add('active');
     }
 
@@ -1182,15 +1208,19 @@
       }
 
       const empId = document.getElementById('editEmpId').value;
+      const rawAbsent = parseInt(document.getElementById('eAbsentCount').value, 10);
+      const absentCount = isNaN(rawAbsent) || rawAbsent < 0 ? 0 : rawAbsent;
+
       const fields = {
-        baseSalary: document.getElementById('eBaseSalary').value,
-        gajiBagian: document.getElementById('eGajiBagian').value,
-        hadiahPondok: document.getElementById('eHadiahPondok').value,
-        tipKaca: document.getElementById('eTipKaca').value,
+        baseSalary:        document.getElementById('eBaseSalary').value,
+        gajiBagian:        document.getElementById('eGajiBagian').value,
+        hadiahPondok:      document.getElementById('eHadiahPondok').value,
+        tipKaca:           document.getElementById('eTipKaca').value,
         tunjanganKeluarga: document.getElementById('eTunjanganKeluarga').value,
-        insentifCuti: document.getElementById('eInsentifCuti').value,
-        bonusIncentive: document.getElementById('eBonusIncentive').value,
-        otherDeductions: document.getElementById('eOtherDeductions').value
+        insentifCuti:      document.getElementById('eInsentifCuti').value,
+        bonusIncentive:    document.getElementById('eBonusIncentive').value,
+        otherDeductions:   document.getElementById('eOtherDeductions').value,
+        absentCount:       absentCount
       };
 
       try {
@@ -1199,10 +1229,17 @@
         document.getElementById('editSlipModal').classList.remove('active');
         renderSlips();
         renderTable();
-        alert("✅ Komponen gaji karyawan berhasil diperbarui!");
+        alert(`✅ Data gaji ${fields.absentCount} hari tidak masuk (potongan -${formatRp(absentCount * 28500)}) berhasil disimpan!`);
       } catch (err) {
         alert("Error: " + err.message);
       }
+    }
+
+    function previewAbsentDeduction() {
+      const n = parseInt(document.getElementById('eAbsentCount').value, 10) || 0;
+      const deduction = Math.max(0, n) * 28500;
+      document.getElementById('eAbsentDeductionPreview').textContent =
+        '- ' + formatRp(deduction) + (n > 0 ? ` (${n}x @Rp28.500)` : '');
     }
 
     function closeDetail() {

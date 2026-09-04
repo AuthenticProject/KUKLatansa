@@ -351,6 +351,15 @@ const PayrollEngine = (() => {
     if (updatedFields.bonusIncentive !== undefined) slip.bonusIncentive = Number(updatedFields.bonusIncentive) || 0;
     if (updatedFields.otherDeductions !== undefined) slip.otherDeductions = Number(updatedFields.otherDeductions) || 0;
 
+    // Handle manual absent count override — recalculate absentDeduction accordingly
+    if (updatedFields.absentCount !== undefined) {
+      const newAbsent = Math.max(0, Math.floor(Number(updatedFields.absentCount) || 0));
+      if (!slip.attendanceCounts) slip.attendanceCounts = {};
+      slip.attendanceCounts.ABSENT = newAbsent;
+      if (!slip.breakdown) slip.breakdown = {};
+      slip.breakdown.absentDeduction = newAbsent * RULES.absent_deduction_rate;
+    }
+
     const grossSalary = slip.baseSalary + slip.gajiBagian + (slip.hadiahPondok || 0) + (slip.tipKaca || 0) + (slip.tunjanganKeluarga || 0) + (slip.insentifCuti || 0) + (slip.bonusIncentive || 0);
     const lateDed = slip.breakdown ? (slip.breakdown.lateDeduction || 0) : 0;
     const absDed = slip.breakdown ? (slip.breakdown.absentDeduction || 0) : 0;
@@ -361,6 +370,7 @@ const PayrollEngine = (() => {
     else slip.breakdown.totalDeductions = totalDeductions;
     
     slip.takeHomePay = grossSalary - totalDeductions;
+
 
     let totalB = 0, totalP = 0;
     run.slips.forEach(s => {
