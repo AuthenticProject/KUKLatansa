@@ -606,9 +606,28 @@ const MasterDB = (() => {
           saveStored('kuk_violations_db', vDb);
         }
 
-        // 5. Sync Glass Tips
+        // 5. Sync Glass Tips (Smart merge keeping local edits)
         if (json.tips && Array.isArray(json.tips)) {
-          localStorage.setItem('kuk_db_tip_v1', JSON.stringify(json.tips));
+          let localTips = getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1') || [];
+          const localMap = new Map();
+          localTips.forEach(t => { if (t && t.id) localMap.set(String(t.id), t); });
+
+          const merged = json.tips.map(cTip => {
+            const loc = localMap.get(String(cTip.id));
+            if (loc && loc._isModified) {
+              return loc;
+            }
+            return { ...(loc || {}), ...cTip };
+          });
+
+          localTips.forEach(t => {
+            if (t && t.id && !merged.some(m => String(m.id) === String(t.id))) {
+              merged.push(t);
+            }
+          });
+
+          localStorage.setItem('kuk_db_tip_v1', JSON.stringify(merged));
+          localStorage.setItem('kuk_tip_db_v1', JSON.stringify(merged));
         }
 
         // 6. Sync Vehicle Loans
@@ -895,7 +914,26 @@ const MasterDB = (() => {
     },
 
     DEFAULT_TIP_DATA: DEFAULT_TIP_DATA,
-    getTipData: () => getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1') || DEFAULT_TIP_DATA
+    getTipData: () => getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1') || DEFAULT_TIP_DATA,
+    saveTipData: function(list) {
+      if (Array.isArray(list)) {
+        saveStored('kuk_db_tip_v1', list);
+        saveStored('kuk_tip_db_v1', list);
+      }
+    },
+    updateTipItem: function(item) {
+      if (!item || !item.id) return;
+      let list = getStored('kuk_db_tip_v1') || getStored('kuk_tip_db_v1') || DEFAULT_TIP_DATA;
+      const idx = list.findIndex(x => String(x.id) === String(item.id));
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...item, _isModified: true };
+      } else {
+        list.unshift({ ...item, _isModified: true });
+      }
+      saveStored('kuk_db_tip_v1', list);
+      saveStored('kuk_tip_db_v1', list);
+      return list;
+    }
   };
 })();
 

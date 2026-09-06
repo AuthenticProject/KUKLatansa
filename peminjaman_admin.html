@@ -857,9 +857,14 @@
           <h3 style="font-size:18px; font-weight:800; color:var(--kuk-maroon);">🚗 Database Armada Kendaraan</h3>
           <p style="font-size:12.5px; color:var(--kuk-text-muted); margin-top:3px;">Daftar seluruh kendaraan operasional beserta status, QR code, dan informasi teknis.</p>
         </div>
-        <button class="pill" onclick="renderArmadaGrid()" style="padding:9px 16px; background:#f1f5f9; color:#475569; border-color:#cbd5e1; font-weight:700; border-radius:100px; cursor:pointer;">
-          🔄 Refresh
-        </button>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="pill" onclick="renderArmadaGrid()" style="padding:9px 16px; background:#f1f5f9; color:#475569; border-color:#cbd5e1; font-weight:700; border-radius:100px; cursor:pointer;">
+            🔄 Refresh
+          </button>
+          <button class="pill" onclick="openModalTambahKendaraan()" style="padding:9px 18px; background:var(--kuk-maroon); color:#fff; border:none; font-weight:700; border-radius:100px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(84,0,0,0.2);">
+            ➕ Tambah Armada
+          </button>
+        </div>
       </div>
 
       <!-- Armada Cards Grid -->
@@ -939,6 +944,90 @@
           <button type="submit" style="flex:1.5; padding:13px; border-radius:10px; background:linear-gradient(135deg, #700000 0%, #4a0000 100%); color:#fff; border:none; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(84,0,0,0.25);">
             Simpan Jadwal Servis
           </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Tambah / Edit Armada Kendaraan -->
+  <div class="modal-backdrop" id="modalKendaraan">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="modal-header">
+        <h3 id="modalKendaraanTitle">🚗 Tambah Armada Kendaraan</h3>
+        <button class="btn-close" onclick="closeModalKendaraan()">×</button>
+      </div>
+
+      <form onsubmit="handleSimpanKendaraan(event)">
+        <input type="hidden" id="modalKendaraanId">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Nama Kendaraan *</label>
+            <input type="text" id="modalKendaraanNama" class="modal-input" placeholder="Contoh: Mitsubishi L300" required>
+          </div>
+          <div class="form-group">
+            <label>Plat / Kode Nomor *</label>
+            <input type="text" id="modalKendaraanPlat" class="modal-input" placeholder="Contoh: AE 1234 XY atau L300" required>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Jenis Kendaraan *</label>
+            <input type="text" id="modalKendaraanJenis" class="modal-input" placeholder="Contoh: Pick Up / Logistik" required>
+          </div>
+          <div class="form-group">
+            <label>Icon Emoji</label>
+            <select id="modalKendaraanIcon" class="modal-input">
+              <option value="🚚">🚚 Pick Up / Box</option>
+              <option value="🚛">🚛 Truk Engkel / Muatan</option>
+              <option value="🛺">🛺 Roda Tiga / Viar</option>
+              <option value="🏗️">🏗️ Forklift / Alat Berat</option>
+              <option value="🚗">🚗 Mobil Operasional</option>
+              <option value="🚐">🚐 Minibus / Van</option>
+              <option value="🛵">🛵 Sepeda Motor</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Status Armada</label>
+            <select id="modalKendaraanStatus" class="modal-input">
+              <option value="Tersedia">Tersedia</option>
+              <option value="Dipinjam">Dipinjam</option>
+              <option value="Tidak Tersedia">Tidak Tersedia</option>
+              <option value="Dalam Perawatan">Dalam Perawatan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>QR Link / URL Pemesanan</label>
+            <input type="text" id="modalKendaraanQrCode" class="modal-input" placeholder="https://... atau link QR">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Foto / Gambar Barcode QR</label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="text" id="modalKendaraanQrImage" class="modal-input" placeholder="Nama file (QR-L300.jpeg) atau URL gambar" style="flex:1;">
+            <label style="cursor:pointer; background:#f1f5f9; border:1px solid #cbd5e1; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:700; color:#334155; white-space:nowrap;">
+              📁 Pilih Foto
+              <input type="file" id="modalKendaraanFile" accept="image/*" style="display:none;" onchange="handleUploadFotoKendaraan(this)">
+            </label>
+          </div>
+          <div id="modalKendaraanPreview" style="margin-top:8px; display:none;">
+            <img id="modalKendaraanImgPreview" src="" alt="Preview" style="height:60px; border-radius:6px; border:1px solid #e2e8f0; object-fit:contain;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Catatan / Spesifikasi Tambahan</label>
+          <textarea id="modalKendaraanCatatan" class="modal-input" rows="2" placeholder="Catatan kapasitas muat, jenis BBM, PIC armada, dll"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="btn" onclick="closeModalKendaraan()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:10px 18px; border-radius:10px; font-weight:700; cursor:pointer;">Batal</button>
+          <button type="submit" class="btn btn-primary" style="background:var(--kuk-maroon); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(84,0,0,0.25);">💾 Simpan Kendaraan</button>
         </div>
       </form>
     </div>
@@ -1530,42 +1619,62 @@
         const toggleColor = k.status === 'Tersedia' ? '#f1f5f9' : '#dcfce7';
         const toggleTextColor = k.status === 'Tersedia' ? '#475569' : '#15803d';
 
+        const catatanHTML = k.catatan
+          ? `<div style="margin-bottom:12px; font-size:11.5px; color:#64748b; background:#f8fafc; padding:6px 10px; border-radius:6px; border:1px dashed #e2e8f0;">📝 ${k.catatan}</div>`
+          : '';
+
         return `
-          <div style="background:#fff; border:1.5px solid #e2e8f0; border-radius:16px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.04); transition:box-shadow 0.2s;">
-            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;">
-              <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
-                <div style="width:46px; height:46px; border-radius:12px; background:rgba(84,0,0,0.08); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">${k.icon || '🚗'}</div>
-                <div style="min-width:0;">
-                  <div style="font-size:15px; font-weight:800; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k.nama}</div>
-                  <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${k.jenis || 'Operasional'}</div>
+          <div style="background:#fff; border:1.5px solid #e2e8f0; border-radius:16px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.04); transition:box-shadow 0.2s; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                  <div style="width:46px; height:46px; border-radius:12px; background:rgba(84,0,0,0.08); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">${k.icon || '🚗'}</div>
+                  <div style="min-width:0;">
+                    <div style="font-size:15px; font-weight:800; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k.nama}</div>
+                    <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${k.jenis || 'Operasional'}</div>
+                  </div>
+                </div>
+                <span style="background:${statusColor.bg}; color:${statusColor.color}; border:1px solid ${statusColor.border}; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:800; white-space:nowrap; flex-shrink:0;">${k.status || 'Tersedia'}</span>
+              </div>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
+                <div>
+                  <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Plat / ID</div>
+                  <div style="font-size:13px; font-weight:800; color:var(--kuk-maroon); background:rgba(84,0,0,0.07); padding:4px 10px; border-radius:6px; display:inline-block;">${k.plat || k.id}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Total Pinjam</div>
+                  <div style="font-size:18px; font-weight:900; color:#0f172a;">${totalPinjam}x ${aktif > 0 ? `<span style="font-size:12px; font-weight:700; color:#d97706;">(${aktif} Aktif)</span>` : ''}</div>
                 </div>
               </div>
-              <span style="background:${statusColor.bg}; color:${statusColor.color}; border:1px solid ${statusColor.border}; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:800; white-space:nowrap; flex-shrink:0;">${k.status || 'Tersedia'}</span>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
+                ${qrHTML}
+                <div style="flex:1; font-size:11.5px; color:#64748b; line-height:1.5;">
+                  <div><strong>ID:</strong> ${k.id}</div>
+                  ${k.qrCode ? `<div style="margin-top:4px; word-break:break-all;"><strong>QR Link:</strong> <a href="${k.qrCode}" target="_blank" style="color:var(--kuk-maroon); font-size:10px;">${k.qrCode.length > 40 ? k.qrCode.slice(0, 40) + '…' : k.qrCode}</a></div>` : ''}
+                </div>
+              </div>
+
+              ${catatanHTML}
             </div>
 
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
-              <div>
-                <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Plat / ID</div>
-                <div style="font-size:13px; font-weight:800; color:var(--kuk-maroon); background:rgba(84,0,0,0.07); padding:4px 10px; border-radius:6px; display:inline-block;">${k.plat || k.id}</div>
+            <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button onclick="openModalEditKendaraan('${k.id}')"
+                  style="padding:8px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; color:#1e293b; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;">
+                  ✏️ Edit Data
+                </button>
+                <button onclick="handleHapusKendaraan('${k.id}')"
+                  style="padding:8px 10px; border-radius:8px; border:1px solid #fca5a5; background:#fee2e2; color:#b91c1c; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;">
+                  🗑️ Hapus
+                </button>
               </div>
-              <div style="text-align:right;">
-                <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Total Pinjam</div>
-                <div style="font-size:18px; font-weight:900; color:#0f172a;">${totalPinjam}x ${aktif > 0 ? `<span style="font-size:12px; font-weight:700; color:#d97706;">(${aktif} Aktif)</span>` : ''}</div>
-              </div>
+              <button onclick="toggleStatusArmada('${k.id}')"
+                style="width:100%; padding:9px; border-radius:8px; border:1px solid #e2e8f0; background:${toggleColor}; color:${toggleTextColor}; font-weight:700; font-size:12px; cursor:pointer; transition:all 0.2s;">
+                ${toggleLabel}
+              </button>
             </div>
-
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;">
-              ${qrHTML}
-              <div style="flex:1; font-size:11.5px; color:#64748b; line-height:1.5;">
-                <div><strong>ID:</strong> ${k.id}</div>
-                ${k.qrCode ? `<div style="margin-top:4px; word-break:break-all;"><strong>QR Link:</strong> <a href="${k.qrCode}" target="_blank" style="color:var(--kuk-maroon); font-size:10px;">${k.qrCode.length > 40 ? k.qrCode.slice(0, 40) + '…' : k.qrCode}</a></div>` : ''}
-              </div>
-            </div>
-
-            <button onclick="toggleStatusArmada('${k.id}')"
-              style="width:100%; padding:9px; border-radius:10px; border:1px solid #e2e8f0; background:${toggleColor}; color:${toggleTextColor}; font-weight:700; font-size:12.5px; cursor:pointer; transition:all 0.2s;">
-              ${toggleLabel}
-            </button>
           </div>
         `;
       }).join('');
@@ -1579,11 +1688,138 @@
       if (!confirm(`Ubah status "${k.nama}" menjadi "${newStatus}"?`)) return;
       PeminjamanDB.saveKendaraan({ ...k, status: newStatus });
       renderArmadaGrid();
+      populateServisKendaraanOptions();
       showToast(`Status ${k.nama} diubah ke: ${newStatus}`);
+    }
+
+    function openModalTambahKendaraan() {
+      document.getElementById('modalKendaraanTitle').innerText = '➕ Tambah Armada Kendaraan';
+      document.getElementById('modalKendaraanId').value = '';
+      document.getElementById('modalKendaraanNama').value = '';
+      document.getElementById('modalKendaraanPlat').value = '';
+      document.getElementById('modalKendaraanJenis').value = '';
+      document.getElementById('modalKendaraanIcon').value = '🚚';
+      document.getElementById('modalKendaraanStatus').value = 'Tersedia';
+      document.getElementById('modalKendaraanQrCode').value = '';
+      document.getElementById('modalKendaraanQrImage').value = '';
+      document.getElementById('modalKendaraanCatatan').value = '';
+      document.getElementById('modalKendaraanPreview').style.display = 'none';
+      document.getElementById('modalKendaraan').classList.add('show');
+    }
+
+    function openModalEditKendaraan(kendaraanId) {
+      const list = PeminjamanDB.getKendaraanList();
+      const k = list.find(x => x.id === kendaraanId);
+      if (!k) return;
+
+      document.getElementById('modalKendaraanTitle').innerText = '✏️ Edit Data Armada: ' + k.nama;
+      document.getElementById('modalKendaraanId').value = k.id;
+      document.getElementById('modalKendaraanNama').value = k.nama || '';
+      document.getElementById('modalKendaraanPlat').value = k.plat || '';
+      document.getElementById('modalKendaraanJenis').value = k.jenis || '';
+      document.getElementById('modalKendaraanIcon').value = k.icon || '🚚';
+      document.getElementById('modalKendaraanStatus').value = k.status || 'Tersedia';
+      document.getElementById('modalKendaraanQrCode').value = k.qrCode || '';
+      document.getElementById('modalKendaraanQrImage').value = k.qrImage || '';
+      document.getElementById('modalKendaraanCatatan').value = k.catatan || '';
+
+      const prev = document.getElementById('modalKendaraanPreview');
+      const imgPrev = document.getElementById('modalKendaraanImgPreview');
+      if (k.qrImage) {
+        imgPrev.src = k.qrImage;
+        prev.style.display = 'block';
+      } else {
+        prev.style.display = 'none';
+      }
+
+      document.getElementById('modalKendaraan').classList.add('show');
+    }
+
+    function closeModalKendaraan() {
+      document.getElementById('modalKendaraan').classList.remove('show');
+    }
+
+    function handleUploadFotoKendaraan(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64 = e.target.result;
+          document.getElementById('modalKendaraanQrImage').value = base64;
+          const imgPrev = document.getElementById('modalKendaraanImgPreview');
+          imgPrev.src = base64;
+          document.getElementById('modalKendaraanPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function handleSimpanKendaraan(e) {
+      e.preventDefault();
+      const id = document.getElementById('modalKendaraanId').value.trim();
+      const nama = document.getElementById('modalKendaraanNama').value.trim();
+      const plat = document.getElementById('modalKendaraanPlat').value.trim();
+      const jenis = document.getElementById('modalKendaraanJenis').value.trim();
+      const icon = document.getElementById('modalKendaraanIcon').value;
+      const status = document.getElementById('modalKendaraanStatus').value;
+      const qrCode = document.getElementById('modalKendaraanQrCode').value.trim();
+      const qrImage = document.getElementById('modalKendaraanQrImage').value.trim();
+      const catatan = document.getElementById('modalKendaraanCatatan').value.trim();
+
+      if (!nama) return alert('Nama kendaraan wajib diisi!');
+
+      const payload = {
+        id: id || ('KND-' + Date.now()),
+        nama,
+        plat: plat || '-',
+        jenis: jenis || 'Operasional',
+        icon: icon || '🚗',
+        status: status || 'Tersedia',
+        qrCode,
+        qrImage,
+        catatan
+      };
+
+      PeminjamanDB.saveKendaraan(payload);
+      closeModalKendaraan();
+      renderArmadaGrid();
+      populateServisKendaraanOptions();
+      showToast(id ? `Data armada ${nama} berhasil diperbarui!` : `Armada baru ${nama} berhasil ditambahkan!`);
+    }
+
+    function handleHapusKendaraan(kendaraanId) {
+      const list = PeminjamanDB.getKendaraanList();
+      const k = list.find(x => x.id === kendaraanId);
+      if (!k) return;
+
+      if (PeminjamanDB.isKendaraanDipinjam(kendaraanId)) {
+        return alert(`⚠️ Tidak dapat menghapus armada "${k.nama}" karena saat ini sedang AKTIF DIPINJAM.`);
+      }
+
+      if (!confirm(`Apakah Anda yakin ingin menghapus armada "${k.nama}" (${k.plat}) dari database kendaraan?`)) {
+        return;
+      }
+
+      PeminjamanDB.deleteKendaraan(kendaraanId);
+      renderArmadaGrid();
+      populateServisKendaraanOptions();
+      showToast(`Armada "${k.nama}" berhasil dihapus dari database.`);
+    }
+
+    function populateServisKendaraanOptions() {
+      const sel = document.getElementById('modalServisKendaraan');
+      if (!sel) return;
+      const curVal = sel.value;
+      const list = PeminjamanDB.getKendaraanList();
+      sel.innerHTML = list.map(k => `<option value="${k.id}">${k.nama} (${k.plat || k.id})</option>`).join('');
+      if (curVal && list.some(k => k.id === curVal)) {
+        sel.value = curVal;
+      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       renderTable();
+      populateServisKendaraanOptions();
     });
   </script>
   <script src="shared/master_db.js"></script>

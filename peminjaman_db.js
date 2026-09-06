@@ -329,7 +329,8 @@ const PeminjamanDB = (() => {
         icon: data.icon || '🚗',
         qrCode: data.qrCode || '',
         qrImage: data.qrImage || '',
-        status: 'Tersedia'
+        status: data.status || 'Tersedia',
+        catatan: data.catatan || ''
       };
       list.push(updatedItem);
     }

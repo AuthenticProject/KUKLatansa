@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -2097,7 +2097,7 @@
       const pJab  = pimpinan ? (pimpinan.jabatan || 'Pimpinan / Direktur KUK') : 'Pimpinan / Direktur KUK';
       const pTtdHtml = (pimpinan && pimpinan.ttdUrl) ? `<img src="${pimpinan.ttdUrl}" style="height:55px; max-width:150px; object-fit:contain; display:block; margin:4px auto;">` : `<div style="height:55px;"></div>`;
 
-      const fToko = document.getElementById('gajiFilterToko') ? document.getElementById('gajiFilterToko').value : 'ALL';
+      // fToko is already declared above
       let kopReport = 'kop_umum.png';
       if (fToko === 'palen') kopReport = 'kop_palen.png';
       else if (fToko === 'bangunan') kopReport = 'kop_bangunan.png';

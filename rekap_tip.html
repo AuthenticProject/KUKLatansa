@@ -192,8 +192,50 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
+      transition: all 0.2s;
     }
     .btn-del:hover { background: #fca5a5; color: #7f1d1d; }
+
+    .btn-edit {
+      background: #e0f2fe;
+      color: #0284c7;
+      border: 1px solid #bae6fd;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover { background: #bae6fd; color: #0369a1; }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .modal-backdrop.show {
+      display: flex !important;
+    }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      animation: modalPop 0.2s ease-out;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body class="kuk-has-shell">
@@ -221,14 +263,16 @@
     <main class="panel">
       
       <div class="filter-bar">
-        <div class="filter-group">
-          <label style="font-weight:700; font-size:13px; color:#475569;">🔍 Filter & Rekapan Tip Kaca:</label>
-          <input type="month" id="filterMonth" onchange="loadRekapTip()">
-          <select id="filterKaryawan" onchange="loadRekapTip()">
+        <div class="filter-group" style="flex-wrap:wrap; gap:8px;">
+          <label style="font-weight:700; font-size:13px; color:#475569;">🔍 Filter Periode:</label>
+          <input type="month" id="filterMonth" onchange="loadRekapTip()" style="padding:7px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          <button type="button" class="btn btn-secondary" id="btnSemuaBulan" onclick="resetFilterBulan()" style="padding:7px 12px; font-size:12px; font-weight:700;">📅 Semua Periode</button>
+          <select id="filterKaryawan" onchange="loadRekapTip()" style="padding:7px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
             <option value="ALL">Semua Karyawan</option>
           </select>
         </div>
-        <div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <span id="activeFilterBadge" style="font-size:12px; font-weight:700; color:var(--kuk-primary, #540000); background:rgba(84,0,0,0.06); padding:6px 12px; border-radius:100px; border:1px solid rgba(84,0,0,0.12);">Menampilkan: Semua Periode</span>
           <button class="btn btn-secondary" onclick="exportToExcel()">📊 Ekspor Excel</button>
         </div>
       </div>
@@ -248,7 +292,7 @@
               <th>Luas (m²)</th>
               <th>Total Harga</th>
               <th>Tip (3%)</th>
-              <th style="width: 60px; text-align:center;">Aksi</th>
+              <th style="width: 85px; text-align:center;">Aksi</th>
             </tr>
           </thead>
           <tbody id="rekapTipTableBody">
@@ -265,25 +309,121 @@
 
   </div>
 
+  <!-- Modal Edit Transaksi Tip Kaca -->
+  <div class="modal-backdrop" id="modalEditTip">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid #f1f5f9; background:#fafafa;">
+        <h3 id="modalEditTipTitle" style="margin:0; font-size:16px; font-weight:800; color:#0f172a;">✏️ Edit Transaksi Tip Kaca</h3>
+        <button type="button" onclick="closeEditTipModal()" style="background:none; border:none; font-size:22px; color:#64748b; cursor:pointer; padding:0 6px;">×</button>
+      </div>
+
+      <form onsubmit="handleSimpanEditTip(event)" style="padding:20px;">
+        <input type="hidden" id="editTipId">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">Tanggal *</label>
+            <input type="date" id="editTipTanggal" required style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">Nama Karyawan *</label>
+            <select id="editTipKaryawan" required style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">Unit / Toko</label>
+            <input type="text" id="editTipUnit" value="KUK Bangunan" style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">Jenis Kaca *</label>
+            <input type="text" id="editTipJenisKaca" placeholder="Contoh: Kaca Air 3mm" required style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">Luas (m²)</label>
+            <input type="number" step="any" id="editTipLuas" placeholder="0" style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">Total Omset / Harga (Rp) *</label>
+            <input type="number" id="editTipTotalHarga" required placeholder="0" oninput="autoCalculateTip()" style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:12px; font-weight:700; color:#475569;">Nominal Tip Kaca (3%) (Rp) *</label>
+            <span style="font-size:11px; color:#15803d; font-weight:700; background:#dcfce7; padding:2px 8px; border-radius:4px;">⚡ 3% Otomatis</span>
+          </div>
+          <input type="number" step="any" id="editTipNominal" required placeholder="0" style="width:100%; padding:10px 12px; border:1.5px solid #86efac; border-radius:8px; font-size:14px; font-weight:800; color:#15803d; box-sizing:border-box; background:#f0fdf4;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:4px;">Keterangan / Catatan</label>
+          <input type="text" id="editTipKeterangan" placeholder="Keterangan transaksi pemotongan kaca..." style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" onclick="closeEditTipModal()" style="padding:10px 18px; border:1px solid #cbd5e1; border-radius:8px; background:#f8fafc; font-weight:700; color:#475569; cursor:pointer;">Batal</button>
+          <button type="submit" style="padding:10px 20px; border:none; border-radius:8px; background:var(--kuk-primary, #540000); color:#fff; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(84,0,0,0.2);">💾 Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="shared/master_db.js"></script>
   <script src="shared/security.js"></script>
   <script src="shared/shell.js" data-base="."></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const now = new Date();
-      const monthStr = now.toISOString().slice(0, 7);
+      const allTips = getTipData();
+      
+      // Deteksi bulan terbaru yang memiliki data untuk kemudahan pengguna
+      let defaultMonth = '';
+      if (allTips && allTips.length > 0) {
+        for (let t of allTips) {
+          const m = getTipMonthStr(t.tanggal || t.tgl);
+          if (m) {
+            defaultMonth = m;
+            break;
+          }
+        }
+      }
+      
       const mInput = document.getElementById('filterMonth');
-      if (mInput) mInput.value = monthStr;
+      if (mInput && defaultMonth) {
+        mInput.value = defaultMonth;
+      }
       
       populateKaryawanDropdown();
       loadRekapTip();
 
-      // Real-time background sync from old & new Google Sheets DB every 10s
+      // Sinkronisasi berkala dari cloud
       setInterval(() => {
         syncDataCloud(true);
-      }, 10000);
+      }, 15000);
     });
+
+    function getTipMonthStr(dateVal) {
+      if (!dateVal) return '';
+      const str = String(dateVal).trim();
+      if (/^\d{4}-\d{2}/.test(str)) {
+        return str.slice(0, 7);
+      }
+      const parts = str.split(/[\/\-]/);
+      if (parts.length === 3) {
+        if (parts[2].length === 4) {
+          return `${parts[2]}-${parts[1].padStart(2, '0')}`;
+        }
+      }
+      return '';
+    }
 
     function getTipData() {
       try {
@@ -301,9 +441,23 @@
       }
     }
 
+    function saveAllTipData(list) {
+      localStorage.setItem('kuk_db_tip_v1', JSON.stringify(list));
+      localStorage.setItem('kuk_tip_db_v1', JSON.stringify(list));
+      if (typeof MasterDB !== 'undefined' && MasterDB.saveTipData) {
+        MasterDB.saveTipData(list);
+      }
+    }
+
+    function resetFilterBulan() {
+      const mInput = document.getElementById('filterMonth');
+      if (mInput) mInput.value = '';
+      loadRekapTip();
+    }
+
     function formatRp(val) {
       const num = Number(val || 0);
-      return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+      return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
     function getEmpName(t) {
@@ -315,6 +469,7 @@
     function populateKaryawanDropdown() {
       const sel = document.getElementById('filterKaryawan');
       if (!sel) return;
+      const currentVal = sel.value;
       const allTips = getTipData();
       const namesSet = new Set();
       allTips.forEach(t => {
@@ -324,34 +479,48 @@
 
       let html = '<option value="ALL">Semua Karyawan</option>';
       Array.from(namesSet).sort().forEach(name => {
-        html += `<option value="${name}">${name}</option>`;
+        const selected = name === currentVal ? 'selected' : '';
+        html += `<option value="${name}" ${selected}>${name}</option>`;
       });
       sel.innerHTML = html;
     }
 
     function loadRekapTip() {
-      const selectedMonth = document.getElementById('filterMonth').value;
+      const selectedMonth = document.getElementById('filterMonth').value.trim();
       const selectedEmp = document.getElementById('filterKaryawan').value;
       const allTips = getTipData();
 
-      let monthTips = allTips.filter(t => {
-        const tDate = t.tanggal || t.tgl || '';
-        return !selectedMonth || tDate.startsWith(selectedMonth);
+      // 1. Filter bulan
+      const monthOnlyTips = allTips.filter(t => {
+        if (!selectedMonth) return true;
+        const m = getTipMonthStr(t.tanggal || t.tgl);
+        return m === selectedMonth;
       });
 
-      if (monthTips.length === 0) {
-        monthTips = allTips;
+      // 2. Filter karyawan
+      const filteredTips = monthOnlyTips.filter(t => {
+        if (!selectedEmp || selectedEmp === 'ALL') return true;
+        return getEmpName(t).toLowerCase() === selectedEmp.toLowerCase();
+      });
+
+      // 3. Update Badge Info Periode
+      const badge = document.getElementById('activeFilterBadge');
+      if (badge) {
+        let periodText = 'Semua Periode';
+        if (selectedMonth) {
+          const [y, m] = selectedMonth.split('-');
+          const mNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+          const mIdx = parseInt(m, 10) - 1;
+          periodText = `${mNames[mIdx] || m} ${y}`;
+        }
+        badge.textContent = `Menampilkan: ${periodText} (${filteredTips.length} Transaksi)`;
       }
 
-      if (selectedEmp && selectedEmp !== 'ALL') {
-        monthTips = monthTips.filter(t => getEmpName(t).toLowerCase() === selectedEmp.toLowerCase());
-      }
-
-      // Calculate totals per employee
+      // 4. Hitung ringkasan per karyawan hanya untuk periode yang dipilih
       let grandTotalTip = 0;
       const empSumMap = {};
 
-      allTips.forEach(t => {
+      monthOnlyTips.forEach(t => {
         const name = getEmpName(t);
         const tip = parseFloat(t.nominalTip || t.tip || 0) || 0;
         grandTotalTip += tip;
@@ -360,38 +529,43 @@
         }
       });
 
-      // Render Summary Grid
+      // 5. Render Kartu Ringkasan
       const grid = document.getElementById('empSummaryGrid');
-      let gridHtml = `
-        <div class="emp-card highlight">
-          <div class="emp-card-label">Total Keseluruhan</div>
-          <div class="emp-card-val">${formatRp(grandTotalTip)}</div>
-        </div>
-      `;
-
-      const sortedEmps = Object.keys(empSumMap).sort((a,b) => empSumMap[b] - empSumMap[a]);
-      sortedEmps.forEach(name => {
-        gridHtml += `
-          <div class="emp-card">
-            <div class="emp-card-label">${name}</div>
-            <div class="emp-card-val">${formatRp(empSumMap[name])}</div>
+      if (grid) {
+        let gridHtml = `
+          <div class="emp-card highlight">
+            <div class="emp-card-label">Total Tip (${selectedMonth ? 'Bulan Terpilih' : 'Semua'})</div>
+            <div class="emp-card-val">${formatRp(grandTotalTip)}</div>
           </div>
         `;
-      });
-      grid.innerHTML = gridHtml;
 
-      // Render Detailed Table and Mobile Cards
+        const sortedEmps = Object.keys(empSumMap).sort((a,b) => empSumMap[b] - empSumMap[a]);
+        sortedEmps.forEach(name => {
+          gridHtml += `
+            <div class="emp-card">
+              <div class="emp-card-label">${name}</div>
+              <div class="emp-card-val">${formatRp(empSumMap[name])}</div>
+            </div>
+          `;
+        });
+        grid.innerHTML = gridHtml;
+      }
+
+      // 6. Render Tabel Desktop dan Kartu Mobile
       const tbody = document.getElementById('rekapTipTableBody');
       const mobileCards = document.getElementById('tipMobileCards');
 
-      if (monthTips.length === 0) {
-        if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">Tidak ada transaksi tip pemotongan kaca.</td></tr>';
-        if (mobileCards) mobileCards.innerHTML = '<div style="text-align:center; padding:30px 16px; color:#94a3b8; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1;">Tidak ada transaksi tip pemotongan kaca.</div>';
+      if (filteredTips.length === 0) {
+        const emptyMsg = selectedMonth
+          ? `Tidak ada transaksi tip pemotongan kaca pada periode ${selectedMonth}.`
+          : `Tidak ada transaksi tip pemotongan kaca.`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:36px; color:#94a3b8; font-weight:600;">${emptyMsg}</td></tr>`;
+        if (mobileCards) mobileCards.innerHTML = `<div style="text-align:center; padding:30px 16px; color:#94a3b8; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1; font-weight:600;">${emptyMsg}</div>`;
         return;
       }
 
       if (tbody) {
-        tbody.innerHTML = monthTips.map(t => {
+        tbody.innerHTML = filteredTips.map(t => {
           const dateStr = t.tanggal || t.tgl || '-';
           const nameStr = getEmpName(t);
           const jenisStr = t.jenisKaca || t.jenis || 'Kaca Standard';
@@ -407,7 +581,8 @@
               <td style="font-weight:700;">${luasNum}</td>
               <td style="font-weight:600; color:#334155;">${formatRp(hargaNum)}</td>
               <td><span class="badge-tip">${formatRp(tipNum)}</span></td>
-              <td style="text-align:center;">
+              <td style="text-align:center; white-space:nowrap;">
+                <button onclick="openEditTipModal('${t.id}')" class="btn-edit" title="Edit Transaksi">✏️</button>
                 <button onclick="deleteTipItem('${t.id}')" class="btn-del" title="Hapus Transaksi">🗑️</button>
               </td>
             </tr>
@@ -416,7 +591,7 @@
       }
 
       if (mobileCards) {
-        mobileCards.innerHTML = monthTips.map(t => {
+        mobileCards.innerHTML = filteredTips.map(t => {
           const dateStr = t.tanggal || t.tgl || '-';
           const nameStr = getEmpName(t);
           const jenisStr = t.jenisKaca || t.jenis || 'Kaca Standard';
@@ -436,7 +611,10 @@
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; border-top:1px dashed #f1f5f9; padding-top:8px;">
                 <div>Luas: <strong>${luasNum} m²</strong> &bull; Total: <strong>${formatRp(hargaNum)}</strong></div>
-                <button onclick="deleteTipItem('${t.id}')" class="btn-del" title="Hapus Transaksi" style="padding:4px 8px;">🗑️ Hapus</button>
+                <div style="display:flex; gap:6px;">
+                  <button onclick="openEditTipModal('${t.id}')" class="btn-edit" style="padding:4px 8px;">✏️ Edit</button>
+                  <button onclick="deleteTipItem('${t.id}')" class="btn-del" title="Hapus Transaksi" style="padding:4px 8px;">🗑️ Hapus</button>
+                </div>
               </div>
             </div>
           `;
@@ -444,14 +622,153 @@
       }
     }
 
+    function openEditTipModal(id) {
+      const allTips = getTipData();
+      const t = allTips.find(x => String(x.id) === String(id));
+      if (!t) return alert('Data tip tidak ditemukan!');
+
+      document.getElementById('editTipId').value = t.id;
+      document.getElementById('editTipTanggal').value = t.tanggal || t.tgl || new Date().toISOString().slice(0, 10);
+      
+      populateEditKaryawanDropdown(getEmpName(t));
+
+      document.getElementById('editTipUnit').value = t.unit || 'KUK Bangunan';
+      document.getElementById('editTipJenisKaca').value = t.jenisKaca || t.jenis || 'Kaca Air 3mm';
+      document.getElementById('editTipLuas').value = t.luasM2 || t.luas || 0;
+      document.getElementById('editTipTotalHarga').value = Math.round(parseFloat(t.totalOmset || t.totalHarga || t.omset || 0));
+      document.getElementById('editTipNominal').value = Math.round(parseFloat(t.nominalTip || t.tip || 0));
+      document.getElementById('editTipKeterangan').value = t.keterangan || '';
+
+      document.getElementById('modalEditTip').classList.add('show');
+    }
+
+    function closeEditTipModal() {
+      document.getElementById('modalEditTip').classList.remove('show');
+    }
+
+    function populateEditKaryawanDropdown(currentVal) {
+      const sel = document.getElementById('editTipKaryawan');
+      if (!sel) return;
+
+      let empNames = [];
+      if (typeof MasterDB !== 'undefined' && MasterDB.getKaryawanList) {
+        empNames = MasterDB.getKaryawanList().map(k => k.namaLengkap || k.nama);
+      }
+      if (empNames.length === 0) {
+        empNames = ['Wiba Sepdioko', 'Syirojul Kahfi', 'Irfan Ulinnuha', 'Nur Rochim', 'Arriyan Muhammad', 'Muhammad Hiba', 'Muhammad Irvan', 'Miftahussurur'];
+      }
+
+      // Pastikan nama saat ini ada di list
+      if (currentVal && !empNames.some(n => n.toLowerCase().includes(currentVal.toLowerCase()) || currentVal.toLowerCase().includes(n.toLowerCase()))) {
+        empNames.unshift(currentVal);
+      }
+
+      sel.innerHTML = empNames.map(name => {
+        const isSelected = (currentVal && (name.toLowerCase() === currentVal.toLowerCase() || name.toLowerCase().includes(currentVal.toLowerCase()))) ? 'selected' : '';
+        return `<option value="${name}" ${isSelected}>${name}</option>`;
+      }).join('');
+    }
+
+    function autoCalculateTip() {
+      const totalHarga = parseFloat(document.getElementById('editTipTotalHarga').value) || 0;
+      const tip = Math.round(totalHarga * 0.03);
+      document.getElementById('editTipNominal').value = tip;
+    }
+
+    function handleSimpanEditTip(e) {
+      e.preventDefault();
+      const id = document.getElementById('editTipId').value;
+      const tanggal = document.getElementById('editTipTanggal').value;
+      const karyawan = document.getElementById('editTipKaryawan').value;
+      const unit = document.getElementById('editTipUnit').value.trim() || 'KUK Bangunan';
+      const jenisKaca = document.getElementById('editTipJenisKaca').value.trim();
+      const luas = parseFloat(document.getElementById('editTipLuas').value) || 0;
+      const totalHarga = parseFloat(document.getElementById('editTipTotalHarga').value) || 0;
+      const nominalTip = parseFloat(document.getElementById('editTipNominal').value) || 0;
+      const keterangan = document.getElementById('editTipKeterangan').value.trim();
+
+      if (!id) return;
+      if (!tanggal || !karyawan || !jenisKaca) {
+        return alert('Harap lengkapi tanggal, nama karyawan, dan jenis kaca.');
+      }
+
+      let all = getTipData();
+      const idx = all.findIndex(x => String(x.id) === String(id));
+      if (idx < 0) return alert('Data tip tidak ditemukan!');
+
+      const updated = {
+        ...all[idx],
+        id: id,
+        tanggal: tanggal,
+        tgl: tanggal,
+        namaKaryawan: karyawan,
+        nama: karyawan,
+        karyawan: karyawan,
+        unit: unit,
+        jenisKaca: jenisKaca,
+        jenis: jenisKaca,
+        luasM2: luas,
+        luas: luas,
+        totalOmset: totalHarga,
+        totalHarga: totalHarga,
+        omset: totalHarga,
+        nominalTip: nominalTip,
+        tip: nominalTip,
+        keterangan: keterangan || `Pemotongan ${jenisKaca}`,
+        _isModified: true
+      };
+
+      all[idx] = updated;
+      saveAllTipData(all);
+      closeEditTipModal();
+      populateKaryawanDropdown();
+      loadRekapTip();
+
+      // Sinkronkan ke cloud backend Google Apps Script jika tersedia
+      try {
+        const SCRIPT_URL = (typeof MasterDB !== 'undefined' && MasterDB.SCRIPT_URL) ? MasterDB.SCRIPT_URL : "https://script.google.com/macros/s/AKfycbyzlX0afsHljDmZaq5NecfO4ofaXSRHX2_4r8ClPeo8NjVESWLaYNpjpXEk1VKF230S/exec";
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'edit_tip',
+            id: id,
+            tanggal: tanggal,
+            idKaryawan: updated.idKaryawan || '',
+            nama: karyawan,
+            jenisKaca: jenisKaca,
+            luas: luas,
+            totalHarga: totalHarga,
+            tip: nominalTip,
+            keterangan: keterangan
+          })
+        }).catch(() => {});
+      } catch(e) {}
+
+      alert('✅ Transaksi tip kaca berhasil diperbarui!');
+    }
+
     function deleteTipItem(id) {
       if (!confirm('Hapus transaksi tip pemotongan kaca ini?')) return;
       let all = getTipData();
-      all = all.filter(t => t.id !== id);
-      localStorage.setItem('kuk_db_tip_v1', JSON.stringify(all));
-      localStorage.setItem('kuk_tip_db_v1', JSON.stringify(all));
+      all = all.filter(t => String(t.id) !== String(id));
+      saveAllTipData(all);
       populateKaryawanDropdown();
       loadRekapTip();
+
+      try {
+        const SCRIPT_URL = (typeof MasterDB !== 'undefined' && MasterDB.SCRIPT_URL) ? MasterDB.SCRIPT_URL : "https://script.google.com/macros/s/AKfycbyzlX0afsHljDmZaq5NecfO4ofaXSRHX2_4r8ClPeo8NjVESWLaYNpjpXEk1VKF230S/exec";
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete_tip',
+            id: id
+          })
+        }).catch(() => {});
+      } catch(e) {}
     }
 
     function syncDataCloud(silent = false) {

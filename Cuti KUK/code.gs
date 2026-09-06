@@ -108,6 +108,8 @@ function doPost(e) {
       return handleEditPelanggaran(ss, payload);
     } else if (action === 'save_tip') {
       return handleSaveTip(ss, payload);
+    } else if (action === 'edit_tip') {
+      return handleEditTip(ss, payload);
     } else if (action === 'delete_tip') {
       return handleDeleteTip(ss, payload);
     } else if (action === 'login') {
@@ -1249,6 +1251,42 @@ function handleDeleteTip(ss, payload) {
       return jsonResponse({ result: 'success', message: 'Data tip berhasil dihapus.' });
     } else {
       return jsonResponse({ result: 'error', message: 'Data tip tidak ditemukan.' });
+    }
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
+  }
+}
+
+function handleEditTip(ss, payload) {
+  try {
+    const { id, tanggal, idKaryawan, nama, jenisKaca, luas, totalHarga, tip, keterangan } = payload;
+    if (!id) {
+      return jsonResponse({ result: 'error', message: 'Parameter ID diperlukan.' });
+    }
+    const sheet = getOrCreateTipKacaSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return jsonResponse({ result: 'error', message: 'Sheet Tip Kaca kosong.' });
+    }
+    const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    let rowIdx = -1;
+    for (let i = 0; i < values.length; i++) {
+      if (String(values[i][0]) === String(id)) {
+        rowIdx = i + 2;
+        break;
+      }
+    }
+    if (rowIdx > 0) {
+      if (tanggal) sheet.getRange(rowIdx, 2).setValue(tanggal);
+      if (idKaryawan) sheet.getRange(rowIdx, 3).setValue(idKaryawan);
+      if (nama) sheet.getRange(rowIdx, 4).setValue(nama);
+      if (jenisKaca) sheet.getRange(rowIdx, 5).setValue(jenisKaca);
+      if (luas !== undefined && luas !== null) sheet.getRange(rowIdx, 6).setValue(luas);
+      if (totalHarga !== undefined && totalHarga !== null) sheet.getRange(rowIdx, 7).setValue(totalHarga);
+      if (tip !== undefined && tip !== null) sheet.getRange(rowIdx, 8).setValue(tip);
+      return jsonResponse({ result: 'success', message: 'Data tip berhasil diperbarui.' });
+    } else {
+      return jsonResponse({ result: 'error', message: 'Data tip tidak ditemukan di spreadsheet.' });
     }
   } catch (error) {
     return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
