@@ -858,9 +858,9 @@
   /* ── Initialise ───────────────────────────────────────────────────── */
   function init() {
     var isIsolatedPage = SHELL_ISOLATED_PAGES.includes(getActivePage());
-    // Only isolate if user is NOT logged in (public employee form view).
-    // If logged in as admin/staff, ALWAYS inject the Dashboard App Shell!
-    if (isIsolatedPage && !getUsername()) return;
+    // Isolated pages (cuti, tip, absen, peminjaman, pelanggaran) are public forms.
+    // They must NEVER display dashboard shell navigation menus.
+    if (isIsolatedPage) return;
     if (!checkAuth()) return;
     injectShell();
   }
