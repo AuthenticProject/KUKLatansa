@@ -980,6 +980,9 @@ const MasterDB = (() => {
 if (typeof window !== 'undefined') {
   window.MasterDB = MasterDB;
 }
+if (typeof global !== 'undefined') {
+  global.MasterDB = MasterDB;
+}
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = MasterDB;
 }

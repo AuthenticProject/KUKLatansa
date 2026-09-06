@@ -690,6 +690,18 @@ const FingerprintEngine = (() => {
       let dateVal = (row[dateKey] || '').toString().trim();
       let timeVal = (row[timeKey] || '').toString().trim();
 
+      if ((!dateVal || !timeVal) && row) {
+        const rowKeys = Object.keys(row);
+        const altTimeKey = rowKeys.find(k => k.toLowerCase().includes('waktu') || k.toLowerCase().includes('date time') || k.toLowerCase().includes('datetime'));
+        if (altTimeKey && row[altTimeKey]) {
+          const parts = String(row[altTimeKey]).trim().split(/\s+/);
+          if (parts.length >= 2) {
+            dateVal = parts[0];
+            timeVal = parts[1];
+          }
+        }
+      }
+
       if (dateKey === timeKey && dateVal.includes(' ')) {
         const parts = dateVal.split(' ');
         dateVal = parts[0];
@@ -778,6 +790,9 @@ const FingerprintEngine = (() => {
 
 if (typeof window !== 'undefined') {
   window.FingerprintEngine = FingerprintEngine;
+}
+if (typeof global !== 'undefined') {
+  global.FingerprintEngine = FingerprintEngine;
 }
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = FingerprintEngine;

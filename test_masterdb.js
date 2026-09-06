@@ -16,11 +16,9 @@ localStorage.setItem('kuk_users_db', JSON.stringify([
 ]));
 
 // Load the MasterDB
-const fs = require('fs');
-const masterDbCode = fs.readFileSync('shared/master_db.js', 'utf8');
+const MasterDB = require('./shared/master_db.js');
 
 try {
-    eval(masterDbCode);
     
     console.log("MasterDB Initialized successfully.");
     
