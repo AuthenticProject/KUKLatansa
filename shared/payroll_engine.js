@@ -43,8 +43,8 @@ const PayrollEngine = (() => {
   function checkPayrollAccess() {
     if (typeof Security !== 'undefined' && Security.can) {
       const user = Security.getCurrentUser();
-      // Allow execution in testing or if user has payroll permission
-      if (user && !Security.can(user, 'payroll')) {
+      // Allow execution in testing or if user has payroll/gaji permission
+      if (user && !Security.can(user, 'payroll') && !Security.can(user, 'gaji')) {
         Security.audit('UNAUTHORIZED_PAYROLL_ACCESS_BLOCKED', { username: user.username, role: user.role }, 'CRITICAL', user);
         throw new Error("Akses Ditolak: Anda tidak memiliki wewenang untuk mengakses atau memodifikasi modul Payroll.");
       }

@@ -589,7 +589,8 @@
       renderToolbar();
       renderSlips();
 
-      document.getElementById('breakdownSection').style.display = 'none';
+      const bs = document.getElementById('breakdownSection');
+      if (bs) bs.style.display = 'none';
       document.getElementById('detailModal').classList.add('active');
     }
 

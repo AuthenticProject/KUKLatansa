@@ -1820,6 +1820,13 @@
     window.addEventListener('DOMContentLoaded', () => {
       renderTable();
       populateServisKendaraanOptions();
+      if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.syncFromCloud) {
+        PeminjamanDB.syncFromCloud().then(() => {
+          renderTable();
+          populateServisKendaraanOptions();
+          if (currentMainTab === 'armada') renderArmadaGrid();
+        });
+      }
     });
   </script>
   <script src="shared/master_db.js"></script>

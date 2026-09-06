@@ -217,12 +217,19 @@ const Security = (() => {
     
     if (permissions.includes('*')) return true;
     if (permissions.includes(requiredPermission)) return true;
+    if (requiredPermission === 'payroll' && permissions.includes('gaji')) return true;
+    if (requiredPermission === 'gaji' && permissions.includes('payroll')) return true;
 
     // Check user-level permissions override if any
-    if (user.permissions && Array.isArray(user.permissions)) {
-      if (user.permissions.includes('*') || user.permissions.includes(requiredPermission)) {
+    if (user.permissions) {
+      const uPerms = Array.isArray(user.permissions)
+        ? user.permissions
+        : String(user.permissions).split(/[\s,]+/);
+      if (uPerms.includes('*') || uPerms.includes(requiredPermission)) {
         return true;
       }
+      if (requiredPermission === 'payroll' && uPerms.includes('gaji')) return true;
+      if (requiredPermission === 'gaji' && uPerms.includes('payroll')) return true;
     }
 
     return false;

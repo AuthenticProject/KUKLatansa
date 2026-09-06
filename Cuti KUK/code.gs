@@ -46,6 +46,9 @@ function doGet(e) {
   if (action === 'getPeminjaman') {
     return getPeminjamanData(ss);
   }
+  if (action === 'getKendaraan') {
+    return getKendaraanCloud(ss);
+  }
 
   return jsonResponse({ error: 'Action tidak valid.' });
 }
@@ -126,6 +129,10 @@ function doPost(e) {
       return handleUpdateStatusPeminjaman(ss, payload);
     } else if (action === 'laporkan_kerusakan_peminjaman') {
       return handleLaporkanKerusakanPeminjaman(ss, payload);
+    } else if (action === 'save_kendaraan') {
+      return handleSaveKendaraan(ss, payload);
+    } else if (action === 'delete_kendaraan') {
+      return handleDeleteKendaraan(ss, payload);
     } else if (action === 'upload_file_drive') {
       return handleUploadFileToDrive(payload);
     }
@@ -1508,5 +1515,153 @@ function handleUploadFileToDrive(payload) {
 
   } catch (err) {
     return jsonResponse({ result: 'error', message: 'Upload gagal: ' + err.toString() });
+  }
+}
+
+// ================================================================
+// SISTEM MANAJEMEN ARMADA KENDARAAN (CLOUD SPREADSHEET)
+// ================================================================
+
+function getOrCreateKendaraanSheet(ss) {
+  let sheet = ss.getSheetByName("Armada Kendaraan");
+  if (!sheet) {
+    sheet = ss.insertSheet("Armada Kendaraan");
+    sheet.appendRow([
+      "ID Kendaraan",
+      "Nama Kendaraan",
+      "Plat Nomor",
+      "Jenis",
+      "Icon",
+      "QR Code",
+      "QR Image",
+      "Status",
+      "Catatan",
+      "Updated At"
+    ]);
+    const headerRange = sheet.getRange("A1:J1");
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#f1f5f9");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function getKendaraanCloud(ss) {
+  try {
+    const sheet = getOrCreateKendaraanSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return jsonResponse({
+        result: 'success',
+        data: []
+      });
+    }
+
+    const values = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
+    const result = [];
+    for (let i = 0; i < values.length; i++) {
+      const r = values[i];
+      if (!r[0]) continue;
+      result.push({
+        id: String(r[0]),
+        nama: String(r[1]),
+        plat: String(r[2]),
+        jenis: String(r[3]),
+        icon: String(r[4] || '🚗'),
+        qrCode: String(r[5] || ''),
+        qrImage: String(r[6] || ''),
+        status: String(r[7] || 'Tersedia'),
+        catatan: String(r[8] || '')
+      });
+    }
+
+    return jsonResponse({
+      result: 'success',
+      data: result
+    });
+  } catch (err) {
+    return jsonResponse({
+      result: 'error',
+      message: err.toString()
+    });
+  }
+}
+
+function handleSaveKendaraan(ss, payload) {
+  try {
+    const record = payload.record || payload;
+    if (!record || !record.id) {
+      return jsonResponse({ result: 'error', message: 'Data kendaraan tidak valid.' });
+    }
+
+    const sheet = getOrCreateKendaraanSheet(ss);
+    const lastRow = sheet.getLastRow();
+    let foundRow = -1;
+
+    if (lastRow > 1) {
+      const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      for (let i = 0; i < ids.length; i++) {
+        if (String(ids[i][0]) === String(record.id)) {
+          foundRow = i + 2;
+          break;
+        }
+      }
+    }
+
+    const rowData = [
+      record.id || '',
+      record.nama || '',
+      record.plat || '',
+      record.jenis || '',
+      record.icon || '🚗',
+      record.qrCode || '',
+      record.qrImage || '',
+      record.status || 'Tersedia',
+      record.catatan || '',
+      new Date().toISOString()
+    ];
+
+    if (foundRow > -1) {
+      sheet.getRange(foundRow, 1, 1, 10).setValues([rowData]);
+    } else {
+      sheet.appendRow(rowData);
+    }
+
+    return jsonResponse({
+      result: 'success',
+      message: 'Armada kendaraan berhasil disimpan ke cloud'
+    });
+  } catch (err) {
+    return jsonResponse({
+      result: 'error',
+      message: err.toString()
+    });
+  }
+}
+
+function handleDeleteKendaraan(ss, payload) {
+  try {
+    const id = payload.id;
+    if (!id) {
+      return jsonResponse({ result: 'error', message: 'ID kendaraan tidak valid.' });
+    }
+
+    const sheet = getOrCreateKendaraanSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      for (let i = 0; i < ids.length; i++) {
+        if (String(ids[i][0]) === String(id)) {
+          sheet.deleteRow(i + 2);
+          return jsonResponse({ result: 'success' });
+        }
+      }
+    }
+    return jsonResponse({ result: 'error', message: 'ID kendaraan tidak ditemukan di cloud.' });
+  } catch (err) {
+    return jsonResponse({
+      result: 'error',
+      message: err.toString()
+    });
   }
 }

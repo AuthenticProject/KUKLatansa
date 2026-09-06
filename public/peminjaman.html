@@ -86,13 +86,20 @@
       FormHelper.populateEmployeeDropdown('empId');
       
       const vSelect = document.getElementById('vehicleId');
-      if(typeof MasterDB !== 'undefined') {
-        const vehicles = MasterDB.getVehicles();
+      let vehicles = [];
+      if (typeof MasterDB !== 'undefined' && MasterDB.getVehicles) {
+        vehicles = MasterDB.getVehicles();
+      } else if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanList) {
+        vehicles = PeminjamanDB.getKendaraanList();
+      }
+      if (vehicles && vehicles.length > 0) {
         vehicles.forEach(v => {
           const opt = document.createElement('option');
           opt.value = v.id;
-          opt.textContent = `${v.name} (${v.plate}) - ${v.status}`;
-          if(v.status !== 'Tersedia') opt.disabled = true;
+          const vName = v.nama || v.name || 'Kendaraan';
+          const vPlat = v.plat || v.plate || '-';
+          opt.textContent = `${vName} (${vPlat}) - ${v.status || 'Tersedia'}`;
+          if (v.status && v.status !== 'Tersedia') opt.disabled = true;
           vSelect.appendChild(opt);
         });
       }

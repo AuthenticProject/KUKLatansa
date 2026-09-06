@@ -179,13 +179,63 @@ const PeminjamanDB = (() => {
     }
   ];
 
+  function syncToMasterVehicles(list) {
+    try {
+      if (!Array.isArray(list)) return;
+      const mList = list.map(k => ({
+        id: k.id,
+        nama: k.nama,
+        name: k.nama,
+        plat: k.plat,
+        plate: k.plat,
+        jenis: k.jenis || 'Operasional',
+        type: k.jenis || 'Operasional',
+        icon: k.icon || '🚗',
+        qrImage: k.qrImage || '',
+        qrCode: k.qrCode || '',
+        status: k.status || 'Tersedia',
+        catatan: k.catatan || ''
+      }));
+      localStorage.setItem('kuk_master_vehicles', JSON.stringify(mList));
+    } catch(e) {}
+  }
+
   function initDB() {
-    if (!localStorage.getItem(STORAGE_KEY_KENDARAAN)) {
-      localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(DEFAULT_KENDARAAN));
+    let raw = localStorage.getItem(STORAGE_KEY_KENDARAAN);
+    let list = null;
+    try {
+      list = raw ? JSON.parse(raw) : null;
+    } catch(e) {
+      list = null;
+    }
+
+    // Periksa apakah ada data di kuk_master_vehicles sebagai fallback jika kuk_db_kendaraan_v2 kosong
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      try {
+        const mRaw = localStorage.getItem('kuk_master_vehicles');
+        const mList = mRaw ? JSON.parse(mRaw) : null;
+        if (Array.isArray(mList) && mList.length > 0) {
+          list = mList.map(v => ({
+            id: v.id,
+            nama: v.nama || v.name || 'Kendaraan',
+            plat: v.plat || v.plate || '-',
+            jenis: v.jenis || v.type || 'Operasional',
+            icon: v.icon || '🚗',
+            qrImage: v.qrImage || '',
+            qrCode: v.qrCode || '',
+            status: v.status || 'Tersedia',
+            catatan: v.catatan || ''
+          }));
+        }
+      } catch(e) {}
+    }
+
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      list = [...DEFAULT_KENDARAAN];
+      localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
     } else {
       // Pastikan L300 & Engkel di localStorage memiliki qrImage default jika kosong
       try {
-        let list = JSON.parse(localStorage.getItem(STORAGE_KEY_KENDARAAN)) || [];
         let changed = false;
         list.forEach(k => {
           const isL300 = String(k.nama||'').toUpperCase().includes('L300') || String(k.id||'').toUpperCase().includes('L300') || String(k.plat||'').toUpperCase().includes('L300');
@@ -202,6 +252,8 @@ const PeminjamanDB = (() => {
         if (changed) localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
       } catch(e) {}
     }
+    syncToMasterVehicles(list);
+
     if (!localStorage.getItem(STORAGE_KEY_PEMINJAMAN)) {
       localStorage.setItem(STORAGE_KEY_PEMINJAMAN, JSON.stringify(DEFAULT_PEMINJAMAN));
     }
@@ -235,20 +287,43 @@ const PeminjamanDB = (() => {
       .then(res => {
         if (res.result === 'success' && Array.isArray(res.data) && res.data.length > 0) {
           const localList = getKendaraanList();
-          const merged = res.data.map(c => {
-            const l = localList.find(x => x.id === c.id || String(x.plat||'').toLowerCase() === String(c.plat||'').toLowerCase() || String(x.nama||'').toLowerCase() === String(c.nama||'').toLowerCase());
-            const isL300 = String(c.nama||'').toUpperCase().includes('L300') || String(c.id||'').toUpperCase().includes('L300') || String(c.plat||'').toUpperCase().includes('L300');
-            const isEngkel = String(c.nama||'').toUpperCase().includes('ENGKEL') || String(c.id||'').toUpperCase().includes('ENGKEL') || String(c.plat||'').toUpperCase().includes('ENGKEL');
-            const defaultImg = isL300 ? (localStorage.getItem('kuk_qr_img_L300') || 'QR-L300.jpeg') : (isEngkel ? (localStorage.getItem('kuk_qr_img_ENGKEL') || 'qr-engkel.png') : '');
-            const img = (c.qrImage && c.qrImage !== '') ? c.qrImage : (l ? (l.qrImage || '') : '');
-            const cachedImg = img || localStorage.getItem('kuk_qr_img_' + c.id) || localStorage.getItem('kuk_qr_img_' + String(c.plat||'').toUpperCase()) || defaultImg;
-            return {
-              ...l,
-              ...c,
-              qrImage: cachedImg
-            };
+          const cloudMap = new Map();
+          res.data.forEach(c => {
+            if (c && c.id) cloudMap.set(String(c.id).toLowerCase(), c);
+            if (c && c.plat) cloudMap.set(String(c.plat).toLowerCase(), c);
           });
+
+          // Smart merge: jaga modifikasi lokal & timpa status/qr dari cloud jika ada
+          const merged = localList.map(localItem => {
+            const idKey = String(localItem.id || '').toLowerCase();
+            const platKey = String(localItem.plat || '').toLowerCase();
+            const c = cloudMap.get(idKey) || (platKey ? cloudMap.get(platKey) : null);
+            if (c) {
+              cloudMap.delete(idKey);
+              if (platKey) cloudMap.delete(platKey);
+              const isL300 = String(c.nama||localItem.nama||'').toUpperCase().includes('L300');
+              const isEngkel = String(c.nama||localItem.nama||'').toUpperCase().includes('ENGKEL');
+              const defaultImg = isL300 ? (localStorage.getItem('kuk_qr_img_L300') || 'QR-L300.jpeg') : (isEngkel ? (localStorage.getItem('kuk_qr_img_ENGKEL') || 'qr-engkel.png') : '');
+              const img = (c.qrImage && c.qrImage !== '') ? c.qrImage : (localItem.qrImage || defaultImg);
+              return {
+                ...localItem,
+                ...c,
+                qrImage: img,
+                catatan: localItem.catatan || c.catatan || ''
+              };
+            }
+            return localItem;
+          });
+
+          // Tambahkan armada baru dari cloud yang belum ada di lokal
+          cloudMap.forEach(cloudItem => {
+            if (cloudItem && !merged.some(m => String(m.id).toLowerCase() === String(cloudItem.id).toLowerCase())) {
+              merged.push(cloudItem);
+            }
+          });
+
           localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(merged));
+          syncToMasterVehicles(merged);
         }
       })
       .catch(() => {});
@@ -275,7 +350,12 @@ const PeminjamanDB = (() => {
   function getKendaraanList() {
     initDB();
     try {
-      const list = JSON.parse(localStorage.getItem(STORAGE_KEY_KENDARAAN)) || DEFAULT_KENDARAAN;
+      const raw = localStorage.getItem(STORAGE_KEY_KENDARAAN);
+      let list = raw ? JSON.parse(raw) : null;
+      if (!Array.isArray(list) || list.length === 0) {
+        list = [...DEFAULT_KENDARAAN];
+        localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+      }
       return list.map(item => {
         const isL300 = String(item.nama||'').toUpperCase().includes('L300') || String(item.id||'').toUpperCase().includes('L300') || String(item.plat||'').toUpperCase().includes('L300');
         const isEngkel = String(item.nama||'').toUpperCase().includes('ENGKEL') || String(item.id||'').toUpperCase().includes('ENGKEL') || String(item.plat||'').toUpperCase().includes('ENGKEL');
@@ -347,6 +427,7 @@ const PeminjamanDB = (() => {
     }
 
     localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+    syncToMasterVehicles(list);
 
     // Sinkronkan barcode ke sesi peminjaman aktif jika kendaraan yang dipinjam sama
     try {
@@ -389,6 +470,7 @@ const PeminjamanDB = (() => {
     let list = getKendaraanList();
     list = list.filter(k => k.id !== id);
     localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+    syncToMasterVehicles(list);
 
     fetch(SCRIPT_URL, {
       method: 'POST',

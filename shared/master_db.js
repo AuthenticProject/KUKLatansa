@@ -845,21 +845,61 @@ const MasterDB = (() => {
       });
     },
 
-    // Vehicles
-    getVehicles: () => getStored(STORAGE_KEY_VEHICLES) || DEFAULT_VEHICLES,
+    // Vehicles (Harmonized with PeminjamanDB)
+    getVehicles: () => {
+      let kList = getStored('kuk_db_kendaraan_v2');
+      if (kList && Array.isArray(kList) && kList.length > 0) {
+        return kList.map(k => ({
+          id: k.id,
+          nama: k.nama,
+          name: k.nama,
+          plat: k.plat,
+          plate: k.plat,
+          jenis: k.jenis || 'Operasional',
+          type: k.jenis || 'Operasional',
+          icon: k.icon || '🚗',
+          qrImage: k.qrImage || '',
+          qrCode: k.qrCode || '',
+          status: k.status || 'Tersedia',
+          catatan: k.catatan || ''
+        }));
+      }
+      let vList = getStored(STORAGE_KEY_VEHICLES);
+      if (!vList || !Array.isArray(vList) || vList.length === 0) {
+        vList = DEFAULT_VEHICLES.map(v => ({
+          ...v,
+          nama: v.nama || v.name,
+          plat: v.plat || v.plate,
+          jenis: v.jenis || v.type
+        }));
+        saveStored(STORAGE_KEY_VEHICLES, vList);
+      }
+      return vList;
+    },
     saveVehicle: (veh) => {
-      const vehs = getStored(STORAGE_KEY_VEHICLES) || DEFAULT_VEHICLES;
+      const vehs = MasterDB.getVehicles();
       if (!veh.id) veh.id = generateId('KND');
+      veh.nama = veh.nama || veh.name;
+      veh.name = veh.nama;
+      veh.plat = veh.plat || veh.plate || '-';
+      veh.plate = veh.plat;
+      veh.jenis = veh.jenis || veh.type || 'Operasional';
+      veh.type = veh.jenis;
+      veh.icon = veh.icon || '🚗';
+      veh.status = veh.status || 'Tersedia';
+
       const idx = vehs.findIndex(v => v.id === veh.id);
       if (idx > -1) vehs[idx] = veh;
       else vehs.push(veh);
       saveStored(STORAGE_KEY_VEHICLES, vehs);
+      saveStored('kuk_db_kendaraan_v2', vehs);
       return veh;
     },
     deleteVehicle: (id) => {
-      let vehs = getStored(STORAGE_KEY_VEHICLES) || DEFAULT_VEHICLES;
+      let vehs = MasterDB.getVehicles();
       vehs = vehs.filter(v => v.id !== id);
       saveStored(STORAGE_KEY_VEHICLES, vehs);
+      saveStored('kuk_db_kendaraan_v2', vehs);
     },
 
     OLD_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyzlX0afsHljDmZaq5NecfO4ofaXSRHX2_4r8ClPeo8NjVESWLaYNpjpXEk1VKF230S/exec",
