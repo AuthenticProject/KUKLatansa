@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -461,6 +461,36 @@
       .bottom-bar { padding: 16px; }
       .btn-submit { padding: 14px; font-size: 14px; border-radius: 12px; }
     }
+
+    .badge-unit {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 3px;
+    }
+    .badge-bangunan { background: #fee2e2; color: #991b1b; }
+    .badge-palen { background: #e0f2fe; color: #0369a1; }
+    .unit-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .unit-pill:hover {
+      background: #f1f5f9;
+    }
+    .unit-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
   </style>
 </head>
 
@@ -480,6 +510,13 @@
       <button class="btn-submit" style="background: #10b981; padding: 10px 16px; border-radius: 10px; font-size: 14px; display: inline-flex; width: auto; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);" onclick="openImportModal()">
         📊 Import Rekapan Fingerprint (Excel)
       </button>
+    </div>
+
+    <!-- Unit Selector Filter Bar -->
+    <div class="unit-filter-bar" id="absenUnitFilterBar" style="display:flex; justify-content:center; gap:8px; margin: 4px 0 12px; flex-wrap:wrap;">
+      <button class="unit-pill active" id="absenPillAll" onclick="setAbsenUnitFilter('ALL')">🏢 Semua Unit</button>
+      <button class="unit-pill" id="absenPillBangunan" onclick="setAbsenUnitFilter('KUK Bangunan')">🏗️ KUK Bangunan</button>
+      <button class="unit-pill" id="absenPillPalen" onclick="setAbsenUnitFilter('KUK Palen')">🏬 KUK Palen</button>
     </div>
 
     <div class="card" style="padding: 0;">
@@ -631,31 +668,46 @@
       setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
     }
 
-    function filterDataByRole(dataArray) {
-      if (!Array.isArray(dataArray)) return dataArray;
-      const rawUser = sessionStorage.getItem('kuk_user');
-      if (!rawUser) return dataArray;
-      
-      const loggedUser = String(rawUser).toLowerCase().trim();
+    let allRawKaryawan = [];
+    let allAbsenHariIni = [];
+    let currentCutiHariIni = new Set();
+    let currentUnitFilter = 'ALL';
 
-      let hasUsersPerm = false;
-      const storedDb = localStorage.getItem('kuk_users_db');
-      if (storedDb) {
-        try {
-          const parsed = JSON.parse(storedDb);
-          const u = parsed.find(x => String(x.username).toLowerCase().trim() === loggedUser);
-          if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
-        } catch(e){}
-      } else {
-        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
-      }
-      if (hasUsersPerm) return dataArray;
-      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
-      return dataArray.filter(item => {
-        const nameStr = String(item.nama || '').toLowerCase().trim();
-        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
-        return isPalen ? isEmpPalen : !isEmpPalen;
-      });
+    function getLoggedUserData() {
+      const rawUser = sessionStorage.getItem('kuk_user');
+      if (!rawUser) return { username: '', toko: '', role: '', isPalen: false, isAdmin: false };
+      try {
+        const parsed = JSON.parse(rawUser);
+        if (parsed && typeof parsed === 'object') {
+          const username = String(parsed.username || '').toLowerCase().trim();
+          const toko = String(parsed.toko || '').toLowerCase().trim();
+          const role = String(parsed.role || '').toLowerCase().trim();
+          const isPalen = toko === 'palen' || ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(username);
+          let hasUsersPerm = false;
+          const storedDb = localStorage.getItem('kuk_users_db');
+          if (storedDb) {
+            try {
+              const uList = JSON.parse(storedDb);
+              const u = uList.find(x => String(x.username).toLowerCase().trim() === username);
+              if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
+            } catch(e){}
+          }
+          const isAdmin = role === 'super_admin' || hasUsersPerm || ['fariz', 'irsyadil'].includes(username);
+          return { username, toko, role, isPalen, isAdmin, userObj: parsed };
+        }
+      } catch(e){}
+      const str = String(rawUser).toLowerCase().trim();
+      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(str);
+      const isAdmin = ['fariz', 'irsyadil'].includes(str);
+      return { username: str, toko: isPalen ? 'palen' : 'bangunan', role: isAdmin ? 'super_admin' : 'staff', isPalen, isAdmin };
+    }
+
+    function isEmployeePalen(emp) {
+      if (!emp) return false;
+      const u = String(emp.unit || emp.toko || '').toLowerCase();
+      if (u.includes('palen')) return true;
+      const nameStr = String(emp.nama || emp.fullName || '').toLowerCase().trim();
+      return nameStr.includes('miftah') || nameStr.includes('nukul');
     }
 
     // Format date as YYYY-MM-DD using local timezone
@@ -667,11 +719,63 @@
       return `${y}-${m}-${d}`;
     }
 
+    function setAbsenUnitFilter(unit) {
+      currentUnitFilter = unit;
+      document.querySelectorAll('.unit-pill').forEach(btn => {
+        if (unit === 'ALL') btn.classList.toggle('active', btn.id === 'absenPillAll');
+        else if (unit === 'KUK Bangunan') btn.classList.toggle('active', btn.id === 'absenPillBangunan');
+        else if (unit === 'KUK Palen') btn.classList.toggle('active', btn.id === 'absenPillPalen');
+      });
+
+      // Filter employees
+      if (unit === 'KUK Palen') {
+        dbKaryawan = allRawKaryawan.filter(isEmployeePalen);
+      } else if (unit === 'KUK Bangunan') {
+        dbKaryawan = allRawKaryawan.filter(k => !isEmployeePalen(k));
+      } else {
+        dbKaryawan = allRawKaryawan.slice();
+      }
+
+      // Check if ALL employees in this filtered view already have attendance recorded today
+      const attendeesInUnit = dbKaryawan.filter(k => !currentCutiHariIni.has(String(k.id)));
+      const alreadyDoneInUnit = attendeesInUnit.length > 0 && attendeesInUnit.every(k => {
+        const kId = String(k.id || '').toLowerCase().trim();
+        const kNama = String(k.nama || '').toLowerCase().trim();
+        return allAbsenHariIni.some(r => {
+          const rId = String(r.idKaryawan || r.id || '').toLowerCase().trim();
+          const rNama = String(r.nama || '').toLowerCase().trim();
+          return (kId && rId === kId) || (kNama && rNama === kNama);
+        });
+      });
+
+      if (alreadyDoneInUnit) {
+        showAlreadyDone(getTodayStr(), unit);
+      } else {
+        // Unlock submit button
+        const btn = document.getElementById('submitBtn');
+        if (btn) {
+          btn.disabled = false;
+          btn.style.background = '';
+          document.getElementById('btnText').textContent = 'Simpan Rekap Absen';
+        }
+        renderKaryawanList(currentCutiHariIni);
+      }
+    }
+
+    // Listen to shell unit change
+    window.addEventListener('kukUnitChange', function(e) {
+      const u = (e.detail && e.detail.unit) || '';
+      if (u === 'palen') setAbsenUnitFilter('KUK Palen');
+      else if (u === 'bangunan') setAbsenUnitFilter('KUK Bangunan');
+      else setAbsenUnitFilter('ALL');
+    });
+
     function init() {
       const loadingRow = '<tr><td colspan="2" style="text-align:center; padding:40px;"><div style="color:var(--text-muted);">Memuat daftar karyawan...</div></td></tr>';
       document.getElementById('karyawanList').innerHTML = loadingRow;
 
       const today = getTodayStr();
+      const userMeta = getLoggedUserData();
 
       // Fetch karyawan list, leave data, AND today's absen in parallel
       Promise.all([
@@ -680,15 +784,13 @@
         fetch(`${SCRIPT_URL}?action=rekapAbsen`).then(r => r.json()).catch(e => ({ result: 'error', data: [] }))
       ])
         .then(([initRes, dashRes, absenRes]) => {
-          let tempKaryawan = (initRes.karyawan || []).filter(k =>
+          allRawKaryawan = (initRes.karyawan || []).filter(k =>
             String(k.status || 'Aktif').toLowerCase() !== 'nonaktif'
           );
-          dbKaryawan = filterDataByRole(tempKaryawan);
 
-          // Cek apakah absen hari ini sudah pernah diisi
+          // Cek absen hari ini
           const absenData = absenRes.data || [];
-          const absenHariIni = absenData.filter(r => {
-            // waktu bisa ISO string; ambil tanggal-nya saja
+          allAbsenHariIni = absenData.filter(r => {
             try {
               const tgl = new Date(r.waktu);
               const y = tgl.getFullYear();
@@ -698,32 +800,40 @@
             } catch { return false; }
           });
 
-          if (absenHariIni.length > 0) {
-            // Sudah diisi hari ini — tampilkan pesan dan kunci form
-            showAlreadyDone(today);
-            return;
-          }
-
           // Build set of employee IDs who are on leave today
-          const cutiHariIni = new Set();
+          currentCutiHariIni = new Set();
           if (dashRes.result === 'success' && Array.isArray(dashRes.data)) {
             dashRes.data.forEach(entry => {
               if (entry.tanggal === today) {
-                cutiHariIni.add(String(entry.idKaryawan));
+                currentCutiHariIni.add(String(entry.idKaryawan));
               }
             });
           }
 
-          renderKaryawanList(cutiHariIni);
+          // Default unit filter based on role and stored preference
+          let defaultUnit = 'ALL';
+          const storedUnit = localStorage.getItem('kuk_unit');
+          if (userMeta.isPalen && !userMeta.isAdmin) {
+            defaultUnit = 'KUK Palen';
+          } else if (!userMeta.isPalen && !userMeta.isAdmin) {
+            defaultUnit = 'KUK Bangunan';
+          } else if (storedUnit === 'palen') {
+            defaultUnit = 'KUK Palen';
+          } else if (storedUnit === 'bangunan') {
+            defaultUnit = 'KUK Bangunan';
+          }
+
+          setAbsenUnitFilter(defaultUnit);
         })
         .catch(e => {
+          console.error(e);
           document.getElementById('karyawanList').innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Gagal memuat data server.</td></tr>';
           showToast('Gagal memuat data server.', 'error');
         });
     }
 
-    function showAlreadyDone(todayStr) {
-      // Ganti isi tabel dengan pesan
+    function showAlreadyDone(todayStr, unitName = 'Unit') {
+      const unitLabel = unitName === 'KUK Palen' ? 'KUK Palen' : (unitName === 'KUK Bangunan' ? 'KUK Bangunan' : 'Semua Unit');
       document.getElementById('karyawanList').innerHTML = `
         <tr><td colspan="2" style="padding: 32px 16px;">
           <div class="already-done-banner">
@@ -731,8 +841,8 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
             <div>
-              <h3>Absen hari ini sudah tercatat!</h3>
-              <p>Rekap briefing tanggal <strong>${todayStr}</strong> sudah diisi.<br>
+              <h3>Absen ${unitLabel} hari ini sudah tercatat!</h3>
+              <p>Rekap briefing tanggal <strong>${todayStr}</strong> untuk <strong>${unitLabel}</strong> sudah berhasil diisi.<br>
                 Untuk mengubah status karyawan, gunakan tab
                 <a href="dashboard/" target="_blank">📋 Dashboard → Rekap Absen Pagi</a>.
               </p>
@@ -741,11 +851,13 @@
         </td></tr>
       `;
 
-      // Kunci tombol submit
+      // Kunci tombol submit untuk unit ini
       const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.style.background = 'var(--success)';
-      document.getElementById('btnText').textContent = '✓ Absen Hari Ini Sudah Diisi';
+      if (btn) {
+        btn.disabled = true;
+        btn.style.background = 'var(--success)';
+        document.getElementById('btnText').textContent = `✓ Absen ${unitLabel} Sudah Diisi`;
+      }
 
       // Sembunyikan cuti section
       document.getElementById('cutiSection').style.display = 'none';
@@ -754,7 +866,7 @@
     function renderKaryawanList(cutiHariIni = new Set()) {
       const tbody = document.getElementById('karyawanList');
       if (dbKaryawan.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Data karyawan kosong.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:var(--text-muted);">Tidak ada karyawan untuk unit ini.</td></tr>';
         return;
       }
 
@@ -765,11 +877,16 @@
       if (hadir.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:var(--text-muted);">Semua karyawan sedang cuti hari ini.</td></tr>';
       } else {
-        tbody.innerHTML = hadir.map(k => `
+        tbody.innerHTML = hadir.map(k => {
+          const isPalen = isEmployeePalen(k);
+          return `
           <tr>
             <td>
               <span class="employee-name">${k.nama}</span>
-              <span class="employee-div">${k.bagian || '-'}</span>
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <span class="employee-div">${k.bagian || '-'}</span>
+                <span class="badge-unit ${isPalen ? 'badge-palen' : 'badge-bangunan'}">${isPalen ? '🏬 Palen' : '🏗️ Bangunan'}</span>
+              </div>
             </td>
             <td>
               <div class="status-group">
@@ -796,7 +913,8 @@
               </div>
             </td>
           </tr>
-        `).join('');
+        `;
+        }).join('');
       }
 
       // Render cuti section below the table
@@ -814,16 +932,19 @@
               Sedang Cuti Hari Ini — tidak termasuk dalam absen
             </div>
             <div class="cuti-list">
-              ${cuti.map(k => `
+              ${cuti.map(k => {
+                const isPalen = isEmployeePalen(k);
+                return `
                 <span class="cuti-badge">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                   </svg>
                   ${k.nama}
-                  <span style="font-weight:400; opacity:0.7;">${k.bagian || ''}</span>
+                  <span style="font-weight:400; opacity:0.7;">${k.bagian || ''} (${isPalen ? 'Palen' : 'Bangunan'})</span>
                 </span>
-              `).join('')}
+              `;
+              }).join('')}
             </div>
           </div>
         `;

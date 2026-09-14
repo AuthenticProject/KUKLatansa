@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -871,8 +871,26 @@
       });
     }
 
+    window.addEventListener('kukUnitChange', function(e) {
+      const u = (e.detail && e.detail.unit) || '';
+      const sel = document.getElementById('filterUnitSelect');
+      if (sel) {
+        if (u === 'palen') sel.value = 'KUK Palen';
+        else if (u === 'bangunan') sel.value = 'KUK Bangunan';
+        else sel.value = 'ALL';
+        renderAnalysisTable();
+      }
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       MasterDB.init();
+      const storedUnit = localStorage.getItem('kuk_unit');
+      const sel = document.getElementById('filterUnitSelect');
+      if (sel && storedUnit) {
+        if (storedUnit === 'palen') sel.value = 'KUK Palen';
+        else if (storedUnit === 'bangunan') sel.value = 'KUK Bangunan';
+        else sel.value = 'ALL';
+      }
       renderRawTable();
     });
   </script>

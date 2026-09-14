@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -379,32 +379,90 @@
       setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
     }
 
-    function filterDataByRole(dataArray) {
-      if (!Array.isArray(dataArray)) return dataArray;
-      const rawUser = sessionStorage.getItem('kuk_user');
-      if (!rawUser) return dataArray;
-      
-      const loggedUser = String(rawUser).toLowerCase().trim();
+    let allRawKaryawan = [];
 
-      let hasUsersPerm = false;
-      const storedDb = localStorage.getItem('kuk_users_db');
-      if (storedDb) {
-        try {
-          const parsed = JSON.parse(storedDb);
-          const u = parsed.find(x => String(x.username).toLowerCase().trim() === loggedUser);
-          if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
-        } catch(e){}
-      } else {
-        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
-      }
-      if (hasUsersPerm) return dataArray;
-      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
-      return dataArray.filter(item => {
-        const nameStr = String(item.nama || '').toLowerCase().trim();
-        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
-        return isPalen ? isEmpPalen : !isEmpPalen;
-      });
+    function getLoggedUserData() {
+      const rawUser = sessionStorage.getItem('kuk_user');
+      if (!rawUser) return { username: '', toko: '', role: '', isPalen: false, isAdmin: false };
+      try {
+        const parsed = JSON.parse(rawUser);
+        if (parsed && typeof parsed === 'object') {
+          const username = String(parsed.username || '').toLowerCase().trim();
+          const toko = String(parsed.toko || '').toLowerCase().trim();
+          const role = String(parsed.role || '').toLowerCase().trim();
+          const isPalen = toko === 'palen' || ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(username);
+          let hasUsersPerm = false;
+          const storedDb = localStorage.getItem('kuk_users_db');
+          if (storedDb) {
+            try {
+              const uList = JSON.parse(storedDb);
+              const u = uList.find(x => String(x.username).toLowerCase().trim() === username);
+              if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
+            } catch(e){}
+          }
+          const isAdmin = role === 'super_admin' || hasUsersPerm || ['fariz', 'irsyadil'].includes(username);
+          return { username, toko, role, isPalen, isAdmin, userObj: parsed };
+        }
+      } catch(e){}
+      const str = String(rawUser).toLowerCase().trim();
+      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(str);
+      const isAdmin = ['fariz', 'irsyadil'].includes(str);
+      return { username: str, toko: isPalen ? 'palen' : 'bangunan', role: isAdmin ? 'super_admin' : 'staff', isPalen, isAdmin };
     }
+
+    function isEmployeePalen(emp) {
+      if (!emp) return false;
+      const u = String(emp.unit || emp.toko || '').toLowerCase();
+      if (u.includes('palen')) return true;
+      const nameStr = String(emp.nama || emp.fullName || '').toLowerCase().trim();
+      return nameStr.includes('miftah') || nameStr.includes('nukul');
+    }
+
+    function populateKaryawanSelect(targetUnit) {
+      const selKaryawan = document.getElementById('vpKaryawan');
+      if (!selKaryawan) return;
+
+      const userMeta = getLoggedUserData();
+      let emps = allRawKaryawan;
+
+      if (!userMeta.isAdmin) {
+        emps = userMeta.isPalen ? emps.filter(isEmployeePalen) : emps.filter(k => !isEmployeePalen(k));
+      } else if (targetUnit === 'palen' || targetUnit === 'KUK Palen') {
+        emps = emps.filter(isEmployeePalen);
+      } else if (targetUnit === 'bangunan' || targetUnit === 'KUK Bangunan') {
+        emps = emps.filter(k => !isEmployeePalen(k));
+      }
+
+      const bangunan = emps.filter(k => !isEmployeePalen(k));
+      const palen = emps.filter(isEmployeePalen);
+
+      if (emps.length === 0) {
+        selKaryawan.innerHTML = '<option value="" disabled>Tidak ada karyawan aktif.</option>';
+        return;
+      }
+
+      let html = '<option value="" disabled selected>Pilih karyawan...</option>';
+      if (bangunan.length > 0 && palen.length > 0) {
+        html += `<optgroup label="🏗️ KUK Bangunan (${bangunan.length})">` +
+          bangunan.map(k => `<option value="${k.id}" data-nama="${k.nama}">${k.nama} (${k.bagian || 'Operasional'})</option>`).join('') +
+          `</optgroup>`;
+        html += `<optgroup label="🏬 KUK Palen (${palen.length})">` +
+          palen.map(k => `<option value="${k.id}" data-nama="${k.nama}">${k.nama} (${k.bagian || 'Operasional'})</option>`).join('') +
+          `</optgroup>`;
+      } else {
+        html += emps.map(k => {
+          const isP = isEmployeePalen(k);
+          return `<option value="${k.id}" data-nama="${k.nama}">${k.nama} (${k.bagian || 'Operasional'} • ${isP ? 'Palen' : 'Bangunan'})</option>`;
+        }).join('');
+      }
+
+      selKaryawan.innerHTML = html;
+    }
+
+    window.addEventListener('kukUnitChange', function(e) {
+      const u = (e.detail && e.detail.unit) || '';
+      populateKaryawanSelect(u);
+    });
 
     function init() {
       // Set default time to current local time (formatted for datetime-local)
@@ -425,16 +483,9 @@
       fetch(`${SCRIPT_URL}?action=dashboard_data`)
         .then(r => r.json())
         .then(res => {
-          let tempKaryawan = (res.karyawan || []).filter(k => k.status.toLowerCase() !== 'nonaktif');
-          dbKaryawan = filterDataByRole(tempKaryawan);
-          const selKaryawan = document.getElementById('vpKaryawan');
-          
-          if (dbKaryawan.length === 0) {
-            selKaryawan.innerHTML = '<option value="" disabled>Tidak ada karyawan aktif.</option>';
-          } else {
-            selKaryawan.innerHTML = '<option value="" disabled selected>Pilih karyawan...</option>' + 
-              dbKaryawan.map(k => `<option value="${k.id}" data-nama="${k.nama}">${k.nama} (${k.bagian})</option>`).join('');
-          }
+          allRawKaryawan = (res.karyawan || []).filter(k => k.status && k.status.toLowerCase() !== 'nonaktif');
+          const storedUnit = localStorage.getItem('kuk_unit') || 'ALL';
+          populateKaryawanSelect(storedUnit);
         })
         .catch(e => {
           showToast('Gagal memuat daftar karyawan dari server.', 'error');
@@ -515,6 +566,8 @@
       if (!tempat) return showToast('Tempat kejadian wajib diisi!', 'error');
       if (!staf) return showToast('Nama staf penginput wajib diisi!', 'error');
       
+      const unit = isEmployeePalen({ id: idKaryawan, nama }) ? 'KUK Palen' : 'KUK Bangunan';
+
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.classList.add('loading');
@@ -524,6 +577,7 @@
         action: 'save_pelanggaran',
         idKaryawan,
         nama,
+        unit,
         jenis,
         poin,
         tempat,

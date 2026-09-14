@@ -91,14 +91,14 @@ console.log('Payroll Run Generated:', {
   totals: runAll.totals
 });
 
-const wibaSlip = runAll.slips.find(s => s.employeeName === 'Wiba');
+const wibaSlip = runAll.slips.find(s => s.employeeName.includes('Wiba'));
 console.log('Wiba Slip (Bangunan + Tip Kaca):', {
   baseSalary: wibaSlip.baseSalary,
   tipKaca: wibaSlip.tipKaca,
   takeHomePay: wibaSlip.takeHomePay
 });
 
-const nukulSlip = runAll.slips.find(s => s.employeeName === 'Nukul');
+const nukulSlip = runAll.slips.find(s => s.employeeName.includes('Nukul'));
 console.log('Nukul Slip (Palen, Tanpa Tip Kaca):', {
   baseSalary: nukulSlip.baseSalary,
   tipKaca: nukulSlip.tipKaca,

@@ -531,6 +531,11 @@
               <span>➕ Input Manual Calon</span>
             </button>
             <input type="text" id="rekSearch" placeholder="🔍 Cari nama / posisi..." oninput="renderRekrutmenTable()" style="width: 180px;">
+            <select id="rekFilterToko" onchange="renderRekrutmenTable()">
+              <option value="ALL">Semua Toko</option>
+              <option value="bangunan">🏗️ KUK Bangunan</option>
+              <option value="palen">🏬 KUK Palen</option>
+            </select>
             <select id="rekFilterStatus" onchange="renderRekrutmenTable()">
               <option value="ALL">Semua Status</option>
               <option value="Seleksi Berkas / Wawancara">Seleksi Berkas / Wawancara</option>
@@ -1338,6 +1343,7 @@
       const list = KaryawanDB.getCalonList();
       const q = (document.getElementById('rekSearch').value || '').toLowerCase();
       const filter = document.getElementById('rekFilterStatus').value;
+      const filterToko = document.getElementById('rekFilterToko') ? document.getElementById('rekFilterToko').value : 'ALL';
 
       let total = list.length;
       let seleksi = list.filter(c => c.statusPipeline === 'Seleksi Berkas / Wawancara').length;
@@ -1352,7 +1358,8 @@
       const filtered = list.filter(c => {
         const matchQ = !q || c.namaLengkap.toLowerCase().includes(q) || c.posisiDilamar.toLowerCase().includes(q);
         const matchF = filter === 'ALL' || c.statusPipeline === filter || (filter === 'Diangkat Karyawan (Menunggu Kontrak)' && c.statusPipeline.includes('Diangkat'));
-        return matchQ && matchF;
+        const matchT = filterToko === 'ALL' || (c.toko || 'bangunan').toLowerCase() === filterToko.toLowerCase();
+        return matchQ && matchF && matchT;
       });
 
       const tbody = document.getElementById('rekTableBody');
@@ -1870,7 +1877,7 @@
         const gp = exist ? Number(exist.gajiPokok || 0) : Number(String(k.gajiPokok || 0).replace(/[^0-9]/g, '') || 3350000);
         const gb = exist ? Number(exist.gajiBagian || 0) : (k.toko === 'palen' ? 200000 : 250000);
         const ins = exist ? Number(exist.insentif || 0) : 150000;
-        const tk = exist ? Number(exist.tipKaca || 0) : (k.toko === 'palen' ? 50000 : 100000);
+        const tk = exist ? Number(exist.tipKaca || 0) : (k.toko === 'palen' ? 0 : 100000);
         const ksj = exist ? Number(exist.potonganKsj || exist.potongan || 0) : 50000;
 
         // Match fingerprint record
@@ -3464,8 +3471,44 @@
       }
     }
 
+    // Synchronize all tab filters with Shell Unit Switcher
+    window.addEventListener('kukUnitChange', function(e) {
+      const u = (e.detail && e.detail.unit) || '';
+      const tokoVal = (u === 'palen') ? 'palen' : (u === 'bangunan' ? 'bangunan' : 'ALL');
+      const unitVal = (u === 'palen') ? 'KUK Palen' : (u === 'bangunan' ? 'KUK Bangunan' : 'all');
+
+      // Tab 1 Rekrutmen
+      const rekFilter = document.getElementById('rekFilterToko');
+      if (rekFilter) { rekFilter.value = tokoVal; renderRekrutmenTable(); }
+
+      // Tab 2 Master Karyawan
+      const masterFilter = document.getElementById('masterFilterUnit');
+      if (masterFilter) { masterFilter.value = unitVal; renderMasterTable(); }
+
+      // Tab 3 Gaji
+      const gajiFilter = document.getElementById('gajiFilterToko');
+      if (gajiFilter) { gajiFilter.value = tokoVal; renderGajiTable(); }
+
+      // Tab 4 Surat
+      const suratFilter = document.getElementById('suratFilterToko');
+      if (suratFilter) { suratFilter.value = tokoVal; renderSuratTable(); }
+    });
+
     // Auto load on init if MasterDB is ready
     window.addEventListener('DOMContentLoaded', () => {
+      const storedUnit = localStorage.getItem('kuk_unit');
+      if (storedUnit) {
+        const tokoVal = (storedUnit === 'palen') ? 'palen' : (storedUnit === 'bangunan' ? 'bangunan' : 'ALL');
+        const unitVal = (storedUnit === 'palen') ? 'KUK Palen' : (storedUnit === 'bangunan' ? 'KUK Bangunan' : 'all');
+        const rekFilter = document.getElementById('rekFilterToko');
+        if (rekFilter) rekFilter.value = tokoVal;
+        const masterFilter = document.getElementById('masterFilterUnit');
+        if (masterFilter) masterFilter.value = unitVal;
+        const gajiFilter = document.getElementById('gajiFilterToko');
+        if (gajiFilter) gajiFilter.value = tokoVal;
+        const suratFilter = document.getElementById('suratFilterToko');
+        if (suratFilter) suratFilter.value = tokoVal;
+      }
       setTimeout(renderMasterTable, 500); // delay to ensure MasterDB is loaded
     });
   </script>

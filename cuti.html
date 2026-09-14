@@ -912,6 +912,14 @@
       return String(rawUser).toLowerCase().trim();
     }
 
+    function isEmployeePalen(item) {
+      if (!item) return false;
+      const u = String(item.unit || item.toko || '').toLowerCase();
+      if (u.includes('palen')) return true;
+      const nameStr = String(item.nama || item.fullName || '').toLowerCase().trim();
+      return nameStr.includes('miftah') || nameStr.includes('nukul');
+    }
+
     function filterDataByRole(dataArray) {
       if (!Array.isArray(dataArray)) return dataArray;
       const loggedUser = getLoggedUsername();
@@ -931,8 +939,7 @@
       if (hasUsersPerm) return dataArray;
       const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
       return dataArray.filter(item => {
-        const nameStr = String(item.nama || item.fullName || '').toLowerCase().trim();
-        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
+        const isEmpPalen = isEmployeePalen(item);
         return isPalen ? isEmpPalen : !isEmpPalen;
       });
     }
@@ -950,8 +957,26 @@
     function renderSelectDropdown() {
       const sel = document.createElement('select');
       sel.id = 'nama';
-      sel.innerHTML = `<option value="">Ketuk untuk memilih</option>` +
-        dbKaryawan.map(k => `<option value="${k.id}">${k.nama || k.fullName}</option>`).join('');
+      
+      const bangunanEmps = dbKaryawan.filter(k => !isEmployeePalen(k));
+      const palenEmps = dbKaryawan.filter(isEmployeePalen);
+      
+      let html = '<option value="">Ketuk untuk memilih</option>';
+      if (bangunanEmps.length > 0 && palenEmps.length > 0) {
+        html += `<optgroup label="🏗️ KUK Bangunan (${bangunanEmps.length})">` +
+          bangunanEmps.map(k => `<option value="${k.id}">${k.nama || k.fullName} (${k.bagian || k.department || 'Operasional'})</option>`).join('') +
+          `</optgroup>`;
+        html += `<optgroup label="🏬 KUK Palen (${palenEmps.length})">` +
+          palenEmps.map(k => `<option value="${k.id}">${k.nama || k.fullName} (${k.bagian || k.department || 'Operasional'})</option>`).join('') +
+          `</optgroup>`;
+      } else {
+        html += dbKaryawan.map(k => {
+          const isP = isEmployeePalen(k);
+          return `<option value="${k.id}">${k.nama || k.fullName} (${k.bagian || k.department || 'Operasional'} • ${isP ? 'Palen' : 'Bangunan'})</option>`;
+        }).join('');
+      }
+      
+      sel.innerHTML = html;
       sel.onchange = onUserChange;
 
       const wrap = document.getElementById('namaWrap');
@@ -970,6 +995,7 @@
         const userId = String(user.id || '').toLowerCase().trim();
         const userNama = String(user.nama || user.fullName || '').toLowerCase().trim();
         const userBagian = String(user.bagian || user.department || user.position || '').toLowerCase().trim();
+        const userUnit = isEmployeePalen(user) ? 'palen' : 'bangunan';
 
         const myRecord = list.find(x => 
           (x.idKaryawan && String(x.idKaryawan).toLowerCase().trim() === userId) ||
@@ -987,6 +1013,7 @@
           const itemId = String(item.idKaryawan || item.id || '').toLowerCase().trim();
           const itemNama = String(item.nama || item.fullName || '').toLowerCase().trim();
           const itemBagian = String(item.bagian || item.department || item.position || '').toLowerCase().trim();
+          const itemUnit = isEmployeePalen(item) ? 'palen' : 'bangunan';
           const isSelf = (itemId === userId || itemNama === userNama);
 
           if (Array.isArray(item.tanggal)) {
@@ -995,10 +1022,12 @@
               leavesMap[tgl].push({
                 id: item.idKaryawan || item.id,
                 nama: item.nama || item.fullName,
-                bagian: item.bagian || item.department || item.position || 'Operasional'
+                bagian: item.bagian || item.department || item.position || 'Operasional',
+                unit: itemUnit === 'palen' ? 'KUK Palen' : 'KUK Bangunan'
               });
 
-              if (!isSelf && itemBagian && itemBagian === userBagian) {
+              // Aturan 1 orang per bagian HANYA berlaku di unit toko yang sama
+              if (!isSelf && itemUnit === userUnit && itemBagian && itemBagian === userBagian) {
                 if (!bookedDates.includes(tgl)) bookedDates.push(tgl);
               }
             });
@@ -1267,7 +1296,22 @@
       }
     }
 
-    function renderMatrixRecapTable() {
+    let cutiMatrixUnitFilter = 'ALL';
+
+    function setCutiMatrixFilter(unit) {
+      cutiMatrixUnitFilter = unit;
+      renderMatrixTable();
+    }
+
+    window.addEventListener('kukUnitChange', function(e) {
+      const u = (e.detail && e.detail.unit) || '';
+      if (u === 'palen') cutiMatrixUnitFilter = 'KUK Palen';
+      else if (u === 'bangunan') cutiMatrixUnitFilter = 'KUK Bangunan';
+      else cutiMatrixUnitFilter = 'ALL';
+      renderMatrixTable();
+    });
+
+    function renderMatrixTable() {
       const container = document.getElementById('matrixRecapContainer');
       if (!container) return;
 
@@ -1295,6 +1339,13 @@
         { idKaryawan: 'K-001', nama: 'Miftah', bagian: 'Kepala Gudang', unit: 'KUK Palen', defaultDates: ['2026-08-10', '2026-08-15', '2026-08-18'] }
       ];
 
+      let displayedEmployees = csvEmployees;
+      if (cutiMatrixUnitFilter === 'KUK Palen') {
+        displayedEmployees = csvEmployees.filter(e => isEmployeePalen(e));
+      } else if (cutiMatrixUnitFilter === 'KUK Bangunan') {
+        displayedEmployees = csvEmployees.filter(e => !isEmployeePalen(e));
+      }
+
       let theadHtml = `
         <tr>
           <th class="emp-head">Karyawan & Bagian</th>
@@ -1314,7 +1365,7 @@
       theadHtml += `</tr>`;
 
       let tbodyHtml = '';
-      csvEmployees.forEach(emp => {
+      displayedEmployees.forEach(emp => {
         const foundRecord = allCuti.find(c => 
           (c.idKaryawan && String(c.idKaryawan).toLowerCase().trim() === String(emp.idKaryawan).toLowerCase().trim()) ||
           (c.nama && String(c.nama).toLowerCase().trim() === String(emp.nama).toLowerCase().trim())
@@ -1376,8 +1427,15 @@
                 Daftar resmi jadwal cuti karyawan KUK La Tansa (SOP Maksimal 3 Hari Per Bulan)
               </p>
             </div>
-            <div style="font-size:11.5px; background:rgba(255,255,255,0.2); padding:4px 12px; border-radius:20px; font-weight:700;">
-              Mode Rekapan (Read-Only)
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <div style="display:flex; gap:4px; background:rgba(255,255,255,0.15); padding:3px; border-radius:20px;">
+                <button onclick="setCutiMatrixFilter('ALL')" style="border:none; background:${cutiMatrixUnitFilter==='ALL'?'var(--kuk-gold,#FFCC00)':'transparent'}; color:${cutiMatrixUnitFilter==='ALL'?'#380000':'#fff'}; font-size:11px; font-weight:700; padding:3px 9px; border-radius:14px; cursor:pointer;">🏢 Semua</button>
+                <button onclick="setCutiMatrixFilter('KUK Bangunan')" style="border:none; background:${cutiMatrixUnitFilter==='KUK Bangunan'?'var(--kuk-gold,#FFCC00)':'transparent'}; color:${cutiMatrixUnitFilter==='KUK Bangunan'?'#380000':'#fff'}; font-size:11px; font-weight:700; padding:3px 9px; border-radius:14px; cursor:pointer;">🏗️ Bangunan</button>
+                <button onclick="setCutiMatrixFilter('KUK Palen')" style="border:none; background:${cutiMatrixUnitFilter==='KUK Palen'?'var(--kuk-gold,#FFCC00)':'transparent'}; color:${cutiMatrixUnitFilter==='KUK Palen'?'#380000':'#fff'}; font-size:11px; font-weight:700; padding:3px 9px; border-radius:14px; cursor:pointer;">🏬 Palen</button>
+              </div>
+              <div style="font-size:11.5px; background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px; font-weight:700;">
+                Mode Rekapan
+              </div>
             </div>
           </div>
           <div class="matrix-wrapper">

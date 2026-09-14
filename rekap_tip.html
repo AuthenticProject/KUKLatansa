@@ -651,11 +651,13 @@
       if (!sel) return;
 
       let empNames = [];
-      if (typeof MasterDB !== 'undefined' && MasterDB.getKaryawanList) {
-        empNames = MasterDB.getKaryawanList().map(k => k.namaLengkap || k.nama);
+      if (typeof MasterDB !== 'undefined' && MasterDB.getEmployees) {
+        empNames = MasterDB.getEmployees()
+          .filter(k => (!k.unit || k.unit.toLowerCase().includes('bangunan')) && (k.status === 'Active' || k.status === 'Aktif'))
+          .map(k => k.fullName || k.nama);
       }
       if (empNames.length === 0) {
-        empNames = ['Wiba Sepdioko', 'Syirojul Kahfi', 'Irfan Ulinnuha', 'Nur Rochim', 'Arriyan Muhammad', 'Muhammad Hiba', 'Muhammad Irvan', 'Miftahussurur'];
+        empNames = ['Wiba Sepdioko', 'Syirojul Kahfi', 'Irfan Ulinnuha', 'Nur Hadi', 'Alip Rejeki', 'Arriyan Muhammad', 'Muhammad Hiba', 'Lailurrohman', 'Muhammad Irvan'];
       }
 
       // Pastikan nama saat ini ada di list

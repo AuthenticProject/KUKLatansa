@@ -784,11 +784,32 @@
         MasterDB.init();
         currentEmployees = MasterDB.getEmployees().filter(e => e.status === 'Active' || e.status === 'Aktif');
       }
+
+      // Sync with shell unit
+      const storedUnit = localStorage.getItem('kuk_unit');
+      const selUnit = document.getElementById('selUnit');
+      if (selUnit && storedUnit) {
+        if (storedUnit === 'palen') selUnit.value = 'KUK Palen';
+        else if (storedUnit === 'bangunan') selUnit.value = 'KUK Bangunan';
+        else selUnit.value = 'ALL';
+      }
+
       switchRekapView('cards');
       loadRekapData();
       loadApprovalList();
       checkDeadlineStatus();
     }
+
+    window.addEventListener('kukUnitChange', function(e) {
+      const u = (e.detail && e.detail.unit) || '';
+      const selUnit = document.getElementById('selUnit');
+      if (selUnit) {
+        if (u === 'palen') selUnit.value = 'KUK Palen';
+        else if (u === 'bangunan') selUnit.value = 'KUK Bangunan';
+        else selUnit.value = 'ALL';
+        filterMatrix();
+      }
+    });
 
     function loadRekapData() {
       const monthIdx = parseInt(document.getElementById('selMonth').value, 10);
