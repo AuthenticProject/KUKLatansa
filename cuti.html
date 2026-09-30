@@ -203,7 +203,7 @@
       margin-bottom: 12px;
     }
 
-    .day {
+    .day, .day-cell {
       aspect-ratio: 1;
       display: flex;
       align-items: center;
@@ -217,17 +217,18 @@
       position: relative;
     }
 
-    .day.empty {
+    .day.empty, .day-cell.empty {
       cursor: default;
     }
 
-    .day:not(.empty):not(.locked):not(.booked):hover {
+    .day:not(.empty):not(.locked):not(.booked):not(.disabled):hover,
+    .day-cell:not(.empty):not(.locked):not(.booked):not(.disabled):hover {
       background: var(--primary-light);
       color: var(--primary);
       transform: scale(1.05);
     }
 
-    .day.today::after {
+    .day.today::after, .day-cell.today::after {
       content: '';
       position: absolute;
       bottom: 4px;
@@ -237,7 +238,7 @@
       border-radius: 50%;
     }
 
-    .day.selected {
+    .day.selected, .day-cell.selected {
       background: var(--primary);
       color: white;
       font-weight: 700;
@@ -245,15 +246,38 @@
       transform: scale(1.05);
     }
 
-    .day.selected.today::after {
+    .day.selected.today::after, .day-cell.selected.today::after {
       background: white;
     }
 
-    .day.booked {
+    .day.booked, .day-cell.booked, .day-cell.disabled {
       background: var(--danger-light);
       color: var(--danger);
       cursor: not-allowed;
       border: 1px dashed #fca5a5;
+    }
+
+    /* Foto staf di card identitas */
+    .staff-photo-wrap {
+      width: 72px;
+      height: 96px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #e2e8f0;
+      border: 2px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .staff-photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
     }
 
     .day.cuti-rekap {
@@ -762,13 +786,20 @@
         </select>
       </div>
       <div id="divisiWrap" style="display:none;">
-        <span class="label">Divisi / Bagian</span>
-        <div class="divisi-badge" id="bagianText">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-          <span>-</span>
+        <div style="display:flex; align-items:flex-start; gap:14px; margin-top:4px;">
+          <div class="staff-photo-wrap" id="staffPhotoWrap">
+            <span id="staffPhotoInitial" style="color:#64748b;">👤</span>
+          </div>
+          <div style="flex:1;">
+            <span class="label">Divisi / Bagian</span>
+            <div class="divisi-badge" id="bagianText">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span>-</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -865,6 +896,7 @@
 
   <script src="shared/master_db.js?v=1787281737"></script>
   <script src="shared/security.js?v=1787281737"></script>
+  <script src="shared/staff_photos.js"></script>
 
   <script>
     // --- KONFIGURASI API ---
@@ -1094,6 +1126,42 @@
       }
     }
 
+    function renderStaffPhoto(user) {
+      const wrap = document.getElementById('staffPhotoWrap');
+      const initial = document.getElementById('staffPhotoInitial');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      if (!user) {
+        const sp = document.createElement('span');
+        sp.id = 'staffPhotoInitial';
+        sp.style.cssText = 'color:#64748b; font-size:28px;';
+        sp.textContent = '👤';
+        wrap.appendChild(sp);
+        return;
+      }
+      const nameKey = String(user.nama || user.fullName || '').toLowerCase().trim().split(' ')[0];
+      let photoUrl = null;
+      if (typeof window.KUK_STAFF_PHOTOS !== 'undefined') {
+        photoUrl = window.KUK_STAFF_PHOTOS[nameKey] || null;
+        if (!photoUrl) {
+          // Try full name split
+          Object.keys(window.KUK_STAFF_PHOTOS).forEach(k => {
+            if (nameKey.includes(k) || k.includes(nameKey)) photoUrl = window.KUK_STAFF_PHOTOS[k];
+          });
+        }
+      }
+      if (photoUrl) {
+        const img = document.createElement('img');
+        img.src = photoUrl;
+        img.alt = user.nama || user.fullName || '';
+        img.onerror = function() { this.style.display='none'; wrap.style.fontSize='28px'; wrap.textContent = (user.nama || user.fullName || 'K')[0].toUpperCase(); };
+        wrap.appendChild(img);
+      } else {
+        wrap.style.cssText += '; font-size:28px; font-weight:700; color:#2563eb; background:#eff6ff;';
+        wrap.textContent = (user.nama || user.fullName || 'K')[0].toUpperCase();
+      }
+    }
+
     function onUserChange() {
       const id = document.getElementById('nama').value;
       activeUser = dbKaryawan.find(x => String(x.id) === String(id));
@@ -1104,6 +1172,7 @@
 
       if (!activeUser) {
         if (divWrap) divWrap.style.display = 'none';
+        renderStaffPhoto(null);
         selectedDates = [];
         bookedDates = [];
         renderCalendar();
@@ -1116,6 +1185,7 @@
 
       if (divWrap) divWrap.style.display = 'block';
       if (divText) divText.textContent = empBagian;
+      renderStaffPhoto(activeUser);
 
       loadLocalCutiData(activeUser);
       renderCalendar();
@@ -1171,7 +1241,15 @@
 
       const rangeLabel = `${startDay} ${prevMonthName} s/d ${endDay} ${targetMonthName}`;
 
-      if (!windowOpen || (batasWaktuCloud && new Date() > new Date(batasWaktuCloud))) {
+      // Baca deadline dari localStorage (disimpan oleh rekap_cuti.html)
+      if (!batasWaktuCloud) {
+        const storedDeadline = localStorage.getItem('kuk_cuti_deadline');
+        if (storedDeadline) batasWaktuCloud = storedDeadline;
+      }
+
+      const deadlineExpired = batasWaktuCloud && new Date() > new Date(batasWaktuCloud);
+
+      if (!windowOpen || deadlineExpired) {
         isLocked = true;
         // WAKTU PENGINPUTAN DITUTUP: TAMPILKAN HANYA REKAPAN
         if (userSelectCard) userSelectCard.style.display = 'none';
