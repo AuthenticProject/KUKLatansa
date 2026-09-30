@@ -480,8 +480,123 @@
       .kpi-grid { gap: 6px !important; }
       .kpi-card { padding: 10px !important; }
       .kpi-info h3 { font-size: 14px !important; }
-      .matrix-table th.emp-head,
-      .matrix-table td.emp-col { min-width: 110px !important; font-size: 10.5px !important; }
+    /* TAMPILAN KALENDER BULANAN */
+    .rekap-cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .rekap-cal-day-header {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 8px 4px;
+      background: #f8fafc;
+      border-radius: 8px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .rekap-cal-day-header.sun {
+      color: #ef4444;
+      background: #fef2f2;
+    }
+    .rekap-cal-day-header.fri {
+      color: #059669;
+      background: #ecfdf5;
+    }
+    .rekap-cal-cell {
+      min-height: 105px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .rekap-cal-cell:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .rekap-cal-cell.empty {
+      background: #f8fafc;
+      border-color: #f1f5f9;
+      opacity: 0.4;
+    }
+    .rekap-cal-cell.today {
+      border: 2px solid var(--kuk-primary);
+      background: #f0f7ff;
+    }
+    .rekap-cal-date-num {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+    .rekap-cal-cell.today .rekap-cal-date-num span.num-badge {
+      background: var(--kuk-primary);
+      color: #fff;
+      border-radius: 6px;
+      padding: 1px 6px;
+    }
+    .rekap-cal-cell.is-sun .rekap-cal-date-num span.num-badge {
+      color: #dc2626;
+    }
+    .rekap-cal-badge-count {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: #fee2e2;
+      color: #dc2626;
+      font-weight: 700;
+    }
+    .rekap-cal-leave-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+    .rekap-cal-leave-tag.bangunan {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-left: 3px solid #0284c7;
+    }
+    .rekap-cal-leave-tag.palen {
+      background: #fef3c7;
+      color: #92400e;
+      border-left: 3px solid #d97706;
+    }
+    @media (max-width: 640px) {
+      .rekap-cal-grid {
+        gap: 4px;
+      }
+      .rekap-cal-cell {
+        min-height: 75px;
+        padding: 4px 2px;
+      }
+      .rekap-cal-date-num {
+        font-size: 11px;
+      }
+      .rekap-cal-leave-tag {
+        font-size: 9px;
+        padding: 2px 3px;
+      }
     }
   </style>
 </head>
@@ -595,24 +710,33 @@
       <!-- View Switcher Tabs -->
       <div style="padding: 12px 18px 0 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid #f1f5f9;">
         <div class="view-toggle-wrap">
-          <button id="viewBtnCards" class="view-toggle-btn active" onclick="switchRekapView('cards')">
-            📋 Ringkasan Cuti
-          </button>
-          <button id="viewBtnAgenda" class="view-toggle-btn" onclick="switchRekapView('agenda')">
-            📅 Agenda Harian
+          <button id="viewBtnCalendar" class="view-toggle-btn active" onclick="switchRekapView('calendar')">
+            📅 Kalender Bulanan
           </button>
           <button id="viewBtnMatrix" class="view-toggle-btn" onclick="switchRekapView('matrix')">
             📊 Matriks 31 Hari
           </button>
+          <button id="viewBtnCards" class="view-toggle-btn" onclick="switchRekapView('cards')">
+            📋 Ringkasan Cuti
+          </button>
+          <button id="viewBtnAgenda" class="view-toggle-btn" onclick="switchRekapView('agenda')">
+            📆 Agenda Harian
+          </button>
         </div>
         <div id="rekapViewHelper" style="font-size:12px; font-weight:600; color:var(--kuk-text-muted);">
-          📱 Mode Kartu: Ringkas &amp; Rapi Tanpa Perlu Geser Layar
+          📅 Mode Kalender Bulanan: Kalender visual seluruh divisi per hari
         </div>
       </div>
 
       <div class="card-body">
+        <!-- VIEW 0: KALENDER BULANAN (Default) -->
+        <div id="rekapCalendarContainer" style="display:block;">
+          <div id="rekapCalDaysHeader" class="rekap-cal-grid" style="margin-top:0; margin-bottom:8px;"></div>
+          <div id="rekapCalGrid" class="rekap-cal-grid" style="margin-top:0;"></div>
+        </div>
+
         <!-- VIEW 1: CARDS / LIST (Zero horizontal scroll, perfect for mobile!) -->
-        <div id="rekapCardsContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;">
+        <div id="rekapCardsContainer" style="display:none; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;">
           <!-- Rendered by JS -->
         </div>
 
@@ -795,11 +919,25 @@
         else selUnit.value = 'ALL';
       }
 
-      switchRekapView('cards');
+      // Auto select current or upcoming period
+      const now = new Date();
+      let defMonth = now.getMonth();
+      let defYear = now.getFullYear();
+      if (now.getDate() >= 28) {
+        defMonth = (defMonth + 1) % 12;
+        if (defMonth === 0) defYear++;
+      }
+      const selMonth = document.getElementById('selMonth');
+      const selYear = document.getElementById('selYear');
+      if (selMonth) selMonth.value = String(defMonth);
+      if (selYear) selYear.value = String(defYear);
+
+      switchRekapView('calendar');
       loadRekapData();
       loadApprovalList();
       checkDeadlineStatus();
       syncDeadlineFromCloud();
+      syncCloud(true); // Auto-sync from cloud on load
     }
 
     window.addEventListener('kukUnitChange', function(e) {
@@ -887,30 +1025,35 @@
       }
     }
 
-    let currentRekapView = 'cards';
+    let currentRekapView = 'calendar';
 
     function switchRekapView(mode) {
       currentRekapView = mode;
+      const btnCalendar = document.getElementById('viewBtnCalendar');
       const btnCards = document.getElementById('viewBtnCards');
       const btnAgenda = document.getElementById('viewBtnAgenda');
       const btnMatrix = document.getElementById('viewBtnMatrix');
       const helper = document.getElementById('rekapViewHelper');
 
+      if (btnCalendar) btnCalendar.classList.toggle('active', mode === 'calendar');
       if (btnCards) btnCards.classList.toggle('active', mode === 'cards');
       if (btnAgenda) btnAgenda.classList.toggle('active', mode === 'agenda');
       if (btnMatrix) btnMatrix.classList.toggle('active', mode === 'matrix');
 
+      const calWrap = document.getElementById('rekapCalendarContainer');
       const cardsWrap = document.getElementById('rekapCardsContainer');
       const agendaWrap = document.getElementById('rekapAgendaContainer');
       const matrixWrap = document.getElementById('rekapMatrixContainer');
 
+      if (calWrap) calWrap.style.display = mode === 'calendar' ? 'block' : 'none';
       if (cardsWrap) cardsWrap.style.display = mode === 'cards' ? 'grid' : 'none';
       if (agendaWrap) agendaWrap.style.display = mode === 'agenda' ? 'flex' : 'none';
       if (matrixWrap) matrixWrap.style.display = mode === 'matrix' ? 'block' : 'none';
 
       if (helper) {
-        if (mode === 'cards') helper.innerHTML = '📱 <strong>Mode Kartu Ringkas:</strong> Tampilan rapi, aesthetic, dan bebas geser layar';
-        else if (mode === 'agenda') helper.innerHTML = '📅 <strong>Mode Agenda Harian:</strong> Jadwal cuti dikelompokkan per tanggal libur';
+        if (mode === 'calendar') helper.innerHTML = '📅 <strong>Mode Kalender Bulanan:</strong> Kalender lengkap seluruh divisi per hari';
+        else if (mode === 'cards') helper.innerHTML = '📱 <strong>Mode Kartu Ringkas:</strong> Ringkasan kuota &amp; jadwal cuti per karyawan';
+        else if (mode === 'agenda') helper.innerHTML = '📆 <strong>Mode Agenda Harian:</strong> Jadwal cuti dikelompokkan per tanggal libur';
         else helper.innerHTML = '📊 <strong>Mode Matriks 31 Hari:</strong> Tabel Gantt kalender bulanan seluruh divisi';
       }
     }
@@ -1115,6 +1258,68 @@
       if (tbody) tbody.innerHTML = bHtml;
       if (cardsContainer) cardsContainer.innerHTML = cardsHtml;
       if (agendaContainer) agendaContainer.innerHTML = agendaHtml;
+
+      // 4. Render Kalender Bulanan Grid
+      const calGrid = document.getElementById('rekapCalGrid');
+      const calHeader = document.getElementById('rekapCalDaysHeader');
+      if (calHeader) {
+        const dayNames = [
+          { name: 'Min', isSun: true },
+          { name: 'Sen' },
+          { name: 'Sel' },
+          { name: 'Rab' },
+          { name: 'Kam' },
+          { name: 'Jum', isFri: true },
+          { name: 'Sab' }
+        ];
+        calHeader.innerHTML = dayNames.map(d => `
+          <div class="rekap-cal-day-header ${d.isSun ? 'sun' : (d.isFri ? 'fri' : '')}">${d.name}</div>
+        `).join('');
+      }
+
+      if (calGrid) {
+        const firstDayIdx = new Date(year, monthIdx, 1).getDay(); // 0 = Sunday
+        let calHtml = '';
+
+        // Padding cells before the 1st
+        for (let i = 0; i < firstDayIdx; i++) {
+          calHtml += `<div class="rekap-cal-cell empty"></div>`;
+        }
+
+        // Day cells
+        for (let d = 1; d <= totalDays; d++) {
+          const dObj = new Date(year, monthIdx, d);
+          const isSun = dObj.getDay() === 0;
+          const isFri = dObj.getDay() === 5;
+          const dateStr = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
+          const isToday = dateStr === todayStr;
+
+          const onLeaveList = dayScheduleMap[d] || [];
+          const leaveCount = onLeaveList.length;
+
+          calHtml += `
+            <div class="rekap-cal-cell ${isToday ? 'today' : ''} ${isSun ? 'is-sun' : ''}" style="${leaveCount > 0 ? 'background:#fcfdfe;' : ''}">
+              <div class="rekap-cal-date-num">
+                <span class="num-badge">${d}</span>
+                ${leaveCount > 0 ? `<span class="rekap-cal-badge-count" title="${leaveCount} karyawan cuti">${leaveCount} Cuti</span>` : ''}
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px; overflow-y:auto; max-height:85px; padding-right:2px;">
+                ${onLeaveList.map(item => `
+                  <div class="rekap-cal-leave-tag ${item.unit === 'Bangunan' ? 'bangunan' : 'palen'}" 
+                       title="${item.name} (${item.dept} • ${item.unit})"
+                       ${isStaff ? `onclick="openEditCutiModal('${item.emp.id}', '${item.name.replace(/'/g, "\\'")}')"` : ''}>
+                    <span>🏖️</span>
+                    <strong style="font-weight:700;">${item.name.split(' ')[0]}</strong>
+                    <span style="font-size:9.5px; opacity:0.8;">(${item.dept})</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        calGrid.innerHTML = calHtml;
+      }
     }
 
     function toggleCutiDate(empId, empName, year, monthIdx, day) {
@@ -1627,15 +1832,73 @@
       });
     }
 
-    function syncCloud() {
-      showToast("Menyinkronkan data cuti dengan Google Sheets...");
-      if (typeof DashboardEngine !== 'undefined') {
-        DashboardEngine.syncFromCloud().then(() => {
-          showToast("Data cuti berhasil disinkronkan!");
-          loadRekapData();
-          loadApprovalList();
+    function syncCloud(isSilent = false) {
+      if (!isSilent) showToast("Menyinkronkan data cuti dengan Google Sheets...");
+      fetch(`${SCRIPT_URL}?action=dashboard_data`)
+        .then(r => r.json())
+        .then(json => {
+          if (json && json.result === 'success' && Array.isArray(json.data)) {
+            const storedCuti = JSON.parse(localStorage.getItem('kuk_db_cuti_v1') || '[]');
+            const groups = {};
+
+            storedCuti.forEach(c => {
+              const key = (c.idKaryawan || c.nama || '').toLowerCase().trim();
+              if (key) {
+                groups[key] = {
+                  id: c.id || `CUTI-${key}`,
+                  idKaryawan: c.idKaryawan || '',
+                  nama: c.nama || '',
+                  bagian: c.bagian || 'Operasional',
+                  unit: c.unit || 'KUK Bangunan',
+                  tanggal: Array.isArray(c.tanggal) ? [...c.tanggal] : (c.tanggal ? [c.tanggal] : []),
+                  totalHari: 0,
+                  tipe: c.tipe || 'Cuti Tahunan',
+                  status: c.status || 'APPROVED',
+                  submittedAt: c.submittedAt || new Date().toISOString()
+                };
+              }
+            });
+
+            json.data.forEach(item => {
+              const key = (item.idKaryawan || item.nama || '').toLowerCase().trim();
+              if (!key) return;
+              if (!groups[key]) {
+                groups[key] = {
+                  id: `CUTI-${item.idKaryawan || key}`,
+                  idKaryawan: item.idKaryawan || '',
+                  nama: item.nama || '',
+                  bagian: item.bagian || 'Operasional',
+                  unit: (item.bagian && item.bagian.toLowerCase().includes('palen')) ? 'KUK Palen' : 'KUK Bangunan',
+                  tanggal: [],
+                  totalHari: 0,
+                  tipe: 'Cuti Tahunan',
+                  status: 'APPROVED',
+                  submittedAt: new Date().toISOString()
+                };
+              }
+              if (item.tanggal && !groups[key].tanggal.includes(item.tanggal)) {
+                groups[key].tanggal.push(item.tanggal);
+              }
+            });
+
+            const merged = Object.values(groups).map(g => {
+              g.totalHari = g.tanggal.length;
+              return g;
+            });
+
+            localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(merged));
+            allCutiRecords = merged;
+            loadRekapData();
+            loadApprovalList();
+            if (!isSilent) showToast("Data cuti berhasil disinkronkan dari server!");
+          } else {
+            if (!isSilent) showToast("Data dari server kosong atau format tidak sesuai.", true);
+          }
+        })
+        .catch(err => {
+          console.warn("Gagal sync cloud:", err);
+          if (!isSilent) showToast("Gagal menyinkronkan data cuti dari server.", true);
         });
-      }
     }
   </script>
   <script src="shared/master_db.js"></script>

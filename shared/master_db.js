@@ -481,10 +481,7 @@ const MasterDB = (() => {
     }
 
     let cutiData = getStored('kuk_db_cuti_v1');
-    const needsCutiReset = !cutiData || cutiData.length !== 11 || cutiData.some(c => Array.isArray(c.tanggal) && c.tanggal.length !== 3);
-    if (needsCutiReset) {
-      saveStored('kuk_db_cuti_v1', DEFAULT_CUTI_DATA);
-    } else {
+    if (!cutiData || !Array.isArray(cutiData) || cutiData.length === 0) {
       saveStored('kuk_db_cuti_v1', DEFAULT_CUTI_DATA);
     }
 
@@ -580,7 +577,55 @@ const MasterDB = (() => {
 
         // 3. Sync Leaves into raw Cuti
         if (json.data && Array.isArray(json.data)) {
-          localStorage.setItem('kuk_db_cuti_v1', JSON.stringify(json.data));
+          const storedCuti = getStored('kuk_db_cuti_v1') || [];
+          const groups = {};
+          
+          storedCuti.forEach(c => {
+            const key = (c.idKaryawan || c.nama || '').toLowerCase().trim();
+            if (key) {
+              groups[key] = {
+                id: c.id || `CUTI-${key}`,
+                idKaryawan: c.idKaryawan || '',
+                nama: c.nama || '',
+                bagian: c.bagian || 'Operasional',
+                unit: c.unit || 'KUK Bangunan',
+                tanggal: Array.isArray(c.tanggal) ? [...c.tanggal] : (c.tanggal ? [c.tanggal] : []),
+                totalHari: 0,
+                tipe: c.tipe || 'Cuti Tahunan',
+                status: c.status || 'APPROVED',
+                submittedAt: c.submittedAt || new Date().toISOString()
+              };
+            }
+          });
+
+          json.data.forEach(item => {
+            const key = (item.idKaryawan || item.nama || '').toLowerCase().trim();
+            if (!key) return;
+            if (!groups[key]) {
+              groups[key] = {
+                id: `CUTI-${item.idKaryawan || key}`,
+                idKaryawan: item.idKaryawan || '',
+                nama: item.nama || '',
+                bagian: item.bagian || 'Operasional',
+                unit: (item.bagian && item.bagian.toLowerCase().includes('palen')) ? 'KUK Palen' : 'KUK Bangunan',
+                tanggal: [],
+                totalHari: 0,
+                tipe: 'Cuti Tahunan',
+                status: 'APPROVED',
+                submittedAt: new Date().toISOString()
+              };
+            }
+            if (item.tanggal && !groups[key].tanggal.includes(item.tanggal)) {
+              groups[key].tanggal.push(item.tanggal);
+            }
+          });
+
+          const mergedCutiList = Object.values(groups).map(g => {
+            g.totalHari = g.tanggal.length;
+            return g;
+          });
+
+          saveStored('kuk_db_cuti_v1', mergedCutiList);
         }
 
         // 4. Sync Violations
