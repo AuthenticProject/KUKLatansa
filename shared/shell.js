@@ -283,13 +283,21 @@
 
   function getAvatarHTML(username) {
     if (!username) return 'U';
+    const clean = String(username).toLowerCase().trim();
     
+    let url = null;
     if (typeof MasterDB !== 'undefined' && MasterDB.getAvatarURL) {
-      const url = MasterDB.getAvatarURL(username);
-      if (url) {
-        const initial = username ? username[0].toUpperCase() : 'U';
-        return '<img src="' + url + '" alt="' + username + '" onerror="this.onerror=null; this.style.display=\'none\'; this.parentElement.innerText=\'' + initial + '\';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">';
-      }
+      url = MasterDB.getAvatarURL(clean);
+    }
+    if (!url && typeof window !== 'undefined') {
+      if (typeof window.getStaffPhoto === 'function') url = window.getStaffPhoto(clean);
+      else if (window.KUK_STAFF_PHOTOS && window.KUK_STAFF_PHOTOS[clean]) url = window.KUK_STAFF_PHOTOS[clean];
+      else url = localStorage.getItem('kuk_user_photo_' + clean);
+    }
+
+    if (url) {
+      const initial = username ? username[0].toUpperCase() : 'U';
+      return '<img src="' + url + '" alt="' + username + '" onerror="this.onerror=null; this.style.display=\'none\'; this.parentElement.innerText=\'' + initial + '\';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">';
     }
 
     const initial = username ? username[0].toUpperCase() : 'U';

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kuk-hr-cache-v61';
+const CACHE_NAME = 'kuk-hr-cache-v62';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -33,6 +33,7 @@ const STATIC_ASSETS = [
   './shared/payroll_engine.js',
   './shared/fingerprint_engine.js',
   './shared/kop_assets.js',
+  './shared/staff_photos.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

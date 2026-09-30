@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <link rel="stylesheet" href="shared/mobile.css">
+  <script src="shared/staff_photos.js"></script>
   <style>
     body { 
       background-color: var(--kuk-bg, #f8fafc); 
@@ -476,7 +477,7 @@
         const roleLabel = roleLabels[roleKey] || roleKey;
         const tokoLabel = u.toko === 'palen' ? 'KUK Palen' : 'KUK Bangunan';
         const initial = (u.username || 'U')[0].toUpperCase();
-        const userFoto = u.foto || localStorage.getItem('kuk_user_photo_' + (u.username||'').toLowerCase());
+        const userFoto = (typeof getStaffPhoto === 'function' && getStaffPhoto(u.username)) || u.foto || localStorage.getItem('kuk_user_photo_' + (u.username||'').toLowerCase());
         const avatarHTML = userFoto 
           ? `<img src="${userFoto}" alt="${u.username}" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerText='${initial}';" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`
           : initial;

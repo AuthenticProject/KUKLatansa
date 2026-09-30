@@ -35,19 +35,19 @@ const MasterDB = (() => {
   // 12 Real Management Staff Accounts from Google Sheets
   const DEFAULT_USERS = [
     // KUK Bangunan Staff
-    { id: 'USR-001', username: 'fariz', password: '12345', role: 'super_admin', namaLengkap: 'Fariz Ridwani, S.I.Kom', jabatan: 'Koordinator', toko: 'bangunan', permissions: ['*'] },
-    { id: 'USR-002', username: 'andika', password: '12345', role: 'hr_admin', namaLengkap: 'Andika Rizaldi, S.Ag', jabatan: 'Kepala Toko', toko: 'bangunan', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
+    { id: 'USR-001', username: 'fariz', password: '12345', role: 'super_admin', namaLengkap: 'Fariz Ridwani, S.I.Kom', jabatan: 'Koordinator', toko: 'bangunan', foto: 'assets/foto_staf/fariz.jpg', permissions: ['*'] },
+    { id: 'USR-002', username: 'andika', password: '12345', role: 'hr_admin', namaLengkap: 'Andika Rizaldi, S.Ag', jabatan: 'Kepala Toko', toko: 'bangunan', foto: 'assets/foto_staf/andika.jpg', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','peminjaman_admin','karyawan','fingerprint','attendance_review','violation_review','payroll'] },
     { id: 'USR-003', username: 'irsyadil', password: '150904', role: 'super_admin', namaLengkap: 'Muhammad Irsyadil Umam', jabatan: 'HRD', toko: 'bangunan', permissions: ['*'] },
-    { id: 'USR-004', username: 'ari', password: '12345', role: 'hr_admin', namaLengkap: 'Ari Hermawan', jabatan: 'Bendahara 1', toko: 'bangunan', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
-    { id: 'USR-005', username: 'shuva', password: '12345', role: 'hr_admin', namaLengkap: 'Ahmad Shuva', jabatan: 'Inventaris', toko: 'bangunan', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
-    { id: 'USR-006', username: 'aria', password: '12345', role: 'hr_admin', namaLengkap: 'Aria', jabatan: 'Inventaris', toko: 'bangunan', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
-    { id: 'USR-007', username: 'zain', password: '12345', role: 'hr_admin', namaLengkap: 'Zainurrofiq', jabatan: 'Bendahara 2', toko: 'bangunan', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
+    { id: 'USR-004', username: 'ari', password: '12345', role: 'hr_admin', namaLengkap: 'Ari Hermawan', jabatan: 'Bendahara 1', toko: 'bangunan', foto: 'assets/foto_staf/ari.jpg', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
+    { id: 'USR-005', username: 'shuva', password: '12345', role: 'hr_admin', namaLengkap: 'Ahmad Shuva', jabatan: 'Inventaris', toko: 'bangunan', foto: 'assets/foto_staf/shuva.jpg', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
+    { id: 'USR-006', username: 'aria', password: '12345', role: 'hr_admin', namaLengkap: 'Aria', jabatan: 'Inventaris', toko: 'bangunan', foto: 'assets/foto_staf/aria.jpg', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
+    { id: 'USR-007', username: 'zain', password: '12345', role: 'hr_admin', namaLengkap: 'Zainurrofiq', jabatan: 'Bendahara 2', toko: 'bangunan', foto: 'assets/foto_staf/zain.jpg', permissions: ['dashboard','absen','cuti','pelanggaran','tip','peminjaman','karyawan'] },
     // KUK Palen Staff
-    { id: 'USR-008', username: 'Raju', password: '54321', role: 'manager', namaLengkap: 'Ahmad Syirajuddin Rabbani', jabatan: 'Kepala Toko', toko: 'palen', permissions: ['dashboard','absen','pelanggaran','karyawan'] },
-    { id: 'USR-009', username: 'Agheea', password: '54321', role: 'hr_admin', namaLengkap: 'Agheea Gheelwana Huda', jabatan: 'HRD', toko: 'palen', permissions: ['dashboard','absen','pelanggaran'] },
-    { id: 'USR-010', username: 'Basith', password: '54321', role: 'hr_admin', namaLengkap: 'Basith Fawwaz', jabatan: 'Sekretaris', toko: 'palen', permissions: ['dashboard','absen','pelanggaran'] },
-    { id: 'USR-011', username: 'Anshory', password: '54321', role: 'hr_admin', namaLengkap: 'Abdulhaq Al Anshory', jabatan: 'Bendahara 2', toko: 'palen', permissions: ['dashboard','absen','pelanggaran'] },
-    { id: 'USR-012', username: 'Lintang', password: '54321', role: 'hr_admin', namaLengkap: 'Lintang Abimanyu', jabatan: 'Bendahara 1', toko: 'palen', permissions: ['dashboard','absen','pelanggaran'] }
+    { id: 'USR-008', username: 'Raju', password: '54321', role: 'manager', namaLengkap: 'Ahmad Syirajuddin Rabbani', jabatan: 'Kepala Toko', toko: 'palen', foto: 'assets/foto_staf/raju.jpg', permissions: ['dashboard','absen','pelanggaran','karyawan'] },
+    { id: 'USR-009', username: 'Agheea', password: '54321', role: 'hr_admin', namaLengkap: 'Agheea Gheelwana Huda', jabatan: 'HRD', toko: 'palen', foto: 'assets/foto_staf/agheea.jpg', permissions: ['dashboard','absen','pelanggaran'] },
+    { id: 'USR-010', username: 'Basith', password: '54321', role: 'hr_admin', namaLengkap: 'Basith Fawwaz', jabatan: 'Sekretaris', toko: 'palen', foto: 'assets/foto_staf/basith.jpg', permissions: ['dashboard','absen','pelanggaran'] },
+    { id: 'USR-011', username: 'Anshory', password: '54321', role: 'hr_admin', namaLengkap: 'Abdulhaq Al Anshory', jabatan: 'Bendahara 2', toko: 'palen', foto: 'assets/foto_staf/anshory.jpg', permissions: ['dashboard','absen','pelanggaran'] },
+    { id: 'USR-012', username: 'Lintang', password: '54321', role: 'hr_admin', namaLengkap: 'Lintang Abimanyu', jabatan: 'Bendahara 1', toko: 'palen', foto: 'assets/foto_staf/lintang.jpg', permissions: ['dashboard','absen','pelanggaran'] }
   ];
 
   const DEFAULT_VEHICLES = [
@@ -696,7 +696,18 @@ const MasterDB = (() => {
     },
 
     // Users (Management Staff)
-    getUsers: () => getStored(STORAGE_KEY_USERS) || DEFAULT_USERS,
+    getUsers: () => {
+      let users = getStored(STORAGE_KEY_USERS) || DEFAULT_USERS;
+      if (typeof window !== 'undefined' && typeof window.getStaffPhoto === 'function') {
+        users.forEach(u => {
+          if (!u.foto) {
+            const p = window.getStaffPhoto(u.username);
+            if (p) u.foto = p;
+          }
+        });
+      }
+      return users;
+    },
     getUser: (idOrUsername) => {
       const users = getStored(STORAGE_KEY_USERS) || DEFAULT_USERS;
       return users.find(u => u.id === idOrUsername || u.username.toLowerCase() === idOrUsername.toLowerCase());
@@ -786,7 +797,18 @@ const MasterDB = (() => {
         if (u && u.foto) return u.foto;
       } catch(e) {}
 
-      // 4. Employee DB
+      // 4. Staff Photos Global Assets (Base64)
+      if (typeof window !== 'undefined') {
+        if (typeof window.getStaffPhoto === 'function') {
+          const sp = window.getStaffPhoto(clean);
+          if (sp) return sp;
+        }
+        if (window.KUK_STAFF_PHOTOS && window.KUK_STAFF_PHOTOS[clean]) {
+          return window.KUK_STAFF_PHOTOS[clean];
+        }
+      }
+
+      // 5. Employee DB
       try {
         const emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
         const e = emps.find(x => (x.id && x.id.toLowerCase() === clean) || (x.nama && x.nama.toLowerCase() === clean) || (x.fullName && x.fullName.toLowerCase().includes(clean)));
