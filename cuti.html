@@ -1168,17 +1168,19 @@
 
       const rangeLabel = `${startDay} ${prevMonthName} s/d ${endDay} ${targetMonthName}`;
 
-      // KALENDER & IDENTITAS SELALU DITAMPILKAN AGAR PENGGUNA BISA MELIHAT JADWAL
-      if (userSelectCard) userSelectCard.style.display = 'block';
-      if (calCard) calCard.style.display = 'block';
-      if (bottomBar) bottomBar.style.display = 'flex';
-      if (matrixWrap) matrixWrap.style.display = 'block';
-      if (rekapListCard) rekapListCard.style.display = 'block';
-
       if (!windowOpen || (batasWaktuCloud && new Date() > new Date(batasWaktuCloud))) {
         isLocked = true;
-        if (pageTitle) pageTitle.textContent = `📋 Jadwal & Rekapan Cuti ${targetMonthName} ${viewYear}`;
-        if (pageSubtitle) pageSubtitle.textContent = `Periode pengajuan ditutup. Anda dapat melihat jadwal libur yang terdaftar.`;
+        // WAKTU PENGINPUTAN DITUTUP: TAMPILKAN HANYA REKAPAN
+        if (userSelectCard) userSelectCard.style.display = 'none';
+        if (calCard) calCard.style.display = 'none';
+        if (summaryCard) summaryCard.style.display = 'none';
+        if (bottomBar) bottomBar.style.display = 'none';
+
+        if (matrixWrap) matrixWrap.style.display = 'block';
+        if (rekapListCard) rekapListCard.style.display = 'block';
+
+        if (pageTitle) pageTitle.textContent = `📋 Rekapan Cuti ${targetMonthName} ${viewYear}`;
+        if (pageSubtitle) pageSubtitle.textContent = `Daftar resmi jadwal cuti karyawan KUK La Tansa.`;
 
         if (alertEl) {
           alertEl.style.display = 'flex';
@@ -1188,11 +1190,23 @@
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <div><strong>🔒 Pengajuan Cuti ${targetMonthName} ${viewYear} Dikunci (Mode Rekapan / Lihat Jadwal)</strong><br>Pengajuan cuti bulan ${targetMonthName} hanya dibuka pada <strong>${rangeLabel}</strong>. Saat ini halaman dalam mode lihat jadwal resmi.</div>
+            <div><strong>🔒 Pengajuan Cuti ${targetMonthName} ${viewYear} Dikunci (Mode Rekapan)</strong><br>Pengajuan cuti hanya dibuka pada <strong>${rangeLabel}</strong>. Saat ini halaman hanya menyajikan rekapan jadwal cuti resmi.</div>
           `;
         }
+
+        renderMatrixTable();
+        renderAllCutiRecapTable();
       } else {
         isLocked = false;
+        // WAKTU PENGINPUTAN DIBUKA: INI BUAT KARYAWAN NGISI, REKAPAN DISEMBUNYIKAN
+        if (userSelectCard) userSelectCard.style.display = 'block';
+        if (calCard) calCard.style.display = 'block';
+        if (summaryCard) summaryCard.style.display = selectedDates.length > 0 ? 'block' : 'none';
+        if (bottomBar) bottomBar.style.display = 'flex';
+
+        if (matrixWrap) matrixWrap.style.display = 'none';
+        if (rekapListCard) rekapListCard.style.display = 'none';
+
         if (pageTitle) pageTitle.textContent = `📅 Form Pengajuan Cuti ${targetMonthName} ${viewYear}`;
         if (pageSubtitle) pageSubtitle.textContent = `Pilih jadwal libur Anda. Maksimal 3 hari per bulan.`;
 
@@ -1207,13 +1221,10 @@
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            <div><strong>🟢 Periode Pengajuan Cuti ${targetMonthName} ${viewYear} Terbuka</strong><br>Pengajuan cuti bulan ${targetMonthName} dibuka pada tanggal <strong>${rangeLabel}</strong>.</div>
+            <div><strong>🟢 Periode Pengajuan Cuti ${targetMonthName} ${viewYear} Terbuka</strong><br>Pengajuan cuti bulan ${targetMonthName} dibuka pada tanggal <strong>${rangeLabel}</strong>. Silakan pilih nama Anda dan tentukan jadwal cuti di kalender.</div>
           `;
         }
       }
-
-      renderMatrixTable();
-      renderAllCutiRecapTable();
     }
 
     function checkDateRestriction(dateObj) {
@@ -1496,12 +1507,13 @@
       });
 
       if (monthlyList.length === 0) {
-        monthlyList = DEFAULT_CSV_EMPLOYEES.map(emp => ({
-          nama: emp.nama,
-          bagian: emp.bagian,
-          unit: emp.unit,
-          tanggal: emp.defaultDates
-        }));
+        if (badgeEl) badgeEl.textContent = `0 Karyawan Cuti`;
+        container.innerHTML = `
+          <div style="text-align:center; padding:30px 16px; color:#64748b; background:#f8fafc; border-radius:12px; font-size:13.5px; border:1px dashed #cbd5e1;">
+            🏖️ Belum ada pengajuan cuti yang tercatat untuk bulan <strong>${targetMonthName} ${viewYear}</strong>.
+          </div>
+        `;
+        return;
       }
 
       if (badgeEl) {
