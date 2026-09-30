@@ -480,11 +480,15 @@
       .kpi-grid { gap: 6px !important; }
       .kpi-card { padding: 10px !important; }
       .kpi-info h3 { font-size: 14px !important; }
-    /* TAMPILAN KALENDER BULANAN */
+      .matrix-table th.emp-head,
+      .matrix-table td.emp-col { min-width: 110px !important; font-size: 10.5px !important; }
+    }
+
+    /* TAMPILAN KALENDER BULANAN (GLOBAL DESKTOP & MOBILE) */
     .rekap-cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
+      display: grid !important;
+      grid-template-columns: repeat(7, 1fr) !important;
+      gap: 8px !important;
       margin-top: 10px;
     }
     .rekap-cal-day-header {
@@ -525,7 +529,7 @@
     .rekap-cal-cell.empty {
       background: #f8fafc;
       border-color: #f1f5f9;
-      opacity: 0.4;
+      opacity: 0.35;
     }
     .rekap-cal-cell.today {
       border: 2px solid var(--kuk-primary);
@@ -584,7 +588,7 @@
     }
     @media (max-width: 640px) {
       .rekap-cal-grid {
-        gap: 4px;
+        gap: 4px !important;
       }
       .rekap-cal-cell {
         min-height: 75px;
@@ -1901,8 +1905,5 @@
         });
     }
   </script>
-  <script src="shared/master_db.js"></script>
-  <script src="shared/security.js"></script>
-  <script src="shared/shell.js" data-base="."></script>
 </body>
 </html>
