@@ -820,7 +820,7 @@
       </div>
 
       <div id="calOverlay"
-        style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.8); z-index:10; border-radius:12px; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(2px);">
+        style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.7); z-index:10; border-radius:12px; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(1px); pointer-events:none;">
         <div class="spinner" style="display:block; border-top-color:var(--primary); margin-bottom:10px;"></div>
         <div style="font-size:14px; font-weight:600; color:var(--text);">Memuat riwayat...</div>
       </div>
@@ -1242,9 +1242,16 @@
       const rangeLabel = `${startDay} ${prevMonthName} s/d ${endDay} ${targetMonthName}`;
 
       // Baca deadline dari localStorage (disimpan oleh rekap_cuti.html)
+      // Hanya berlaku jika deadline masih di dalam window periode saat ini
       if (!batasWaktuCloud) {
         const storedDeadline = localStorage.getItem('kuk_cuti_deadline');
-        if (storedDeadline) batasWaktuCloud = storedDeadline;
+        if (storedDeadline) {
+          const dl = new Date(storedDeadline);
+          // Hanya pakai jika deadline-nya berada di dalam periode window yang sedang dibuka
+          if (dl >= startDate && dl <= new Date(endDate.getTime() + 86400000)) {
+            batasWaktuCloud = storedDeadline;
+          }
+        }
       }
 
       const deadlineExpired = batasWaktuCloud && new Date() > new Date(batasWaktuCloud);
