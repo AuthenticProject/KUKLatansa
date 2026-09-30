@@ -121,7 +121,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      MasterDB.init();
+      if (typeof MasterDB !== 'undefined') MasterDB.init();
 
       // Set default date
       const now = new Date();
@@ -137,7 +137,7 @@
       sel.innerHTML = '<option value="" disabled selected>Pilih Karyawan Bangunan...</option>';
 
       // Filter specifically KUK Bangunan employees
-      const emps = MasterDB.getEmployees().filter(e => {
+      const emps = (typeof MasterDB !== 'undefined' ? MasterDB.getEmployees() : []).filter(e => {
         const isAct = e.status === 'Active' || e.status === 'Aktif';
         const isB = !e.unit || e.unit.toLowerCase().includes('bangunan');
         return isAct && isB;
