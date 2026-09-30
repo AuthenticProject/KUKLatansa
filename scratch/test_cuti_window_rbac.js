@@ -3,7 +3,7 @@ function isCutiWindowOpen(dateObj = new Date()) {
   const m = dateObj.getMonth();
   const y = dateObj.getFullYear();
   const lastDay = new Date(y, m + 1, 0).getDate();
-  return (d === lastDay || d === 1 || d === 2);
+  return (d === lastDay || d === 1 || d === 2 || d === 3);
 }
 
 function canEditCutiMatrix(userSession) {
@@ -15,27 +15,31 @@ console.log("==========================================");
 console.log("🧪 TESTING CUTI SUBMISSION WINDOW & RBAC");
 console.log("==========================================");
 
-// 1. Test Window Open on 31 August 2026
+// 1. Test Window Open on 31 August 2026 (Akhir bulan)
 const aug31 = new Date(2026, 7, 31); // Month is 0-indexed: 7 = August
 console.log("31 Agustus 2026 (Akhir bulan):", isCutiWindowOpen(aug31) ? "DIBUKA ✅" : "DITUTUP ❌");
 
-// 2. Test Window Open on 1 September 2026
+// 2. Test Window Open on 1 September 2026 (Hari ke-1)
 const sep1 = new Date(2026, 8, 1);
 console.log("1 September 2026 (Hari ke-1):", isCutiWindowOpen(sep1) ? "DIBUKA ✅" : "DITUTUP ❌");
 
-// 3. Test Window Open on 2 September 2026
+// 3. Test Window Open on 2 September 2026 (Hari ke-2)
 const sep2 = new Date(2026, 8, 2);
 console.log("2 September 2026 (Hari ke-2):", isCutiWindowOpen(sep2) ? "DIBUKA ✅" : "DITUTUP ❌");
 
-// 4. Test Window Closed on 3 September 2026
+// 4. Test Window Open on 3 September 2026 (Hari ke-3)
 const sep3 = new Date(2026, 8, 3);
-console.log("3 September 2026 (Hari ke-3):", !isCutiWindowOpen(sep3) ? "DITUTUP PRESISI ✅" : "DIBUKA ❌");
+console.log("3 September 2026 (Hari ke-3):", isCutiWindowOpen(sep3) ? "DIBUKA ✅" : "DITUTUP ❌");
 
-// 5. Test Window Closed on 22 August 2026
+// 5. Test Window Closed on 4 September 2026 (Hari ke-4)
+const sep4 = new Date(2026, 8, 4);
+console.log("4 September 2026 (Hari ke-4):", !isCutiWindowOpen(sep4) ? "DITUTUP PRESISI ✅" : "DIBUKA ❌");
+
+// 6. Test Window Closed on 22 August 2026 (Pertengahan bulan)
 const aug22 = new Date(2026, 7, 22);
 console.log("22 Agustus 2026 (Pertengahan bulan):", !isCutiWindowOpen(aug22) ? "DITUTUP PRESISI ✅" : "DIBUKA ❌");
 
-// 6. Test RBAC Rules
+// 7. Test RBAC Rules
 console.log("\n--- TESTING RBAC LEAVE MATRIX EDIT ---");
 console.log("Karyawan Mandiri (Tanpa Login Staf):", !canEditCutiMatrix(null) ? "EDIT DITOLAK (READ ONLY) ✅" : "DIIZINKAN ❌");
 console.log("Staf Terautentikasi (Andika - HR Admin):", canEditCutiMatrix({ username: 'andika', role: 'hr_admin' }) ? "EDIT DIIZINKAN ✅" : "DITOLAK ❌");
@@ -44,7 +48,8 @@ if (
   isCutiWindowOpen(aug31) &&
   isCutiWindowOpen(sep1) &&
   isCutiWindowOpen(sep2) &&
-  !isCutiWindowOpen(sep3) &&
+  isCutiWindowOpen(sep3) &&
+  !isCutiWindowOpen(sep4) &&
   !isCutiWindowOpen(aug22) &&
   !canEditCutiMatrix(null) &&
   canEditCutiMatrix({ username: 'andika', role: 'hr_admin' })

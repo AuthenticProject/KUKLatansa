@@ -887,8 +887,48 @@
       { idKaryawan: 'K-001', nama: 'Miftah', bagian: 'Kepala Gudang', unit: 'KUK Palen', defaultDates: ['2026-08-10', '2026-08-15', '2026-08-18'] }
     ];
 
-    let viewYear = today.getFullYear();
-    let viewMonth = today.getMonth();
+    function getCutiWindowRange(targetYear, targetMonth) {
+      // Dibuka dari hari terakhir bulan sebelumnya (00:00:00)
+      const startDate = new Date(targetYear, targetMonth, 0, 0, 0, 0, 0);
+
+      // Sampai 3 hari pertama bulan tersebut (23:59:59.999)
+      const endDate = new Date(targetYear, targetMonth, 3, 23, 59, 59, 999);
+
+      return { startDate, endDate };
+    }
+
+    function isCutiWindowOpenForMonth(targetYear, targetMonth, currentDate = today) {
+      const { startDate, endDate } = getCutiWindowRange(targetYear, targetMonth);
+      const curr = new Date(currentDate.getTime());
+      return curr >= startDate && curr <= endDate;
+    }
+
+    function getDefaultViewMonthAndYear(currentDate = today) {
+      const curY = currentDate.getFullYear();
+      const curM = currentDate.getMonth();
+
+      // Cek apakah window untuk bulan berikutnya (contoh: Oktober saat tgl 30 September) sedang dibuka:
+      const nextM = (curM + 1) % 12;
+      const nextY = curM === 11 ? curY + 1 : curY;
+      if (isCutiWindowOpenForMonth(nextY, nextM, currentDate)) {
+        return { year: nextY, month: nextM };
+      }
+
+      // Cek apakah window untuk bulan ini (contoh: tgl 1-3) sedang dibuka:
+      if (isCutiWindowOpenForMonth(curY, curM, currentDate)) {
+        return { year: curY, month: curM };
+      }
+
+      // Default: jika sudah melewati tgl 3, arahkan ke bulan berikutnya
+      if (currentDate.getDate() > 3) {
+        return { year: nextY, month: nextM };
+      }
+      return { year: curY, month: curM };
+    }
+
+    const defaultPeriod = getDefaultViewMonthAndYear(today);
+    let viewYear = defaultPeriod.year;
+    let viewMonth = defaultPeriod.month;
 
     // --- STATE ---
     let dbKaryawan = [];
@@ -1107,22 +1147,6 @@
       updateUI();
     }
 
-    function getCutiWindowRange(targetYear, targetMonth) {
-      const startDate = new Date(targetYear, targetMonth, 0);
-      startDate.setHours(0, 0, 0, 0);
-
-      const endDate = new Date(targetYear, targetMonth, 2);
-      endDate.setHours(23, 59, 59, 999);
-
-      return { startDate, endDate };
-    }
-
-    function isCutiWindowOpenForMonth(targetYear, targetMonth, currentDate = today) {
-      const { startDate, endDate } = getCutiWindowRange(targetYear, targetMonth);
-      const curr = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-      return curr >= startDate && curr <= endDate;
-    }
-
     function checkCutiLockState(batasWaktuCloud = null) {
       const alertEl = document.getElementById('deadlineAlert');
       const userSelectCard = document.getElementById('userSelectCard');
@@ -1144,19 +1168,17 @@
 
       const rangeLabel = `${startDay} ${prevMonthName} s/d ${endDay} ${targetMonthName}`;
 
+      // KALENDER & IDENTITAS SELALU DITAMPILKAN AGAR PENGGUNA BISA MELIHAT JADWAL
+      if (userSelectCard) userSelectCard.style.display = 'block';
+      if (calCard) calCard.style.display = 'block';
+      if (bottomBar) bottomBar.style.display = 'flex';
+      if (matrixWrap) matrixWrap.style.display = 'block';
+      if (rekapListCard) rekapListCard.style.display = 'block';
+
       if (!windowOpen || (batasWaktuCloud && new Date() > new Date(batasWaktuCloud))) {
         isLocked = true;
-        // BUKAN WAKTU PENGAJUAN: Tampilkan HANYA Rekapan Cuti (Matriks & Daftar)
-        if (userSelectCard) userSelectCard.style.display = 'none';
-        if (calCard) calCard.style.display = 'none';
-        if (summaryCard) summaryCard.style.display = 'none';
-        if (bottomBar) bottomBar.style.display = 'none';
-
-        if (matrixWrap) matrixWrap.style.display = 'block';
-        if (rekapListCard) rekapListCard.style.display = 'block';
-
-        if (pageTitle) pageTitle.textContent = `📋 Rekapan Cuti ${targetMonthName} ${viewYear}`;
-        if (pageSubtitle) pageSubtitle.textContent = `Daftar resmi jadwal cuti karyawan KUK La Tansa.`;
+        if (pageTitle) pageTitle.textContent = `📋 Jadwal & Rekapan Cuti ${targetMonthName} ${viewYear}`;
+        if (pageSubtitle) pageSubtitle.textContent = `Periode pengajuan ditutup. Anda dapat melihat jadwal libur yang terdaftar.`;
 
         if (alertEl) {
           alertEl.style.display = 'flex';
@@ -1166,21 +1188,11 @@
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <div><strong>🔒 Pengajuan Cuti ${targetMonthName} ${viewYear} Dikunci (Mode Rekapan)</strong><br>Pengajuan cuti hanya dibuka pada <strong>${rangeLabel}</strong>. Saat ini halaman hanya menyajikan rekapan jadwal cuti resmi.</div>
+            <div><strong>🔒 Pengajuan Cuti ${targetMonthName} ${viewYear} Dikunci (Mode Rekapan / Lihat Jadwal)</strong><br>Pengajuan cuti bulan ${targetMonthName} hanya dibuka pada <strong>${rangeLabel}</strong>. Saat ini halaman dalam mode lihat jadwal resmi.</div>
           `;
         }
-        renderMatrixRecapTable();
-        renderAllCutiRecapTable();
       } else {
         isLocked = false;
-        // SEDANG WAKTU PENGAJUAN: Tampilkan HANYA Form Pengajuan Cuti (Pilih Karyawan & Kalender)
-        if (userSelectCard) userSelectCard.style.display = 'block';
-        if (calCard) calCard.style.display = 'block';
-        if (bottomBar) bottomBar.style.display = 'flex';
-
-        if (matrixWrap) matrixWrap.style.display = 'none';
-        if (rekapListCard) rekapListCard.style.display = 'none';
-
         if (pageTitle) pageTitle.textContent = `📅 Form Pengajuan Cuti ${targetMonthName} ${viewYear}`;
         if (pageSubtitle) pageSubtitle.textContent = `Pilih jadwal libur Anda. Maksimal 3 hari per bulan.`;
 
@@ -1199,9 +1211,11 @@
           `;
         }
       }
+
+      renderMatrixTable();
+      renderAllCutiRecapTable();
     }
 
-    
     function checkDateRestriction(dateObj) {
       if (!activeUser) {
         showToast('Pilih nama karyawan terlebih dahulu!', 'error');
@@ -1220,8 +1234,14 @@
     }
 
     function toggleDate(key) {
+      const [y, m, d] = key.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+
       if (isLocked) {
-        showToast('Form pengajuan cuti sedang terkunci.', 'error');
+        const { startDate, endDate } = getCutiWindowRange(viewYear, viewMonth);
+        const prevMName = MONTHS[(viewMonth - 1 + 12) % 12];
+        const curMName = MONTHS[viewMonth];
+        showToast(`Pengajuan cuti ${curMName} ${viewYear} dikunci (hanya dibuka ${startDate.getDate()} ${prevMName} s/d ${endDate.getDate()} ${curMName}).`, 'warning');
         return;
       }
       if (!activeUser) {
@@ -1229,21 +1249,21 @@
         return;
       }
 
-      const [y, m, d] = key.split('-').map(Number);
-      const dateObj = new Date(y, m - 1, d);
-
       if (selectedDates.includes(key)) {
         selectedDates = selectedDates.filter(k => k !== key);
       } else {
         if (!checkDateRestriction(dateObj)) return;
 
-        if (selectedDates.length >= 3) {
-          showToast('Batas maksimal pengajuan cuti adalah 3 hari per bulan!', 'error');
+        // Validasi kuota 3 hari PER BULAN yang dipilih (bukan akumulasi semua bulan)
+        const targetPrefix = `${y}-${String(m).padStart(2, '0')}`;
+        const countThisMonth = selectedDates.filter(k => k.startsWith(targetPrefix)).length;
+        if (countThisMonth >= 3) {
+          showToast(`Batas maksimal pengajuan cuti adalah 3 hari untuk bulan ${MONTHS[m - 1]} ${y}!`, 'error');
           return;
         }
 
         if (bookedDates.includes(key)) {
-          showToast('Tanggal ini sudah diambil oleh rekan satu bagian/divisi!', 'error');
+          showToast('Tanggal ini sudah diambil oleh rekan satu bagian/divisi di unit yang sama!', 'error');
           return;
         }
 
@@ -1256,8 +1276,13 @@
 
     function renderCalendar() {
       const grid = document.getElementById('calGrid');
-      const title = document.getElementById('calMonthTitle');
-      if (title) title.textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+      const title = document.getElementById('calTitle') || document.getElementById('calMonthTitle');
+      const targetMonthName = MONTHS[viewMonth];
+      if (title) {
+        title.innerHTML = `${targetMonthName} ${viewYear} ${isLocked 
+          ? '<span style="font-size:11px; color:#dc2626; font-weight:700; background:#fee2e2; padding:3px 8px; border-radius:12px; margin-left:6px;">🔒 Terkunci</span>' 
+          : '<span style="font-size:11px; color:#16a34a; font-weight:700; background:#dcfce7; padding:3px 8px; border-radius:12px; margin-left:6px;">🟢 Dibuka</span>'}`;
+      }
       if (!grid) return;
 
       grid.innerHTML = '';
@@ -1286,6 +1311,7 @@
 
         if (isSelected) {
           cell.classList.add('selected');
+          cell.title = `Pilihan Cuti Anda: ${d} ${targetMonthName} ${viewYear}`;
         } else if (isBooked) {
           cell.classList.add('disabled', 'booked');
           cell.title = 'Sudah diambil oleh rekan satu bagian/divisi';
@@ -1525,19 +1551,40 @@
     function updateUI() {
       const summary = document.getElementById('summaryCard');
       const chips = document.getElementById('selectedChips');
-      document.getElementById('totalSelected').textContent = selectedDates.length;
+      const curMonthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+      const datesCurMonth = selectedDates.filter(k => k.startsWith(curMonthPrefix));
+      
+      const totalSelectedEl = document.getElementById('totalSelected');
+      if (totalSelectedEl) totalSelectedEl.textContent = datesCurMonth.length;
 
-      if (selectedDates.length === 0) {
+      // Update quota box
+      const quotaTextEl = document.getElementById('quotaText');
+      const quotaDotsEl = document.getElementById('quotaDots');
+      if (quotaTextEl) {
+        quotaTextEl.textContent = `Kuota cuti ${MONTHS[viewMonth]}: ${datesCurMonth.length}/3 Hari Terpakai`;
+      }
+      if (quotaDotsEl) {
+        const dots = quotaDotsEl.querySelectorAll('.dot');
+        dots.forEach((dot, idx) => {
+          if (idx < datesCurMonth.length) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      if (datesCurMonth.length === 0) {
         summary.style.display = 'none';
       } else {
         summary.style.display = 'block';
         const cardTitleEl = summary.querySelector('.summary-title');
         if (cardTitleEl) {
           cardTitleEl.innerHTML = isLocked
-            ? `Rekapan Cuti Bulan Ini (<span id="totalSelected">${selectedDates.length}</span> Hari)`
-            : `Ringkasan Pilihan Anda (<span id="totalSelected">${selectedDates.length}</span> Hari)`;
+            ? `Jadwal Cuti ${MONTHS[viewMonth]} ${viewYear} (<span id="totalSelected">${datesCurMonth.length}</span> Hari)`
+            : `Pilihan Cuti ${MONTHS[viewMonth]} ${viewYear} (<span id="totalSelected">${datesCurMonth.length}</span> Hari)`;
         }
-        chips.innerHTML = selectedDates.slice().sort().map(k => `
+        chips.innerHTML = datesCurMonth.slice().sort().map(k => `
           <div class="chip">
             ${formatLabel(k)}
             ${!isLocked ? `<button onclick="removeDate('${k}')"><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
@@ -1550,18 +1597,20 @@
       if (!activeUser) {
         btn.disabled = true; btnText.textContent = 'Pilih Karyawan Dahulu';
       } else if (isLocked) {
-        btn.disabled = true; btnText.textContent = '🔒 Form Dikunci (Hanya Rekapan Cuti)';
+        btn.disabled = true; btnText.textContent = '🔒 Periode Pengajuan Ditutup';
       } else {
         btn.disabled = false;
-        btnText.textContent = `Simpan Jadwal (${selectedDates.length} Hari)`;
+        btnText.textContent = `Simpan Jadwal (${datesCurMonth.length} Hari ${MONTHS[viewMonth]})`;
       }
     }
 
     function handleSubmit() {
       if (isLocked || !activeUser) return;
-      document.getElementById('modalDesc').innerHTML = selectedDates.length > 0
-        ? `Menyimpan <strong>${selectedDates.length} jadwal</strong> cuti Anda. Pastikan sesuai kuota per bulan.`
-        : `<span style="color:red">Membatalkan / menghapus semua jadwal cuti Anda. Lanjutkan?</span>`;
+      const curMonthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+      const datesCurMonth = selectedDates.filter(k => k.startsWith(curMonthPrefix));
+      document.getElementById('modalDesc').innerHTML = datesCurMonth.length > 0
+        ? `Menyimpan <strong>${datesCurMonth.length} hari</strong> cuti untuk bulan <strong>${MONTHS[viewMonth]} ${viewYear}</strong>. Pastikan sudah sesuai kesepakatan divisi.`
+        : `<span style="color:red">Membatalkan / mengosongkan semua jadwal cuti bulan ${MONTHS[viewMonth]} ${viewYear}. Lanjutkan?</span>`;
       document.getElementById('modal').classList.add('show');
     }
 
@@ -1576,6 +1625,7 @@
       try {
         let allCuti = JSON.parse(localStorage.getItem('kuk_db_cuti_v1') || '[]');
         const targetEmpName = activeUser.nama || activeUser.fullName;
+        const targetEmpUnit = activeUser.unit || (isEmployeePalen(activeUser) ? 'KUK Palen' : 'KUK Bangunan');
         const idx = allCuti.findIndex(c => 
           (c.idKaryawan && String(c.idKaryawan).toLowerCase().trim() === String(activeUser.id).toLowerCase().trim()) ||
           (c.nama && String(c.nama).toLowerCase().trim() === String(targetEmpName).toLowerCase().trim())
@@ -1585,7 +1635,7 @@
           idKaryawan: activeUser.id,
           nama: targetEmpName,
           bagian: activeUser.bagian || 'Operasional',
-          unit: activeUser.unit || 'KUK Bangunan',
+          unit: targetEmpUnit,
           tanggal: selectedDates,
           totalHari: selectedDates.length,
           tipe: 'Cuti Tahunan',
@@ -1604,9 +1654,11 @@
       fetch(SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({
+          action: 'simpan_cuti',
           idKaryawan: activeUser.id,
           nama: activeUser.nama || activeUser.fullName,
           bagian: activeUser.bagian,
+          unit: activeUser.unit || (isEmployeePalen(activeUser) ? 'KUK Palen' : 'KUK Bangunan'),
           tanggal: selectedDates
         })
       })
@@ -1616,11 +1668,13 @@
           btn.classList.remove('loading');
           if (res.result === 'success') {
             showToast('Data cuti berhasil disimpan ke server!', 'success');
-            selectedDates = res.tanggal || selectedDates;
+            if (Array.isArray(res.tanggal)) selectedDates = res.tanggal;
             renderCalendar();
             updateUI();
+            renderMatrixTable();
+            renderAllCutiRecapTable();
           } else {
-            showToast('Data cuti berhasil disimpan!', 'success');
+            showToast(res.message || 'Gagal menyimpan data cuti ke server.', 'error');
             renderCalendar();
             updateUI();
           }
@@ -1628,9 +1682,11 @@
         .catch(e => {
           btn.disabled = false;
           btn.classList.remove('loading');
-          showToast('Data cuti tersimpan secara lokal.', 'success');
+          showToast('Data cuti tersimpan di database lokal sistem.', 'success');
           renderCalendar();
           updateUI();
+          renderMatrixTable();
+          renderAllCutiRecapTable();
         });
     }
 

@@ -281,7 +281,7 @@
     <div class="card">
       <div class="form-group">
         <label>Pilih Karyawan</label>
-        <select id="vpKaryawan">
+        <select id="vpKaryawan" onchange="onKaryawanSelectChange()">
           <option value="" disabled selected>Memuat daftar karyawan...</option>
         </select>
       </div>
@@ -330,16 +330,9 @@
       </div>
 
       <div class="form-group">
-        <label>Nama Staf Penginput</label>
+        <label id="lblStaf">Nama Staf Penginput <span id="stafUnitBadge"></span></label>
         <select id="vpStaf">
-          <option value="" disabled selected>Pilih nama staf...</option>
-          <option value="fariz">fariz</option>
-          <option value="andika">andika</option>
-          <option value="irsyadil">irsyadil</option>
-          <option value="ari">ari</option>
-          <option value="shuva">shuva</option>
-          <option value="aria">aria</option>
-          <option value="zain">zain</option>
+          <option value="" disabled selected>Pilih karyawan dahulu atau pilih staf...</option>
         </select>
       </div>
 
@@ -418,6 +411,98 @@
       return nameStr.includes('miftah') || nameStr.includes('nukul');
     }
 
+    const DEFAULT_STAFF_BANGUNAN = [
+      { username: 'fariz', namaLengkap: 'Fariz Ridwani, S.I.Kom', jabatan: 'Koordinator', toko: 'bangunan' },
+      { username: 'andika', namaLengkap: 'Andika Rizaldi, S.Ag', jabatan: 'Kepala Toko', toko: 'bangunan' },
+      { username: 'irsyadil', namaLengkap: 'Muhammad Irsyadil Umam', jabatan: 'HRD', toko: 'bangunan' },
+      { username: 'ari', namaLengkap: 'Ari Hermawan', jabatan: 'Bendahara 1', toko: 'bangunan' },
+      { username: 'shuva', namaLengkap: 'Ahmad Shuva', jabatan: 'Inventaris', toko: 'bangunan' },
+      { username: 'aria', namaLengkap: 'Aria', jabatan: 'Inventaris', toko: 'bangunan' },
+      { username: 'zain', namaLengkap: 'Zainurrofiq', jabatan: 'Bendahara 2', toko: 'bangunan' }
+    ];
+
+    const DEFAULT_STAFF_PALEN = [
+      { username: 'raju', namaLengkap: 'Ahmad Syirajuddin Rabbani', jabatan: 'Kepala Toko', toko: 'palen' },
+      { username: 'agheea', namaLengkap: 'Agheea Gheelwana Huda', jabatan: 'HRD', toko: 'palen' },
+      { username: 'basith', namaLengkap: 'Basith Fawwaz', jabatan: 'Sekretaris', toko: 'palen' },
+      { username: 'anshory', namaLengkap: 'Abdulhaq Al Anshory', jabatan: 'Bendahara 2', toko: 'palen' },
+      { username: 'lintang', namaLengkap: 'Lintang Abimanyu', jabatan: 'Bendahara 1', toko: 'palen' }
+    ];
+
+    function getAllStaffList() {
+      let users = [];
+      const storedDb = localStorage.getItem('kuk_users_db');
+      if (storedDb) {
+        try { users = JSON.parse(storedDb); } catch(e){}
+      }
+      if (!users || users.length === 0) {
+        if (typeof MasterDB !== 'undefined' && typeof MasterDB.getUsers === 'function') {
+          users = MasterDB.getUsers();
+        }
+      }
+      if (!users || users.length === 0) {
+        users = [...DEFAULT_STAFF_BANGUNAN, ...DEFAULT_STAFF_PALEN];
+      }
+      return users;
+    }
+
+    function populateStafSelect(targetUnit = 'ALL', autoSelectUsername = null) {
+      const selStaf = document.getElementById('vpStaf');
+      const badgeWrap = document.getElementById('stafUnitBadge');
+      if (!selStaf) return;
+
+      const allUsers = getAllStaffList();
+      const bangunanStaff = allUsers.filter(u => !String(u.toko || '').toLowerCase().includes('palen'));
+      const palenStaff = allUsers.filter(u => String(u.toko || '').toLowerCase().includes('palen'));
+
+      let html = '<option value="" disabled selected>Pilih nama staf...</option>';
+
+      if (targetUnit === 'palen' || targetUnit === 'KUK Palen') {
+        if (badgeWrap) badgeWrap.innerHTML = '<span style="background:#fef3c7; color:#b45309; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:6px;">🏬 Staf KUK Palen</span>';
+        html += palenStaff.map(s => `<option value="${s.username}">${s.username} - ${s.namaLengkap || s.username} (${s.jabatan || 'Staf Palen'})</option>`).join('');
+      } else if (targetUnit === 'bangunan' || targetUnit === 'KUK Bangunan') {
+        if (badgeWrap) badgeWrap.innerHTML = '<span style="background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:6px;">🏗️ Staf KUK Bangunan</span>';
+        html += bangunanStaff.map(s => `<option value="${s.username}">${s.username} - ${s.namaLengkap || s.username} (${s.jabatan || 'Staf Bangunan'})</option>`).join('');
+      } else {
+        if (badgeWrap) badgeWrap.innerHTML = '';
+        html += `<optgroup label="🏗️ Staf KUK Bangunan (${bangunanStaff.length})">` +
+          bangunanStaff.map(s => `<option value="${s.username}">${s.username} - ${s.namaLengkap || s.username} (${s.jabatan || 'Staf Bangunan'})</option>`).join('') +
+          `</optgroup>`;
+        html += `<optgroup label="🏬 Staf KUK Palen (${palenStaff.length})">` +
+          palenStaff.map(s => `<option value="${s.username}">${s.username} - ${s.namaLengkap || s.username} (${s.jabatan || 'Staf Palen'})</option>`).join('') +
+          `</optgroup>`;
+      }
+
+      selStaf.innerHTML = html;
+
+      // Auto-select username jika relevan
+      const loggedData = getLoggedUserData();
+      const preferred = autoSelectUsername || (loggedData ? loggedData.username : null);
+      if (preferred) {
+        const optionExists = Array.from(selStaf.options).some(o => o.value.toLowerCase() === preferred.toLowerCase());
+        if (optionExists) {
+          selStaf.value = preferred.toLowerCase();
+        }
+      }
+    }
+
+    function onKaryawanSelectChange() {
+      const selKaryawan = document.getElementById('vpKaryawan');
+      if (!selKaryawan || !selKaryawan.value) {
+        const storedUnit = localStorage.getItem('kuk_unit') || 'ALL';
+        populateStafSelect(storedUnit);
+        return;
+      }
+      const selectedOption = selKaryawan.options[selKaryawan.selectedIndex];
+      const idKaryawan = selKaryawan.value;
+      const nama = selectedOption ? (selectedOption.getAttribute('data-nama') || selectedOption.text) : '';
+      
+      const isPalen = isEmployeePalen({ id: idKaryawan, nama });
+      const targetUnit = isPalen ? 'palen' : 'bangunan';
+
+      populateStafSelect(targetUnit);
+    }
+
     function populateKaryawanSelect(targetUnit) {
       const selKaryawan = document.getElementById('vpKaryawan');
       if (!selKaryawan) return;
@@ -462,6 +547,7 @@
     window.addEventListener('kukUnitChange', function(e) {
       const u = (e.detail && e.detail.unit) || '';
       populateKaryawanSelect(u);
+      populateStafSelect(u);
     });
 
     function init() {
@@ -479,13 +565,16 @@
         defaultDate: localISOTime
       });
 
+      const storedUnit = localStorage.getItem('kuk_unit') || 'ALL';
+      populateStafSelect(storedUnit);
+
       // Fetch employees list
       fetch(`${SCRIPT_URL}?action=dashboard_data`)
         .then(r => r.json())
         .then(res => {
           allRawKaryawan = (res.karyawan || []).filter(k => k.status && k.status.toLowerCase() !== 'nonaktif');
-          const storedUnit = localStorage.getItem('kuk_unit') || 'ALL';
-          populateKaryawanSelect(storedUnit);
+          const currentUnit = localStorage.getItem('kuk_unit') || 'ALL';
+          populateKaryawanSelect(currentUnit);
         })
         .catch(e => {
           showToast('Gagal memuat daftar karyawan dari server.', 'error');
@@ -566,7 +655,22 @@
       if (!tempat) return showToast('Tempat kejadian wajib diisi!', 'error');
       if (!staf) return showToast('Nama staf penginput wajib diisi!', 'error');
       
-      const unit = isEmployeePalen({ id: idKaryawan, nama }) ? 'KUK Palen' : 'KUK Bangunan';
+      const isEmpPalen = isEmployeePalen({ id: idKaryawan, nama });
+      const unit = isEmpPalen ? 'KUK Palen' : 'KUK Bangunan';
+
+      // Validasi kepatutan unit toko antara staf penginput dan karyawan
+      const allStaff = getAllStaffList();
+      const staffObj = allStaff.find(s => String(s.username).toLowerCase() === String(staf).toLowerCase());
+      const isStaffPalen = staffObj 
+        ? String(staffObj.toko || '').toLowerCase().includes('palen')
+        : ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(String(staf).toLowerCase());
+
+      if (isEmpPalen && !isStaffPalen) {
+        return showToast('❌ Karyawan KUK Palen hanya boleh dicatat oleh staf KUK Palen!', 'error');
+      }
+      if (!isEmpPalen && isStaffPalen) {
+        return showToast('❌ Karyawan KUK Bangunan hanya boleh dicatat oleh staf KUK Bangunan!', 'error');
+      }
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
@@ -741,7 +845,7 @@
               <tr>
                 <td>Staf Pencatat</td>
                 <td>:</td>
-                <td>${staf}</td>
+                <td>${stafDisplay}</td>
               </tr>
             </table>
 
@@ -759,7 +863,7 @@
               <div class="sign-col">
                 <p>Staf Penginput / HR,<br><strong>${unitName}</strong></p>
                 <div class="sign-space"></div>
-                <p style="text-decoration: underline; font-weight: bold;">( ${staf} )</p>
+                <p style="text-decoration: underline; font-weight: bold;">( ${stafDisplay} )</p>
               </div>
               <div class="sign-col">
                 <p>${isPalen ? 'Kolelet' : 'Rangkasbitung'}, ${tglFormatted}<br>Karyawan Bersangkutan,</p>
