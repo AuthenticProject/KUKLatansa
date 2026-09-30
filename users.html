@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -478,7 +478,7 @@
         const initial = (u.username || 'U')[0].toUpperCase();
         const userFoto = u.foto || localStorage.getItem('kuk_user_photo_' + (u.username||'').toLowerCase());
         const avatarHTML = userFoto 
-          ? `<img src="${userFoto}" alt="${u.username}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`
+          ? `<img src="${userFoto}" alt="${u.username}" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerText='${initial}';" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`
           : initial;
 
         const perms = u.permissions || [];

@@ -1016,7 +1016,7 @@
             </label>
           </div>
           <div id="modalKendaraanPreview" style="margin-top:8px; display:none;">
-            <img id="modalKendaraanImgPreview" src="" alt="Preview" style="height:60px; border-radius:6px; border:1px solid #e2e8f0; object-fit:contain;">
+            <img id="modalKendaraanImgPreview" src="" alt="Preview" onerror="this.style.display='none';" style="height:60px; border-radius:6px; border:1px solid #e2e8f0; object-fit:contain;">
           </div>
         </div>
 
@@ -1612,7 +1612,7 @@
         const aktif = allPinjam.filter(p => (p.kendaraanId === k.id || p.platKendaraan === k.plat) && p.status === 'Aktif/Dipinjam').length;
 
         const qrHTML = k.qrImage
-          ? `<img src="${k.qrImage}" alt="QR ${k.nama}" style="width:80px; height:80px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;">`
+          ? `<img src="${k.qrImage}" alt="QR ${k.nama}" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\\'width:80px; height:80px; background:#f1f5f9; border-radius:8px; border:1px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; font-size:28px;\\'>${k.icon || '🚗'}</div>';" style="width:80px; height:80px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;">`
           : `<div style="width:80px; height:80px; background:#f1f5f9; border-radius:8px; border:1px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; font-size:28px;">${k.icon || '🚗'}</div>`;
 
         const toggleLabel = k.status === 'Tersedia' ? '⬛ Tandai Tidak Tersedia' : '✅ Tandai Tersedia';

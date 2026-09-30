@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <link rel="stylesheet" href="shared/mobile.css">
+  <script src="shared/kop_assets.js"></script>
   <style>
     body.kuk-has-shell {
       padding-top: 80px !important;
@@ -722,13 +723,22 @@
       if (!slip) return;
 
       const isPalen = slip.unit && String(slip.unit).toLowerCase().includes('palen');
-      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      let kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      if (typeof getKukKopBase64 === 'function') {
+        kopSrc = getKukKopBase64(isPalen ? 'palen' : 'bangunan');
+      } else {
+        try {
+          kopSrc = new URL(kopSrc, window.location.href).href;
+        } catch(e) {}
+      }
 
       const printWin = window.open('', '_blank', 'width=700,height=800');
       printWin.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
+          <meta charset="UTF-8">
+          <base href="${window.location.href}">
           <title>Slip Gaji - ${slip.employeeName} - ${currentPeriod.periodName}</title>
           <style>
             body { font-family: 'Outfit', Arial, sans-serif; padding: 30px; color: #0f172a; line-height: 1.5; }
@@ -898,7 +908,14 @@
       if (!slip) return;
 
       const isPalen = slip.unit && String(slip.unit).toLowerCase().includes('palen');
-      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      let kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      if (typeof getKukKopBase64 === 'function') {
+        kopSrc = getKukKopBase64(isPalen ? 'palen' : 'bangunan');
+      } else {
+        try {
+          kopSrc = new URL(kopSrc, window.location.href).href;
+        } catch(e) {}
+      }
       const tokoFullTitle = isPalen ? 'PALEN CENTRE "KUK"' : 'TB. KUK La Tansa';
       const unitName = slip.unit || (isPalen ? 'KUK Palen' : 'KUK Bangunan');
 
@@ -943,6 +960,7 @@
         <html lang="id">
         <head>
           <meta charset="UTF-8">
+          <base href="${window.location.href}">
           <title>Surat Keterangan Gaji - ${slip.employeeName} - ${noSurat}</title>
           <style>
             @page {

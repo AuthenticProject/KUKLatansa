@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <link rel="stylesheet" href="shared/mobile.css">
+  <script src="shared/kop_assets.js"></script>
   <style>
     :root {
       --bg: #fafafa;
@@ -341,6 +342,20 @@
         <input type="text" id="vpWaktu" placeholder="Pilih waktu & tanggal...">
       </div>
 
+      <div class="form-group">
+        <label>Foto Bukti Kejadian (Opsional)</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <label style="cursor:pointer; background:#f1f5f9; border:1px solid #cbd5e1; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700; color:#334155; display:inline-flex; align-items:center; gap:6px;">
+            📷 Pilih / Ambil Foto Bukti
+            <input type="file" id="vpFotoFile" accept="image/*" style="display:none;" onchange="handleFotoBuktiUpload(this)">
+          </label>
+          <button type="button" id="btnHapusFoto" onclick="hapusFotoBukti()" style="display:none; background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">Hapus Foto</button>
+        </div>
+        <div id="vpFotoPreviewWrap" style="display:none; margin-top:10px; border:1.5px dashed #cbd5e1; border-radius:10px; padding:8px; text-align:center; background:#fafafa;">
+          <img id="vpFotoPreview" src="" alt="Preview Bukti" style="max-height:180px; max-width:100%; border-radius:8px; object-fit:contain;">
+        </div>
+      </div>
+
       <div style="display: flex; gap: 10px; flex-direction: column;">
         <button class="btn-submit" id="submitBtn" onclick="savePelanggaran()">
           <span class="loader"></span>
@@ -360,6 +375,38 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
     let dbKaryawan = [];
+    let currentFotoBukti = null;
+
+    function handleFotoBuktiUpload(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        currentFotoBukti = dataUrl;
+        const img = document.getElementById('vpFotoPreview');
+        const wrap = document.getElementById('vpFotoPreviewWrap');
+        const btnHapus = document.getElementById('btnHapusFoto');
+        if (img) img.src = dataUrl;
+        if (wrap) wrap.style.display = 'block';
+        if (btnHapus) btnHapus.style.display = 'inline-block';
+        showToast('Foto bukti berhasil dimuat!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function hapusFotoBukti() {
+      currentFotoBukti = null;
+      const fileIn = document.getElementById('vpFotoFile');
+      const wrap = document.getElementById('vpFotoPreviewWrap');
+      const btnHapus = document.getElementById('btnHapusFoto');
+      const img = document.getElementById('vpFotoPreview');
+      if (fileIn) fileIn.value = '';
+      if (img) img.src = '';
+      if (wrap) wrap.style.display = 'none';
+      if (btnHapus) btnHapus.style.display = 'none';
+    }
 
     function showToast(msg, type = 'info') {
       const container = document.getElementById('toastContainer');
@@ -686,7 +733,8 @@
         poin,
         tempat,
         staf,
-        waktu
+        waktu,
+        fotoBukti: currentFotoBukti || ''
       };
       
       fetch(SCRIPT_URL, {
@@ -713,6 +761,7 @@
             document.getElementById('vpPoin').removeAttribute('readonly');
             document.getElementById('vpTempat').value = '';
             document.getElementById('vpStaf').value = '';
+            hapusFotoBukti();
             
             setTimeout(() => {
               btn.style.background = 'var(--primary)';
@@ -763,7 +812,7 @@
         return showToast('Pilih karyawan dan jenis pelanggaran untuk mencetak.', 'error');
       }
 
-      const { idKaryawan, nama, jenis, poin, tempat, staf, waktu } = dataToPrint;
+      const { idKaryawan, nama, jenis, poin, tempat, staf, waktu, fotoBukti } = dataToPrint;
 
       // Deteksi Toko Karyawan
       let isPalen = false;
@@ -777,7 +826,15 @@
 
       const unitName = isPalen ? 'KUK Palen' : 'KUK Bangunan';
       const unitCode = isPalen ? 'PLN' : 'BGN';
-      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      let kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      if (typeof getKukKopBase64 === 'function') {
+        kopSrc = getKukKopBase64(isPalen ? 'palen' : 'bangunan');
+      } else {
+        try {
+          kopSrc = new URL(kopSrc, window.location.href).href;
+        } catch(e) {}
+      }
+
       const now = new Date();
       const tglFormatted = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
       const noSurat = `PLG/KUK-${unitCode}/${now.getFullYear()}/${Math.floor(100+Math.random()*899)}`;
@@ -788,6 +845,7 @@
         <html lang="id">
         <head>
           <meta charset="UTF-8">
+          <base href="${window.location.href}">
           <title>Surat Bukti Pelanggaran - ${nama}</title>
           <style>
             body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; line-height: 1.6; background: #fff; }
@@ -854,6 +912,13 @@
               <div style="margin-top: 4px; font-size: 14px; font-weight: bold; color: #b91c1c;">${jenis}</div>
               <div style="margin-top: 4px; font-size: 13px; color: #475569;">Poin Pelanggaran: <strong>${poin} Poin</strong></div>
             </div>
+
+            ${(fotoBukti || currentFotoBukti) ? `
+            <div style="margin: 18px 0; text-align: center; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; background: #fafafa;">
+              <p style="font-size: 13px; font-weight: bold; margin: 0 0 8px; color: #334155;">📷 LAMPIRAN FOTO BUKTI KEJADIAN:</p>
+              <img src="${fotoBukti || currentFotoBukti}" alt="Foto Bukti Kejadian" style="max-height: 260px; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            </div>
+            ` : ''}
 
             <p style="font-size: 14px; text-align: justify; margin-top: 14px;">
               Surat catatan pelanggaran ini dibuat sebagai arsip kedisiplinan resmi dan bahan evaluasi performa kerja karyawan secara periodik oleh Manajemen KUK La Tansa.

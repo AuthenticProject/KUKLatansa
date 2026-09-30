@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <link rel="stylesheet" href="shared/mobile.css">
+  <script src="shared/kop_assets.js"></script>
   <style>
     
     body {
@@ -2108,10 +2109,15 @@
       let kopReport = 'kop_umum.png';
       if (fToko === 'palen') kopReport = 'kop_palen.png';
       else if (fToko === 'bangunan') kopReport = 'kop_bangunan.png';
+      if (typeof getKukKopBase64 === 'function') {
+        kopReport = getKukKopBase64(fToko);
+      }
 
       const printHtml = `
         <html>
           <head>
+            <meta charset="UTF-8">
+            <base href="${window.location.href}">
             <title>Laporan Rekapan Penggajian Bulanan - TB. KUK Latansa</title>
             <style>
               body { font-family: 'Arial', sans-serif; padding: 30px; color: #0f172a; }
@@ -2458,7 +2464,14 @@
       if (!g) return showToast('Data gaji tidak ditemukan.', 'error');
 
       const isPalen = g.toko === 'palen' || (g.unit && String(g.unit).toLowerCase().includes('palen'));
-      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      let kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      if (typeof getKukKopBase64 === 'function') {
+        kopSrc = getKukKopBase64(isPalen ? 'palen' : 'bangunan');
+      } else {
+        try {
+          kopSrc = new URL(kopSrc, window.location.href).href;
+        } catch(e) {}
+      }
       const tokoFullTitle = isPalen ? 'PALEN CENTRE "KUK"' : 'TB. KUK La Tansa';
       const unitName = isPalen ? 'KUK Palen' : 'KUK Bangunan';
 
@@ -2505,6 +2518,7 @@
         <html lang="id">
         <head>
           <meta charset="UTF-8">
+          <base href="${window.location.href}">
           <title>Surat Keterangan Gaji - ${g.namaLengkap} - ${noSurat}</title>
           <style>
             @page {
@@ -3062,6 +3076,8 @@
       w.document.write(`
         <html>
           <head>
+            <meta charset="UTF-8">
+            <base href="${window.location.href}">
             <title>Cetak Surat Kontrak PKWT - KUK HR Portal</title>
             <style>
               body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; background: #fff; }

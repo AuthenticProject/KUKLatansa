@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="shared/design-tokens.css">
   <link rel="stylesheet" href="shared/shell.css">
   <link rel="stylesheet" href="shared/mobile.css">
+  <script src="shared/kop_assets.js"></script>
   <style>
     body {
       background-color: var(--kuk-bg);
@@ -365,7 +366,14 @@
 
       const unitStr = t.unit || 'KUK Bangunan';
       const isPalen = unitStr.toLowerCase().includes('palen');
-      const kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      let kopSrc = isPalen ? 'kop_palen.png' : 'kop_bangunan.png';
+      if (typeof getKukKopBase64 === 'function') {
+        kopSrc = getKukKopBase64(isPalen ? 'palen' : 'bangunan');
+      } else {
+        try {
+          kopSrc = new URL(kopSrc, window.location.href).href;
+        } catch(e) {}
+      }
       const unitCode = isPalen ? 'PLN' : 'BGN';
       const now = new Date();
       const tglFormatted = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -377,6 +385,7 @@
         <html lang="id">
         <head>
           <meta charset="UTF-8">
+          <base href="${window.location.href}">
           <title>Surat Peringatan - ${t.employeeName} - ${t.id}</title>
           <style>
             body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; line-height: 1.6; background: #fff; }

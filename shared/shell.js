@@ -287,7 +287,8 @@
     if (typeof MasterDB !== 'undefined' && MasterDB.getAvatarURL) {
       const url = MasterDB.getAvatarURL(username);
       if (url) {
-        return '<img src="' + url + '" alt="' + username + '" style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">';
+        const initial = username ? username[0].toUpperCase() : 'U';
+        return '<img src="' + url + '" alt="' + username + '" onerror="this.onerror=null; this.style.display=\'none\'; this.parentElement.innerText=\'' + initial + '\';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">';
       }
     }
 

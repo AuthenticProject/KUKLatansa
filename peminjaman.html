@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -1113,7 +1113,7 @@
       const platNo   = document.getElementById('qrPlatNomor').textContent || '';
       const win = window.open('', '_blank', 'width=480,height=620');
       win.document.write(`<!DOCTYPE html>
-<html><head><title>Barcode Pertamina ${platNo}</title>
+<html><head><meta charset="UTF-8"><base href="${window.location.href}"><title>Barcode Pertamina ${platNo}</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: Arial, sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#fff; padding:20px; }
