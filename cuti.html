@@ -1252,6 +1252,12 @@
             batasWaktuCloud = storedDeadline;
           }
         }
+      } else {
+        const dl = new Date(batasWaktuCloud);
+        // Jika dari cloud, pastikan juga deadline-nya berada di dalam periode window yang sedang dibuka
+        if (dl < startDate || dl > new Date(endDate.getTime() + 86400000)) {
+          batasWaktuCloud = null;
+        }
       }
 
       const deadlineExpired = batasWaktuCloud && new Date() > new Date(batasWaktuCloud);
@@ -1838,6 +1844,18 @@
       autoSelectLoggedUser();
       renderCalendar();
       updateUI();
+
+      // Sinkronisasi batas waktu & data awal dari cloud GAS
+      fetch(`${SCRIPT_URL}?action=init`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && typeof data.batasWaktu !== 'undefined') {
+            checkCutiLockState(data.batasWaktu);
+            renderCalendar();
+            updateUI();
+          }
+        })
+        .catch(() => {});
     }
 
     init();

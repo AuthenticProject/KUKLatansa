@@ -187,8 +187,37 @@ function handleSimpanCuti(ss, payload) {
   // Validasi Batas Waktu (Dilewati jika yang edit adalah Admin via Dashboard)
   if (!isAdmin) {
     const { batasWaktu } = getInitData(ss);
-    if (batasWaktu && new Date() > new Date(batasWaktu)) {
-      return jsonResponse({ result: 'error', message: 'Batas waktu penginputan telah berakhir. Data dikunci.' });
+    const now = new Date();
+    
+    // Cek window periode untuk setiap tanggal yang diajukan
+    for (let d of tanggal) {
+      const parts = d.split('-').map(Number);
+      if (parts.length === 3) {
+        const targetYear = parts[0];
+        const targetMonth = parts[1] - 1; // 0-indexed (e.g. 9 = Oktober)
+        
+        // Window resmi: hari terakhir bulan sebelumnya s/d tgl 3 bulan target
+        const startDate = new Date(targetYear, targetMonth, 0, 0, 0, 0, 0);
+        const endDate = new Date(targetYear, targetMonth, 3, 23, 59, 59, 999);
+        
+        // Jika ada custom deadline yang diatur admin dan berada di dalam window periode bulan ini:
+        let periodDeadline = endDate;
+        if (batasWaktu) {
+          const dl = new Date(batasWaktu);
+          // Hanya gunakan custom deadline jika relevan dengan periode bulan ini
+          if (dl >= startDate && dl <= new Date(endDate.getTime() + 86400000 * 7)) {
+            periodDeadline = dl;
+          }
+        }
+        
+        // Validasi apakah waktu pengajuan saat ini sudah di luar periode/batas waktu
+        if (now < startDate || now > periodDeadline) {
+          return jsonResponse({ 
+            result: 'error', 
+            message: 'Batas waktu penginputan telah berakhir. Data dikunci.' 
+          });
+        }
+      }
     }
   }
 

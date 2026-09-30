@@ -761,6 +761,7 @@
   <script src="shared/shell.js" data-base="."></script>
 
   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAjktMA76CUG0l-kCOMuazdLrWt6ULfv6cwhlL-QuGiwhtVJx8Sb12tkOHyXqk48tl/exec";
     const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     let allCutiRecords = [];
     let currentEmployees = [];
@@ -798,6 +799,7 @@
       loadRekapData();
       loadApprovalList();
       checkDeadlineStatus();
+      syncDeadlineFromCloud();
     }
 
     window.addEventListener('kukUnitChange', function(e) {
@@ -1526,6 +1528,22 @@
       }
     }
 
+    function syncDeadlineFromCloud() {
+      fetch(`${SCRIPT_URL}?action=init`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && typeof data.batasWaktu !== 'undefined') {
+            if (data.batasWaktu) {
+              localStorage.setItem('kuk_cuti_deadline', data.batasWaktu);
+            } else {
+              localStorage.removeItem('kuk_cuti_deadline');
+            }
+            checkDeadlineStatus();
+          }
+        })
+        .catch(() => {});
+    }
+
     function saveDeadline() {
       const val = document.getElementById('inputDeadline').value;
       if (!val) {
@@ -1533,15 +1551,43 @@
         return;
       }
       localStorage.setItem('kuk_cuti_deadline', val);
-      showToast("Batas waktu pengajuan cuti berhasil disimpan!");
+      showToast("Menyimpan batas waktu ke cloud...");
       checkDeadlineStatus();
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'save_setup', batasWaktu: val })
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.result === 'success') {
+            showToast("Batas waktu pengajuan cuti berhasil disinkronkan ke server!");
+          }
+        })
+        .catch(err => {
+          console.warn("Gagal sync deadline ke server:", err);
+        });
     }
 
     function clearDeadline() {
       localStorage.removeItem('kuk_cuti_deadline');
       document.getElementById('inputDeadline').value = '';
-      showToast("Batas waktu pengajuan cuti telah dihapus.");
+      showToast("Menghapus batas waktu dari cloud...");
       checkDeadlineStatus();
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'save_setup', batasWaktu: '' })
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.result === 'success') {
+            showToast("Batas waktu berhasil dihapus di cloud & form cuti terbuka.");
+          }
+        })
+        .catch(err => {
+          console.warn("Gagal clear deadline di server:", err);
+        });
     }
 
     function exportMatrixCSV() {
