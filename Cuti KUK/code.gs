@@ -164,7 +164,11 @@ function handleSaveSetup(ss, payload) {
 }
 
 function handleSimpanCuti(ss, payload) {
-  const { idKaryawan, nama, bagian, tanggal, isAdmin } = payload;
+  let { idKaryawan, nama, bagian, tanggal, isAdmin } = payload;
+  if (!bagian && (payload.department || payload.position || payload.jabatan)) {
+    bagian = payload.department || payload.position || payload.jabatan;
+  }
+  if (!bagian) bagian = 'Operasional';
 
   if (!idKaryawan || !nama || !bagian || !Array.isArray(tanggal)) {
     return jsonResponse({ result: 'error', message: 'Data tidak lengkap.' });

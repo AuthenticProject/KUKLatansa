@@ -19,17 +19,17 @@ const MasterDB = (() => {
 
   // 11 Karyawan Resmi KUK (Database HRD Utama - 100% Sesuai Spreadsheet Google)
   const DEFAULT_EMPLOYEES = [
-    { id: 'K-001', nik: '3502020013', nama: 'Miftah', fullName: 'Miftah', unit: 'KUK Palen', department: 'Kepala Gudang', position: 'Kepala Gudang', gajiPokok: 700000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '13', hireDate: '2023-10-15', contactNumber: '' },
-    { id: 'K-002', nik: '3502020012', nama: 'Nukul', fullName: 'Nukul', unit: 'KUK Palen', department: 'Kepala Toko', position: 'Kepala Toko', gajiPokok: 700000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '12', hireDate: '2023-10-01', contactNumber: '' },
-    { id: 'K-003', nik: '3502010002', nama: 'Wiba', fullName: 'Wiba Sepdioko', unit: 'KUK Bangunan', department: 'Admin 2', position: 'Admin 2', gajiPokok: 850000, gajiBagian: 500000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '2', hireDate: '2023-01-01', contactNumber: '' },
-    { id: 'K-004', nik: '3502010003', nama: 'Ulin', fullName: 'Irfan Ulinnuha', unit: 'KUK Bangunan', department: 'Kepala Toko', position: 'Kepala Toko', gajiPokok: 850000, gajiBagian: 650000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '3', hireDate: '2022-05-10', contactNumber: '' },
-    { id: 'K-005', nik: '3502010004', nama: 'Kahfi', fullName: 'Syirojul Kahfi', unit: 'KUK Bangunan', department: 'Kasir', position: 'Kasir', gajiPokok: 850000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '4', hireDate: '2023-03-15', contactNumber: '' },
-    { id: 'K-006', nik: '3502010005', nama: 'Nur', fullName: 'Nur Hadi', unit: 'KUK Bangunan', department: 'Kepala Gudang', position: 'Kepala Gudang', gajiPokok: 850000, gajiBagian: 610000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '5', hireDate: '2021-08-20', contactNumber: '' },
-    { id: 'K-007', nik: '3502010007', nama: 'Alip', fullName: 'Alip Rejeki', unit: 'KUK Bangunan', department: 'Pengiriman', position: 'Pengiriman', gajiPokok: 850000, gajiBagian: 400000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '7', hireDate: '2023-06-01', contactNumber: '' },
-    { id: 'K-008', nik: '3502010008', nama: 'Riyan', fullName: 'Arriyan Muhammad', unit: 'KUK Bangunan', department: 'Frontliner', position: 'Frontliner', gajiPokok: 850000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '8', hireDate: '2023-07-10', contactNumber: '' },
-    { id: 'K-009', nik: '3502010009', nama: 'Hiba', fullName: 'Muhammad Hiba', unit: 'KUK Bangunan', department: 'Frontliner', position: 'Frontliner', gajiPokok: 850000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '9', hireDate: '2023-07-15', contactNumber: '' },
-    { id: 'K-010', nik: '3502010010', nama: 'Rohman', fullName: 'Lailurrohman', unit: 'KUK Bangunan', department: 'Frontliner', position: 'Frontliner', gajiPokok: 850000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '10', hireDate: '2023-08-01', contactNumber: '' },
-    { id: 'K-011', nik: '3502010011', nama: 'Irvan', fullName: 'Muhammad Irvan', unit: 'KUK Bangunan', department: 'Admin 3', position: 'Admin 3', gajiPokok: 850000, gajiBagian: 650000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '11', hireDate: '2023-09-01', contactNumber: '' }
+    { id: 'K-001', nik: '3502020013', nama: 'Miftah', fullName: 'Miftah', unit: 'KUK Palen', department: 'Kepala Gudang', position: 'Kepala Gudang', bagian: 'Kepala Gudang', gajiPokok: 700000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '13', hireDate: '2023-10-15', contactNumber: '' },
+    { id: 'K-002', nik: '3502020012', nama: 'Nukul', fullName: 'Nukul', unit: 'KUK Palen', department: 'Kepala Toko', position: 'Kepala Toko', bagian: 'Kepala Toko', gajiPokok: 700000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '12', hireDate: '2023-10-01', contactNumber: '' },
+    { id: 'K-003', nik: '3502010002', nama: 'Wiba', fullName: 'Wiba Sepdioko', unit: 'KUK Bangunan', department: 'Admin 2', position: 'Admin 2', bagian: 'Admin 2', gajiPokok: 850000, gajiBagian: 500000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '2', hireDate: '2023-01-01', contactNumber: '' },
+    { id: 'K-004', nik: '3502010003', nama: 'Ulin', fullName: 'Irfan Ulinnuha', unit: 'KUK Bangunan', department: 'Kepala Toko', position: 'Kepala Toko', bagian: 'Kepala Toko', gajiPokok: 850000, gajiBagian: 650000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '3', hireDate: '2022-05-10', contactNumber: '' },
+    { id: 'K-005', nik: '3502010004', nama: 'Kahfi', fullName: 'Syirojul Kahfi', unit: 'KUK Bangunan', department: 'Kasir', position: 'Kasir', bagian: 'Kasir', gajiPokok: 850000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '4', hireDate: '2023-03-15', contactNumber: '' },
+    { id: 'K-006', nik: '3502010005', nama: 'Nur', fullName: 'Nur Hadi', unit: 'KUK Bangunan', department: 'Kepala Gudang', position: 'Kepala Gudang', bagian: 'Kepala Gudang', gajiPokok: 850000, gajiBagian: 610000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '5', hireDate: '2021-08-20', contactNumber: '' },
+    { id: 'K-007', nik: '3502010007', nama: 'Alip', fullName: 'Alip Rejeki', unit: 'KUK Bangunan', department: 'Pengiriman', position: 'Pengiriman', bagian: 'Pengiriman', gajiPokok: 850000, gajiBagian: 400000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '7', hireDate: '2023-06-01', contactNumber: '' },
+    { id: 'K-008', nik: '3502010008', nama: 'Riyan', fullName: 'Arriyan Muhammad', unit: 'KUK Bangunan', department: 'Frontliner', position: 'Frontliner', bagian: 'Frontliner', gajiPokok: 850000, gajiBagian: 300000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '8', hireDate: '2023-07-10', contactNumber: '' },
+    { id: 'K-009', nik: '3502010009', nama: 'Hiba', fullName: 'Muhammad Hiba', unit: 'KUK Bangunan', department: 'Frontliner', position: 'Frontliner', bagian: 'Frontliner', gajiPokok: 850000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '9', hireDate: '2023-07-15', contactNumber: '' },
+    { id: 'K-010', nik: '3502010010', nama: 'Rohman', fullName: 'Lailurrohman', unit: 'KUK Bangunan', department: 'Frontliner', position: 'Frontliner', bagian: 'Frontliner', gajiPokok: 850000, gajiBagian: 200000, sudahBerkeluarga: false, totalPelanggaran: 0, status: 'Active', fingerprintId: '10', hireDate: '2023-08-01', contactNumber: '' },
+    { id: 'K-011', nik: '3502010011', nama: 'Irvan', fullName: 'Muhammad Irvan', unit: 'KUK Bangunan', department: 'Admin 3', position: 'Admin 3', bagian: 'Admin 3', gajiPokok: 850000, gajiBagian: 650000, sudahBerkeluarga: true, totalPelanggaran: 0, status: 'Active', fingerprintId: '11', hireDate: '2023-09-01', contactNumber: '' }
   ];
 
   // 12 Real Management Staff Accounts from Google Sheets
@@ -663,8 +663,20 @@ const MasterDB = (() => {
     getPositions: () => [...POSITIONS],
 
     // Employees (Workforce)
-    getEmployees: () => getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES,
-    getKaryawan: () => getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES,
+    getEmployees: () => {
+      let emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
+      return emps.map(e => ({
+        ...e,
+        bagian: e.bagian || e.department || e.position || 'Operasional'
+      }));
+    },
+    getKaryawan: () => {
+      let emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
+      return emps.map(e => ({
+        ...e,
+        bagian: e.bagian || e.department || e.position || 'Operasional'
+      }));
+    },
     getPublicEmployeeList: () => {
       const emps = getStored(STORAGE_KEY_EMPLOYEES) || DEFAULT_EMPLOYEES;
       return emps

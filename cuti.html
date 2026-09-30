@@ -1111,8 +1111,11 @@
         return;
       }
 
+      const empBagian = activeUser.bagian || activeUser.department || activeUser.position || activeUser.jabatan || 'Operasional';
+      activeUser.bagian = empBagian;
+
       if (divWrap) divWrap.style.display = 'block';
-      if (divText) divText.textContent = activeUser.bagian || 'Tanpa Divisi';
+      if (divText) divText.textContent = empBagian;
 
       loadLocalCutiData(activeUser);
       renderCalendar();
@@ -1634,10 +1637,13 @@
       document.getElementById('btnText').textContent = 'Menyimpan...';
 
       // 1. Simpan ke database lokal terlebih dahulu (kuk_db_cuti_v1)
+      const empBagian = activeUser.bagian || activeUser.department || activeUser.position || activeUser.jabatan || 'Operasional';
+      activeUser.bagian = empBagian;
+      const targetEmpName = activeUser.nama || activeUser.fullName;
+      const targetEmpUnit = activeUser.unit || (isEmployeePalen(activeUser) ? 'KUK Palen' : 'KUK Bangunan');
+
       try {
         let allCuti = JSON.parse(localStorage.getItem('kuk_db_cuti_v1') || '[]');
-        const targetEmpName = activeUser.nama || activeUser.fullName;
-        const targetEmpUnit = activeUser.unit || (isEmployeePalen(activeUser) ? 'KUK Palen' : 'KUK Bangunan');
         const idx = allCuti.findIndex(c => 
           (c.idKaryawan && String(c.idKaryawan).toLowerCase().trim() === String(activeUser.id).toLowerCase().trim()) ||
           (c.nama && String(c.nama).toLowerCase().trim() === String(targetEmpName).toLowerCase().trim())
@@ -1646,7 +1652,7 @@
           id: idx >= 0 ? allCuti[idx].id : `CUTI-${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${Date.now()}`,
           idKaryawan: activeUser.id,
           nama: targetEmpName,
-          bagian: activeUser.bagian || 'Operasional',
+          bagian: empBagian,
           unit: targetEmpUnit,
           tanggal: selectedDates,
           totalHari: selectedDates.length,
@@ -1668,9 +1674,9 @@
         body: JSON.stringify({
           action: 'simpan_cuti',
           idKaryawan: activeUser.id,
-          nama: activeUser.nama || activeUser.fullName,
-          bagian: activeUser.bagian,
-          unit: activeUser.unit || (isEmployeePalen(activeUser) ? 'KUK Palen' : 'KUK Bangunan'),
+          nama: targetEmpName,
+          bagian: empBagian,
+          unit: targetEmpUnit,
           tanggal: selectedDates
         })
       })
@@ -1705,9 +1711,14 @@
     function getKaryawanList() {
       if (typeof MasterDB !== 'undefined') {
         const emps = typeof MasterDB.getEmployees === 'function' ? MasterDB.getEmployees() : (typeof MasterDB.getKaryawan === 'function' ? MasterDB.getKaryawan() : []);
-        if (Array.isArray(emps) && emps.length > 0) return emps;
+        if (Array.isArray(emps) && emps.length > 0) {
+          return emps.map(e => ({
+            ...e,
+            bagian: e.bagian || e.department || e.position || e.jabatan || 'Operasional'
+          }));
+        }
       }
-      return DEFAULT_CSV_EMPLOYEES.map(e => ({ id: e.idKaryawan, nama: e.nama, fullName: e.nama, bagian: e.bagian, unit: e.unit }));
+      return DEFAULT_CSV_EMPLOYEES.map(e => ({ id: e.idKaryawan, nama: e.nama, fullName: e.nama, bagian: e.bagian || 'Operasional', unit: e.unit }));
     }
 
     function init() {
